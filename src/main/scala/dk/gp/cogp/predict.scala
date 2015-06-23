@@ -27,8 +27,9 @@ object predict {
     val w = model.modelParams.w
     val beta = model.modelParams.beta
     
-    val kSS = model.covFunc.cov(s.toArray, s.toArray)
-    val kSZ = model.covFunc.covNM(s.toDenseMatrix.t, model.z)(0, ::)
+    val kSS = model.covFunc.cov(s.toDenseMatrix.t, s.toDenseMatrix.t,model.covFuncParams)(0,0)
+    
+    val kSZ = model.covFunc.cov(s.toDenseMatrix.t, model.z,model.covFuncParams)(0, ::)
     val kZZinv = inv(model.kZZ)
 
     val w2 = pow(w, 2)

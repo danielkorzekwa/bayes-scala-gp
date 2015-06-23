@@ -1,4 +1,4 @@
-package dk.gp.cogp.svi
+package dk.gp.cogp.svi.u
 
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
@@ -6,6 +6,9 @@ import breeze.linalg.inv
 import breeze.linalg.cholesky
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.model.CogpModelParams
+import dk.gp.cogp.svi.u.calcLBGradUEta2
+import dk.gp.cogp.svi.u.calcLBGradUEta1
+import dk.gp.cogp.svi.LBState
 
 /**
  * Stochastic update for the parameters (mu,S) of q(u|y)
@@ -26,9 +29,9 @@ object stochasticUpdateU {
    * @param y [X x P]
    * @param l Learning rate
    */
-  def apply(j: Int,  l: Double, modelParams:CogpModelParams, y: DenseMatrix[Double],kXZ:DenseMatrix[Double],kZZ:DenseMatrix[Double]): MultivariateGaussian = {
+  def apply(j: Int,  l: Double, lbState:LBState, y: DenseMatrix[Double],kXZ:DenseMatrix[Double],kZZ:DenseMatrix[Double]): MultivariateGaussian = {
 
-    val u = modelParams.u
+    val u = lbState.u
     //natural parameters theta
     val theta1 = inv(u(j).v) * u(j).m
     val theta2 = -0.5 * inv(u(j).v)
@@ -38,10 +41,13 @@ object stochasticUpdateU {
      * Thus no need for inverse of Fisher information matrix. Sweet.
      *  Hensman et al. Gaussian Processes for Big Data, 2013
      */
-    val (naturalGradEta1, naturalaGradEta2) = calcLBGrad2(j, modelParams,y,kXZ,kZZ)
+    val naturalGradEta1 = calcLBGradUEta1(j, lbState.beta, lbState.w,  y,   kZZ, kXZ,lbState)
+   val naturalGradEta2 = calcLBGradUEta2(j, lbState.beta, lbState.w,  kZZ, kXZ,lbState)
+   
+    // val (naturalGradEta1, naturalaGradEta2) = calcLBGrad2(j, modelParams,y,kXZ,kZZ)
 
     val newTheta1 = theta1 + l * naturalGradEta1
-    val newTheta2 = theta2 + l * naturalaGradEta2
+    val newTheta2 = theta2 + l * naturalGradEta2
   
     val newS = -0.5 * inv(newTheta2)
     val newM = newS * newTheta1

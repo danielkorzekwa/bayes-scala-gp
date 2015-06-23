@@ -13,11 +13,12 @@ class predictTest {
   val x: DenseMatrix[Double] = DenseVector.rangeD(-10, 10, 1).toDenseMatrix.t
   val y = DenseVector.horzcat(DenseVector.zeros[Double](x.size) + 1d, DenseVector.zeros[Double](x.size) + 2d)
 
-   val covFunc = CovSEiso(log(1), log(1))
-  
+  val covFuncParams = DenseVector(log(1), log(1))
+  val covFunc = CovSEiso()
+
   @Test def test = {
 
-    val model = cogp(x, y,covFunc)
+    val model = cogp(x, y, covFunc, covFuncParams)
     val predictedY = predict(x, model)
 
     println(predictedY)

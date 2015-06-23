@@ -1,4 +1,4 @@
-package dk.gp.cogp.svi
+package dk.gp.cogp.svi.v
 
 import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix

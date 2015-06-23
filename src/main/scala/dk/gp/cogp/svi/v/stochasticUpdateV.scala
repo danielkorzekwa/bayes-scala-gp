@@ -1,10 +1,13 @@
-package dk.gp.cogp.svi
+package dk.gp.cogp.svi.v
 
-import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.model.CogpModelParams
+import breeze.linalg.InjectNumericOps
+import dk.gp.cogp.svi.v.calcLBGradVEta1
+import dk.gp.cogp.svi.v.calcLBGradVEta2
+import dk.gp.cogp.svi.LBState
 
 /**
  * Stochastic update for the parameters (mu,S) of p(v|y)
@@ -14,10 +17,10 @@ import dk.gp.cogp.model.CogpModelParams
 
 object stochasticUpdateV {
 
-  def apply(i: Int,  l: Double, modelParams: CogpModelParams, y: DenseMatrix[Double],
+  def apply(i: Int,  l: Double, lbState: LBState, y: DenseMatrix[Double],
             kXZ: DenseMatrix[Double], kZZ: DenseMatrix[Double]): MultivariateGaussian = {
 
-    val m = modelParams
+    val m = lbState
     
     //natural parameters theta
     val theta1 = inv(m.v(i).v) * m.v(i).m
