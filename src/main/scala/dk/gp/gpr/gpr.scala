@@ -8,14 +8,14 @@ import breeze.linalg.VectorConstructors
 
 object gpr {
 
-  def apply(x: DenseMatrix[Double], y: DenseVector[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], noiseLogStdDev: Double, mean: Double = 0d): GprModel = {
+  def apply(x: DenseMatrix[Double], y: DenseVector[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], noiseLogStdDev: Double, mean: Double = 0d,gpMaxIter:Int=100): GprModel = {
 
     val initialGpModel = GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev, mean)
     
     val diffFunc = GprDiffFunction(initialGpModel)
     val initialParams = DenseVector(covFuncParams.toArray :+ noiseLogStdDev)
     
-    val optimizer = new LBFGS[DenseVector[Double]](maxIter = 100, m = 3, tolerance = 1.0E-6)
+    val optimizer = new LBFGS[DenseVector[Double]](maxIter = gpMaxIter, m = 3, tolerance = 1.0E-6)
     val optIterations = optimizer.iterations(diffFunc, initialParams).toList
 
     val newParams = optIterations.last.x

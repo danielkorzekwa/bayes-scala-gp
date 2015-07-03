@@ -3,7 +3,6 @@ package dk.gp.cogp.svi.u
 import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
 import breeze.linalg.DenseVector
-import dk.gp.cogp.model.CogpModelParams
 import breeze.numerics._
 import dk.gp.cogp.svi.LBState
 

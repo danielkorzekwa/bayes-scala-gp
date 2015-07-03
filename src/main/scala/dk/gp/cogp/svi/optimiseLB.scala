@@ -1,7 +1,6 @@
 package dk.gp.cogp.svi
 
 import breeze.linalg.DenseMatrix
-import dk.gp.cogp.model.CogpModelParams
 import breeze.linalg.DenseVector
 import dk.gp.cov.CovFunc
 import dk.gp.math.MultivariateGaussian

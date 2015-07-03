@@ -3,10 +3,7 @@ package dk.gp.cogp.svi.v
 import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
 import dk.gp.math.MultivariateGaussian
-import dk.gp.cogp.model.CogpModelParams
 import breeze.linalg.InjectNumericOps
-import dk.gp.cogp.svi.v.calcLBGradVEta1
-import dk.gp.cogp.svi.v.calcLBGradVEta2
 import dk.gp.cogp.svi.LBState
 
 /**

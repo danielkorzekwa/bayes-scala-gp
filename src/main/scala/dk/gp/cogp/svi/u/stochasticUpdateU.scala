@@ -5,9 +5,6 @@ import breeze.linalg.DenseVector
 import breeze.linalg.inv
 import breeze.linalg.cholesky
 import dk.gp.math.MultivariateGaussian
-import dk.gp.cogp.model.CogpModelParams
-import dk.gp.cogp.svi.u.calcLBGradUEta2
-import dk.gp.cogp.svi.u.calcLBGradUEta1
 import dk.gp.cogp.svi.LBState
 
 /**

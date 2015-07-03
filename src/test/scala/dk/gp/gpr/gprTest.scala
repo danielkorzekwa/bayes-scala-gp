@@ -22,7 +22,7 @@ class gprTest {
   @Test def test = {
 
     val gpModel = gpr(x, y, covFunc, covFuncParams, noiseLogStdDev)
-
+ 
     assertEquals(0.68594, gpModel.covFuncParams(0), 0.0001)
     assertEquals(-0.99340, gpModel.covFuncParams(1), 0.0001)
     assertEquals(-1.9025, gpModel.noiseLogStdDev, 0.0001)
