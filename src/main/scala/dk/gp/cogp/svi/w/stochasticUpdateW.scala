@@ -17,7 +17,6 @@ object stochasticUpdateW {
       y:DenseMatrix[Double]): (DenseMatrix[Double], DenseMatrix[Double]) = {
 
     val wGrad = calcLBGradW(lbState.w,lbState.beta,lbState.u,lbState.v,kXZ,kZZ,kXXDiag,y)
-    println(wGrad.toString + "\n")
     
     val (newW, newWDelta) = classicalMomentum(lbState.w, lbState.wDelta, learningRate, momentum, wGrad)
 

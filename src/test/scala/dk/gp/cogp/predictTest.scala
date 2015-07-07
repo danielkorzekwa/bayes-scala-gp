@@ -1,11 +1,10 @@
 package dk.gp.cogp
 
-import org.junit._
-import Assert._
+import org.junit.Test
+
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import breeze.linalg._
-import breeze.numerics._
+import breeze.numerics.log
 import dk.gp.cov.CovSEiso
 
 class predictTest {
@@ -19,6 +18,10 @@ class predictTest {
   @Test def test = {
 
     val model = cogp(x, y, covFunc, covFuncParams)
+
+    val loglik = calcLBLoglik(model.v)
+    println("LB loglik=" + loglik)
+
     val predictedY = predict(x, model)
 
     println(predictedY)
