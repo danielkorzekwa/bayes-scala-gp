@@ -3,7 +3,7 @@ lazy val root = (project in file(".")).
     name := "bayes-scala-gp",
     organization := "com.github.danielkorzekwa",
     version := "0.1-SNAPSHOT",
-    scalaVersion := "2.10.4",
+    scalaVersion := "2.11.4",
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",

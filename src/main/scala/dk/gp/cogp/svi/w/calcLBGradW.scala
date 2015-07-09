@@ -11,7 +11,9 @@ import dk.gp.math.MultivariateGaussian
 import breeze.linalg._
 
 object calcLBGradW {
-
+ 
+  
+  
   def apply(w: DenseMatrix[Double], beta: DenseVector[Double], u: Array[MultivariateGaussian], v: Array[MultivariateGaussian], kXZ: DenseMatrix[Double], kZZ: DenseMatrix[Double], kXXDiag: DenseVector[Double],
             y: DenseMatrix[Double]): DenseMatrix[Double] = {
 
