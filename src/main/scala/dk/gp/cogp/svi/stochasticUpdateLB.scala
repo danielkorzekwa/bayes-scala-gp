@@ -8,25 +8,24 @@ import dk.gp.cogp.svi.w.stochasticUpdateW
 import dk.gp.cogp.svi.beta.stochasticUpdateBeta
 import breeze.linalg.DenseVector
 import dk.gp.cov.utils.covDiag
+import dk.gp.cogp.CogpModel
 
 object stochasticUpdateLB {
 
-  def apply(lbState: LBState, x: DenseMatrix[Double], y: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], l: Double): LBState = {
+  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double], l: Double): CogpModel = {
 
-    val z = x //simplifying assumption
-    val kXZ = covFunc.cov(x, z, covFuncParams) 
-    val kZZ = kXZ  + (DenseMatrix.eye[Double](x.size) * 1e-7)
-    val kXXDiag = covDiag(x, covFunc, covFuncParams)
+    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, l, model, x, y) }.toArray
 
-    val newU = (0 until lbState.u.size).map { j => stochasticUpdateU(j, l, lbState, y, kXZ, kZZ) }.toArray
+    val (newW, newWDelta) = stochasticUpdateW(model, x, y)
 
-    val (newW, newWDelta) = stochasticUpdateW(lbState, kXZ, kZZ, kXXDiag,y)
-   
-    val (newBeta, newBetaDelta) = stochasticUpdateBeta(lbState)
+    val (newBeta, newBetaDelta) = stochasticUpdateBeta(model)
 
-    val newV = (0 until lbState.v.size).map { i => stochasticUpdateV(i, l, lbState, y, kXZ, kZZ) }.toArray
+    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, l, model, x, y) }.toArray
 
-    lbState.copy(u = newU, v = newV, beta = newBeta, betaDelta = newBetaDelta, w = newW, wDelta = newWDelta)
+    val newG = model.g.zip(newU).map { case (g, newU) => g.copy(u = newU) }
+    val newH = model.h.zip(newV).map { case (h, newV) => h.copy(u = newV) }
+    val newModel = model.copy(g = newG, h = newH, beta = newBeta, betaDelta = newBetaDelta, w = newW, wDelta = newWDelta)
+    newModel
   }
 
   // private def

@@ -8,27 +8,29 @@ import breeze.numerics._
 
 object predict {
 
-  def apply(sMatrix: DenseMatrix[Double], model: CogpModel): DenseMatrix[UnivariateGaussian] = {
+  def apply(sMatrix: DenseMatrix[Double], x:DenseMatrix[Double],model: CogpModel): DenseMatrix[UnivariateGaussian] = {
 
     val predictedY = (0 until sMatrix.rows).map { sIndex =>
       val s = sMatrix(sIndex, ::).t
-      predict(s, model)
+      predict(s, x,model)
     }
 
     DenseVector.horzcat[UnivariateGaussian](predictedY: _*).t
   }
 
-  def apply(s: DenseVector[Double], model: CogpModel): DenseVector[UnivariateGaussian] = {
+  def apply(s: DenseVector[Double], x:DenseMatrix[Double],model: CogpModel): DenseVector[UnivariateGaussian] = {
 
-    val u = model.u
-    val v = model.v
+    val u = model.g.map(_.u)
+    val v = model.h.map(_.u)
     val w = model.w
     val beta = model.beta
 
-    val kSS = model.covFunc.cov(s.toDenseMatrix.t, s.toDenseMatrix.t, model.covFuncParams)(0, 0)
+    val kSS = model.g.head.covFunc.cov(s.toDenseMatrix.t, s.toDenseMatrix.t, model.g.head.covFuncParams)(0, 0)
 
-    val kSZ = model.covFunc.cov(s.toDenseMatrix.t, model.z, model.covFuncParams)(0, ::)
-    val kZZinv = inv(model.kZZ)
+    val kSZ = model.g.head.covFunc.cov(s.toDenseMatrix.t, model.g.head.z, model.g.head.covFuncParams)(0, ::)
+    
+     val kZZ = model.g.head.covFunc.cov(model.g.head.z, model.g.head.z, model.g.head.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+    val kZZinv = inv(kZZ)
 
     val w2 = pow(w, 2)
 

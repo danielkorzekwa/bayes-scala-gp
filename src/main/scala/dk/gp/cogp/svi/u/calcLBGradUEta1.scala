@@ -3,15 +3,15 @@ package dk.gp.cogp.svi.u
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import breeze.linalg.inv
-import dk.gp.cogp.svi.LBState
+import dk.gp.cogp.CogpModel
 
 object calcLBGradUEta1 {
 
   def apply(j: Int, beta: DenseVector[Double], w: DenseMatrix[Double], y: DenseMatrix[Double],
-            kZZ: DenseMatrix[Double], kXZ: DenseMatrix[Double], lbState: LBState): DenseVector[Double] = {
+            kZZ: DenseMatrix[Double], kXZ: DenseMatrix[Double], model: CogpModel): DenseVector[Double] = {
 
-    val u = lbState.u
-    val v = lbState.v
+    val u = model.g.map(_.u)
+    val v =  model.h.map(_.u)
 
     val A = kXZ * inv(kZZ)
 

@@ -1,9 +1,9 @@
 package dk.gp.cogp.svi.w
 
 import breeze.linalg.DenseMatrix
-import dk.gp.cogp.svi.LBState
 import dk.gp.cogp.svi.classicalMomentum
 import breeze.linalg.DenseVector
+import dk.gp.cogp.CogpModel
 
 object stochasticUpdateW {
 
@@ -13,12 +13,11 @@ object stochasticUpdateW {
   /**
    * Returns [new w, w delta]
    */
-  def apply(lbState: LBState,kXZ:DenseMatrix[Double],kZZ:DenseMatrix[Double],kXXDiag:DenseVector[Double],
-      y:DenseMatrix[Double]): (DenseMatrix[Double], DenseMatrix[Double]) = {
+  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): (DenseMatrix[Double], DenseMatrix[Double]) = {
 
-    val wGrad = calcLBGradW(lbState.w,lbState.beta,lbState.u,lbState.v,kXZ,kZZ,kXXDiag,y)
-    
-    val (newW, newWDelta) = classicalMomentum(lbState.w, lbState.wDelta, learningRate, momentum, wGrad)
+    val wGrad = calcLBGradW(model, x, y)
+
+    val (newW, newWDelta) = classicalMomentum(model.w, model.wDelta, learningRate, momentum, wGrad)
 
     (newW, newWDelta)
   }
