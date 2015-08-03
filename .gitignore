@@ -9,3 +9,5 @@ target/
 *.iml
 .idea
 /bin/
+/.cache-main
+/.cache-tests
