@@ -7,13 +7,18 @@ import dk.gp.cogp.CogpModel
 
 object calcLBGradUEta1 {
 
-  def apply(j: Int, beta: DenseVector[Double], w: DenseMatrix[Double], y: DenseMatrix[Double],
-            kZZ: DenseMatrix[Double], kXZ: DenseMatrix[Double], model: CogpModel): DenseVector[Double] = {
+  def apply(j: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
 
+    val z = model.g(j).z
+    val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
+    val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+
+    val beta = model.beta
+    val w = model.w
     val u = model.g.map(_.u)
-    val v =  model.h.map(_.u)
+    val v = model.h.map(_.u)
 
-    val A = kXZ * inv(kZZ)
+    val Aj = kXZ * inv(kZZ)
 
     val tmp = (0 until beta.size).map { i =>
       val betaVal = beta(i)
@@ -21,12 +26,18 @@ object calcLBGradUEta1 {
 
       val othersJIdx = (0 until w.cols).filter(jIndex => jIndex != j)
       val wAm = if (othersJIdx.size > 0) {
-        othersJIdx.map { jIndex => w(i, jIndex) * A * u(jIndex).m }.toArray.sum
+        othersJIdx.map { jIndex => w(i, jIndex) * Aj * u(jIndex).m }.toArray.sum
       } else DenseVector.zeros[Double](y.rows)
 
-      val yVal = y(::, i) - A * v(i).m - wAm
+      val z = model.h(i).z
+      val kZZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+      val kXZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams)
+      val kZX2 = kXZ2.t
+      val Ai = kXZ2 * inv(kZZ2)
 
-      betaVal * wVal * A.t * yVal
+      val yVal = y(::, i) - Ai * v(i).m - wAm
+
+      betaVal * wVal * Aj.t * yVal
     }.reduceLeft((total, x) => total + x)
 
     val eta1Grad = tmp - inv(u(j).v) * u(j).m

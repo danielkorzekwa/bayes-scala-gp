@@ -14,30 +14,34 @@ import dk.gp.cogp.CogpModel
 
 object stochasticUpdateV {
 
-  def apply(i: Int,  l: Double,  model:CogpModel, x: DenseMatrix[Double],y: DenseMatrix[Double]): MultivariateGaussian = {
+  private val learningRate = 1e-2
 
-       val z = x
+  def apply(i: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
+
+    val z = x
     val kXZ = model.g.head.covFunc.cov(z, z, model.g.head.covFuncParams)
     val kZZ = model.g.head.covFunc.cov(z, z, model.g.head.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-   
-    
+
     val m = model
-    
-      val u = model.g.map(_.u)
-      val v = model.h.map(_.u)
-      
+
+    val u = model.g.map(_.u)
+    val v = model.h.map(_.u)
+
     //natural parameters theta
     val theta1 = inv(v(i).v) * v(i).m
     val theta2 = -0.5 * inv(v(i).v)
-   
-    val naturalGradEta1 = calcLBGradVEta1(m.beta(i), m.w(i, ::).t, kZZ, kXZ, v(i).v, y(::, i), v(i).m, u)
-    val naturalGradEta2 = calcLBGradVEta2(m.beta(i),v(i).v, kZZ, kXZ)
 
-    val newTheta1 = theta1 + l * naturalGradEta1
-    val newTheta2 = theta2 + l * naturalGradEta2
+    val naturalGradEta1 = calcLBGradVEta1(i, model, x, y)
+    val naturalGradEta2 = calcLBGradVEta2(i, model, x, y)
+
+    val newTheta1 = theta1 + learningRate * naturalGradEta1
+    val newTheta2 = theta2 + learningRate * naturalGradEta2
 
     val newS = -0.5 * inv(newTheta2)
-    val newM = newS * newTheta1
+
+    //@TODO following Nguyen, why is that: a bit of hack to allow h_i to be input-dependent noise
+    //val newM = newS * newTheta1
+    val newM = v(i).m
     MultivariateGaussian(newM, newS)
   }
 }

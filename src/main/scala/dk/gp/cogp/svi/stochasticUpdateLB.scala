@@ -14,17 +14,19 @@ object stochasticUpdateLB {
 
   def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double], l: Double): CogpModel = {
 
-    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, l, model, x, y) }.toArray
+    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, model, x, y) }.toArray
 
     val (newW, newWDelta) = stochasticUpdateW(model, x, y)
 
-    val (newBeta, newBetaDelta) = stochasticUpdateBeta(model)
+    val (newBeta, newBetaDelta) = stochasticUpdateBeta(model, x, y)
 
-    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, l, model, x, y) }.toArray
+    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, model, x, y) }.toArray
 
     val newG = model.g.zip(newU).map { case (g, newU) => g.copy(u = newU) }
     val newH = model.h.zip(newV).map { case (h, newV) => h.copy(u = newV) }
-    val newModel = model.copy(g = newG, h = newH, beta = newBeta, betaDelta = newBetaDelta, w = newW, wDelta = newWDelta)
+    // val newModel = model.copy(g = newG, h = newH, beta = newBeta, betaDelta = newBetaDelta, w = newW, wDelta = newWDelta)
+
+    val newModel = model.copy(beta = newBeta, betaDelta = newBetaDelta)
     newModel
   }
 

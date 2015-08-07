@@ -3,16 +3,24 @@ package dk.gp.cogp.svi.v
 import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
+import dk.gp.cogp.CogpModel
 
 object calcLBGradVEta2 {
 
-  def apply(beta: Double, S: DenseMatrix[Double], kZZ: DenseMatrix[Double], kXZ: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def apply(i: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseMatrix[Double] = {
 
-    val A = kXZ * inv(kZZ)
+    val z_i = model.h(i).z
+    val kZZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+    val kXZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams)
 
-    val lambda = inv(kZZ) + beta * A.t * A
+    val Ai = kXZ_i * inv(kZZ_i)
 
-    val grad = 0.5 * inv(S) - 0.5 * lambda
+    val v = model.h.map(_.u)
+    val beta = model.beta
+
+    val lambda = inv(kZZ_i) + beta(i) * Ai.t * Ai
+
+    val grad = 0.5 * inv(v(i).v) - 0.5 * lambda
 
     grad
   }

@@ -16,11 +16,6 @@ object calcLBGradW {
 
   def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseMatrix[Double] = {
 
-    val z = x
-    val kXZ = model.g.head.covFunc.cov(z, z, model.g.head.covFuncParams)
-    val kZZ = model.g.head.covFunc.cov(z, z, model.g.head.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-    val kXXDiag = covDiag(x, model.g.head.covFunc, model.g.head.covFuncParams)
-
     val w = model.w
     val beta = model.beta
     val u = model.g.map(_.u)
@@ -30,15 +25,34 @@ object calcLBGradW {
 
     for (i <- 0 until dw.rows) {
 
-      val Aj = kXZ * inv(kZZ)
-      val wAm = (0 until dw.cols).foldLeft(DenseVector.zeros[Double](kXZ.rows))((wAm, j) => wAm + w(i, j) * Aj * u(j).m)
+      val wAm = (0 until dw.cols).foldLeft(DenseVector.zeros[Double](x.rows)) { (wAm, j) =>
+
+        val z = model.g(j).z
+        val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
+        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+        val Aj = kXZ * inv(kZZ)
+
+        wAm + w(i, j) * Aj * u(j).m
+      }
+
+      val z = model.h(i).z
+      val kZZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+      val kXZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams)
+      val kZX2 = kXZ2.t
+      val Ai = kXZ2 * inv(kZZ2)
+      val lambdaI = Ai.t * Ai
 
       for (j <- 0 until dw.cols) {
 
-        //trace term
-        val Ai = Aj
+        val z = model.g(j).z
+        val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
+        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+        val kXXDiag = covDiag(x, model.g(j).covFunc, model.g(j).covFuncParams)
+
+        val Aj = kXZ * inv(kZZ)
         val lambdaJ = Aj.t * Aj
 
+        //trace term
         val traceTerm = beta(i) * w(i, j) * trace(u(j).v * lambdaJ)
 
         //kTilde term

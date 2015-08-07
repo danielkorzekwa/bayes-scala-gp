@@ -12,16 +12,16 @@ import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.CogpGPVar
 
-object optimiseLB {
+object cogp {
 
   def apply(x: DenseMatrix[Double], y: DenseMatrix[Double],
             covFuncG: Array[CovFunc], covFuncGParams: Array[DenseVector[Double]],
             covFuncH: Array[CovFunc], covFuncHParams: Array[DenseVector[Double]],
             l: Double, iterNum: Int): CogpModel = {
 
-    val initialLBState = getInitialLBState(x, y, covFuncG, covFuncGParams, covFuncH, covFuncHParams)
+    val initialModel = getInitialLBState(x, y, covFuncG, covFuncGParams, covFuncH, covFuncHParams)
 
-    val finalLBState = (0 until iterNum).foldLeft(initialLBState) {
+    val finalLBState = (0 until iterNum).foldLeft(initialModel) {
 
       case (currLBState, iter) => stochasticUpdateLB(currLBState, x, y, l)
     }
@@ -41,7 +41,7 @@ object optimiseLB {
 
     val priorG = covFuncG.zip(covFuncGParams).map { case (covFunc, covFuncParams) => CogpGPVar(x, getInitialIndVarV(mean(y(*, ::))), covFunc, covFuncParams) }
 
-    val priorH = covFuncH.zip(covFuncGParams).zipWithIndex.map { case ((covFunc, covFuncParams), i) => CogpGPVar(x, getInitialIndVarV(y(::, i)), covFunc, covFuncParams) }
+    val priorH = covFuncH.zip(covFuncHParams).zipWithIndex.map { case ((covFunc, covFuncParams), i) => CogpGPVar(x, getInitialIndVarV(y(::, i)), covFunc, covFuncParams) }
 
     val lbState = CogpModel(priorG, priorH, beta, betaDelta, w, wDelta)
 

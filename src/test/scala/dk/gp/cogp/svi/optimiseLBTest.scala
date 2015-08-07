@@ -27,7 +27,7 @@ class optimiseLBTest {
 
   @Test def test = {
 
-    val modelParams = optimiseLB(x, y, covFuncG, cofFuncGParams, covFuncH, covFuncHParams, l = 0.1, iterNum = 100)
+    val modelParams = cogp(x, y, covFuncG, cofFuncGParams, covFuncH, covFuncHParams, l = 0.1, iterNum = 100)
 
     println("w: " + modelParams.w)
     println("beta: " + modelParams.beta)
