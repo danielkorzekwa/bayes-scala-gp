@@ -28,12 +28,13 @@ class predictTest {
 
   @Test def test = {
 
-    val model = cogp(x, y, covFuncG, cofFuncGParams, covFuncH, covFuncHParams, l = 0.1, iterNum = 1)
+    val model = cogp(x, y, covFuncG, cofFuncGParams, covFuncH, covFuncHParams, l = 0.1, iterNum = 2)
 
     val loglik = calcLBLoglik(model, x, y)
 
     println("LB loglik=" + loglik)
     println("new w:" + model.w)
+     println("new beta:" + model.beta)
 
     val s = x
     val predictedY = predict(s, x, model)

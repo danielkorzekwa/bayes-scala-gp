@@ -5,4 +5,4 @@ import dk.gp.cov.CovFunc
 import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 
-case class CogpGPVar(z: DenseMatrix[Double], u: MultivariateGaussian, covFunc: CovFunc, covFuncParams: DenseVector[Double])
+case class CogpGPVar(z: DenseMatrix[Double], u: MultivariateGaussian, covFunc: CovFunc, covFuncParams: DenseVector[Double],covFuncParamsDelta: DenseVector[Double])

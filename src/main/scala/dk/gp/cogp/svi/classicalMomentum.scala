@@ -1,6 +1,7 @@
 package dk.gp.cogp.svi
 
 import breeze.linalg.DenseMatrix
+import breeze.linalg.DenseVector
 
 /**
  * Ilya Sutskever et al. On the importance of initialization and momentum in deep learning, 2013 (eq. 1, 2)
@@ -22,6 +23,15 @@ object classicalMomentum {
     val newTheta = theta + newDelta
 
     (newTheta, newDelta)
+  }
+  
+  
+  //@TODO would that be better to use Ufunc here? maybe not, this is not a universal function acting just as a marker for explicitly provided implementations.
+   def apply(theta: DenseVector[Double], thetaDelta: DenseVector[Double], epsilon: Double, mu: Double, thetaGrad: DenseVector[Double]): (DenseVector[Double], DenseVector[Double]) = {
+
+   val (newTheta,newThetaDelta) = apply(theta.toDenseMatrix,thetaDelta.toDenseMatrix,epsilon,mu,thetaGrad.toDenseMatrix)
+   
+   (newTheta.toDenseVector,newThetaDelta.toDenseVector)
   }
 
 }

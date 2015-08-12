@@ -40,6 +40,8 @@ object calcLBGradUEta1 {
       betaVal * wVal * Aj.t * yVal
     }.reduceLeft((total, x) => total + x)
 
+    //@TODO why u(j).v is used here instead of [..] term from eq 19. Computing gradient with respect to natural parameters using chain rule indicates that [...] should be used.
+    // Is it because u(j).v=Sj is a maximiser of [....] when setting derivative of Lower bound with respect to Sj to 0?
     val eta1Grad = tmp - inv(u(j).v) * u(j).m
     eta1Grad
   }

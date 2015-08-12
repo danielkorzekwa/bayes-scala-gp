@@ -29,9 +29,11 @@ object CogpModel {
     val w = new DenseMatrix(2, 1, Array(1.0, 1)) // [P x Q]
     val wDelta = DenseMatrix.zeros[Double](w.rows, w.cols)
 
-    val priorG = covFuncG.zip(covFuncGParams).map { case (covFunc, covFuncParams) => CogpGPVar(x, getInitialIndVarV(mean(y(*, ::))), covFunc, covFuncParams) }
+    val priorG = covFuncG.zip(covFuncGParams).map { case (covFunc, covFuncParams) => 
+      CogpGPVar(x, getInitialIndVarV(mean(y(*, ::))), covFunc, covFuncParams,DenseVector.zeros[Double](covFuncParams.size)) }
 
-    val priorH = covFuncH.zip(covFuncHParams).zipWithIndex.map { case ((covFunc, covFuncParams), i) => CogpGPVar(x, getInitialIndVarV(y(::, i)), covFunc, covFuncParams) }
+    val priorH = covFuncH.zip(covFuncHParams).zipWithIndex.map { case ((covFunc, covFuncParams), i) => 
+      CogpGPVar(x, getInitialIndVarV(y(::, i)), covFunc, covFuncParams,DenseVector.zeros[Double](covFuncParams.size)) }
 
     val lbState = CogpModel(priorG, priorH, beta, betaDelta, w, wDelta)
 

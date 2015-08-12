@@ -9,6 +9,7 @@ import dk.gp.cogp.svi.beta.stochasticUpdateBeta
 import breeze.linalg.DenseVector
 import dk.gp.cov.utils.covDiag
 import dk.gp.cogp.CogpModel
+import dk.gp.cogp.svi.hypcovg.stochasticUpdateHypCovG
 
 object stochasticUpdateLB {
 
@@ -20,13 +21,18 @@ object stochasticUpdateLB {
 
     val (newBeta, newBetaDelta) = stochasticUpdateBeta(model, x, y)
 
+    val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, model, x, y) }.toArray
+
     val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, model, x, y) }.toArray
 
-    val newG = model.g.zip(newU).map { case (g, newU) => g.copy(u = newU) }
-    val newH = model.h.zip(newV).map { case (h, newV) => h.copy(u = newV) }
-    // val newModel = model.copy(g = newG, h = newH, beta = newBeta, betaDelta = newBetaDelta, w = newW, wDelta = newWDelta)
+    val newG = (0 until model.g.size).map { j =>
+      model.g(j).copy(u = newU(j), covFuncParams = newHypCovG(j)._1, covFuncParamsDelta = newHypCovG(j)._2)
+    }.toArray
 
-    val newModel = model.copy(beta = newBeta, betaDelta = newBetaDelta)
+    val newH = model.h.zip(newV).map { case (h, newV) => h.copy(u = newV) }
+
+    val newModel = model.copy(g = newG, h = newH, beta = newBeta, betaDelta = newBetaDelta, w = newW, wDelta = newWDelta)
+
     newModel
   }
 

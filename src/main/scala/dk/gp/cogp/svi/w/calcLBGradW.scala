@@ -39,7 +39,7 @@ object calcLBGradW {
       val kZZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
       val kXZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams)
       val kZX2 = kXZ2.t
-      val Ai = kXZ2 * inv(kZZ2)
+      val Ai = kXZ2 * inv(kZZ2) //@TODO, use cholesky decomposition, understand why, stability&performance
       val lambdaI = Ai.t * Ai
 
       for (j <- 0 until dw.cols) {
