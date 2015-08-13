@@ -9,8 +9,11 @@ import breeze.linalg.DenseVector
  */
 trait CovFunc {
 
-  def cov(x1:DenseMatrix[Double],x2:DenseMatrix[Double],covFuncParams:DenseVector[Double]):DenseMatrix[Double]
-  
-  def covD(x:DenseMatrix[Double],covFuncParams:DenseVector[Double]):Array[DenseMatrix[Double]]
- 
+  def cov(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): DenseMatrix[Double]
+
+  //@TODO delete this method
+  def covD(x: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]]
+
+  def covD(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]]
+
 }

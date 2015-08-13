@@ -51,6 +51,8 @@ object calcLBLoglik {
       val traceQTerm = (0 until gArray.size).map { j =>
 
         val z = cogpModel.g(j).z
+
+        //@TODO use (x,z) instead of (z,z), similarly in other places in the project
         val kXZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams)
         val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
 
@@ -68,6 +70,12 @@ object calcLBLoglik {
         val kZX = kXZ.t
         val kXXDiag = covDiag(x, cogpModel.g(j).covFunc, cogpModel.g(j).covFuncParams)
 
+        //@TODO performance improvement:
+        /**
+         * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
+         * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
+         * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
+         */
         val kTildeDiagSum = sum(kXXDiag - diag(kXZ * inv(kZZ) * kZX))
 
         pow(w(i, j), 2) * kTildeDiagSum
