@@ -19,7 +19,6 @@ object calcLBGradHypCovG {
     val z = model.g(j).z
     val kXZ = model.g(j).covFunc.cov(x, z, model.g(j).covFuncParams)
     val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-    val kZZd = model.g(j).covFunc.covD(z, model.g(j).covFuncParams)
     val kZZdArray = model.g(j).covFunc.covD(z, model.g(j).covFuncParams)
     val kXZDArray = model.g(j).covFunc.covD(x, z, model.g(j).covFuncParams)
 

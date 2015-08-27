@@ -15,9 +15,9 @@ object stochasticUpdateHypCovG {
 
     val hypParamsD = calcLBGradHypCovG(j, model, x, y)
 
-    val (newHypParams, newBetaDelta) = classicalMomentum(model.g(j).covFuncParams.toDenseMatrix, model.g(j).covFuncParamsDelta.toDenseMatrix, learningRate, momentum, hypParamsD.toDenseMatrix)
+    val (newHypParams, newBetaDelta) = classicalMomentum(model.g(j).covFuncParams, model.g(j).covFuncParamsDelta, learningRate, momentum, hypParamsD)
 
-    (newHypParams.toDenseVector, newBetaDelta.toDenseVector)
+    (newHypParams, newBetaDelta)
   }
 
 }
