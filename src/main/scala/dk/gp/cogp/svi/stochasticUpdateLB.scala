@@ -11,30 +11,71 @@ import dk.gp.cov.utils.covDiag
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.svi.hypcovg.stochasticUpdateHypCovG
 import dk.gp.cogp.svi.hypcovh.stochasticUpdateHypCovH
+import dk.gp.math.MultivariateGaussian
 
 object stochasticUpdateLB {
 
-  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double], l: Double): CogpModel = {
+  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): CogpModel = {
 
-    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, model, x, y) }.toArray
-    val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, model, x, y) }.toArray
-    val newG = (0 until model.g.size).map { j =>
-      model.g(j).copy(u = newU(j), covFuncParams = newHypCovG(j)._1, covFuncParamsDelta = newHypCovG(j)._2)
-    }.toArray
+    var currModel = model
 
-    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, model, x, y) }.toArray
-    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, model, x, y) }.toArray
-    val newH = (0 until model.h.size).map { i =>
-      model.h(i).copy(u = newV(i), covFuncParams = newHypCovH(i)._1, covFuncParamsDelta = newHypCovH(i)._2)
-    }.toArray
+    //@TODO when learning just the covParameters, at some iteration, loglik accuracy suddenly goes down, numerical stability issues? 
+    //@TODO Given just gU and hypG are learned, learning first hypG then gU doesn't not converge (loglik is decreasing), why is that?
+    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, currModel, x, y) }.toArray
+    currModel = withNewGu(newU, currModel)
 
-    val (newW, newWDelta) = stochasticUpdateW(model, x, y)
+    val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, currModel, x, y) }.toArray
+    currModel = withNewCovParamsG(newHypCovG, currModel)
+
+ 
+    val (newW, newWDelta) = stochasticUpdateW(currModel, x, y)
+    currModel = currModel.copy(w = newW, wDelta = newWDelta)
+
     val (newBeta, newBetaDelta) = stochasticUpdateBeta(model, x, y)
+    currModel = currModel.copy(beta = newBeta, betaDelta = newBetaDelta)
 
-    val newModel = model.copy(g = newG, h = newH, beta = newBeta, betaDelta = newBetaDelta, w = newW, wDelta = newWDelta)
+    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, currModel, x, y) }.toArray
+    currModel = withNewHu(newV, currModel)
+
+    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, currModel, x, y) }.toArray
+    currModel = withNewCovParamsH(newHypCovH, currModel)
+
+    currModel
+  }
+
+  private def withNewGu(newGu: Array[MultivariateGaussian], model: CogpModel): CogpModel = {
+    val newG = (0 until model.g.size).map { j =>
+      model.g(j).copy(u = newGu(j))
+    }.toArray
+    val newModel = model.copy(g = newG)
 
     newModel
   }
 
-  // private def
+  private def withNewCovParamsG(newHypCovG: Array[(DenseVector[Double], DenseVector[Double])], model: CogpModel): CogpModel = {
+    val newG = (0 until model.g.size).map { j =>
+      model.g(j).copy(covFuncParams = newHypCovG(j)._1, covFuncParamsDelta = newHypCovG(j)._2)
+    }.toArray
+    val newModel = model.copy(g = newG)
+
+    newModel
+  }
+
+  private def withNewHu(newHu: Array[MultivariateGaussian], model: CogpModel): CogpModel = {
+    val newH = (0 until model.h.size).map { i =>
+      model.h(i).copy(u = newHu(i))
+    }.toArray
+    val newModel = model.copy(h = newH)
+
+    newModel
+  }
+
+  private def withNewCovParamsH(newHypCovH: Array[(DenseVector[Double], DenseVector[Double])], model: CogpModel): CogpModel = {
+    val newH = (0 until model.h.size).map { i =>
+      model.h(i).copy(covFuncParams = newHypCovH(i)._1, covFuncParamsDelta = newHypCovH(i)._2)
+    }.toArray
+    val newModel = model.copy(h = newH)
+
+    newModel
+  }
 }
