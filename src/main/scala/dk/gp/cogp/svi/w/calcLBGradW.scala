@@ -11,6 +11,7 @@ import dk.gp.math.MultivariateGaussian
 import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cov.utils.covDiag
+import dk.gp.math.invchol
 
 object calcLBGradW {
 
@@ -30,7 +31,11 @@ object calcLBGradW {
         val z = model.g(j).z
         val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
         val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-        val Aj = kXZ * inv(kZZ)
+        
+        val kZZCholR = cholesky(kZZ).t
+        val kZZinv = invchol(kZZCholR)
+        
+        val Aj = kXZ * kZZinv
 
         wAm + w(i, j) * Aj * u(j).m
       }
@@ -39,7 +44,10 @@ object calcLBGradW {
       val kZZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
       val kXZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams)
       val kZX2 = kXZ2.t
-      val Ai = kXZ2 * inv(kZZ2) //@TODO, use cholesky decomposition, understand why, stability&performance
+      
+      val kZZ2CholR = cholesky(kZZ2).t
+      val kZZ2inv = invchol(kZZ2CholR)
+      val Ai = kXZ2 * kZZ2inv 
       val lambdaI = Ai.t * Ai
 
       for (j <- 0 until dw.cols) {
@@ -49,7 +57,10 @@ object calcLBGradW {
         val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
         val kXXDiag = covDiag(x, model.g(j).covFunc, model.g(j).covFuncParams)
 
-        val Aj = kXZ * inv(kZZ)
+        val kZZCholR = cholesky(kZZ).t
+        val kZZinv = invchol(kZZCholR)
+        
+        val Aj = kXZ * kZZinv
         val lambdaJ = Aj.t * Aj
 
         //trace term
@@ -63,7 +74,7 @@ object calcLBGradW {
          */
         val kZX = kXZ.t
 
-        val kTildeDiagSum = sum(kXXDiag) - trace(kZX * kXZ * inv(kZZ))
+        val kTildeDiagSum = sum(kXXDiag) - trace(kZX * kXZ * kZZinv)
         val tildeTerm = beta(i) * w(i, j) * kTildeDiagSum
 
         //log normal term

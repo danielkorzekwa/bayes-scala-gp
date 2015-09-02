@@ -12,6 +12,8 @@ import breeze.linalg.sum
 import scala.math.Pi
 import breeze.linalg.diag
 import dk.gp.cov.utils.covDiag
+import breeze.linalg.cholesky
+import dk.gp.math.invchol
 
 object calcLBLoglik {
 
@@ -26,9 +28,10 @@ object calcLBLoglik {
 
       val z = cogpModel.g(j).z
       val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+      val kZZinv = invchol(cholesky(kZZ).t)
 
       val u = gArray(j).u
-      val qTerm_j = 0.5 * (logdet(kZZ)._2 + logdet(inv(u.v))._2) + 0.5 * trace(inv(kZZ) * (u.m * u.m.t + u.v))
+      val qTerm_j = 0.5 * (logdet(kZZ)._2 + logdet(inv(u.v))._2) + 0.5 * trace(kZZinv * (u.m * u.m.t + u.v)) //is it better to compute log det using chol decomposition? look at cogp impl and alg 2.1 of Rasmussen book
       qTerm_j
     }.sum
 
@@ -38,15 +41,17 @@ object calcLBLoglik {
       val kZZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
       val kXZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams)
       val kZX2 = kXZ2.t
-      val Ai2 = kXZ2 * inv(kZZ2)
+      
+      val kZZ2inv = invchol(cholesky(kZZ2).t)
+      val Ai2 = kXZ2 * kZZ2inv
       val lambdaI = Ai2.t * Ai2
 
       val kXXDiag_i = covDiag(x, cogpModel.h(i).covFunc, cogpModel.h(i).covFuncParams)
 
-      val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ2 * inv(kZZ2) * kZX2))
+      val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ2 * kZZ2inv * kZX2))
 
       val v = hArray(i).u
-      val pTerm_i = 0.5 * (logdet(kZZ2)._2 - logdet(v.v)._2) + 0.5 * trace(inv(kZZ2) * ((v.m * v.m.t + v.v)))
+      val pTerm_i = 0.5 * (logdet(kZZ2)._2 - logdet(v.v)._2) + 0.5 * trace(kZZ2inv * ((v.m * v.m.t + v.v)))
 
       val traceQTerm = (0 until gArray.size).map { j =>
 
@@ -55,8 +60,9 @@ object calcLBLoglik {
         //@TODO use (x,z) instead of (z,z), similarly in other places in the project
         val kXZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams)
         val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-
-        val Aj = kXZ * inv(kZZ)
+val kZZinv = invchol(cholesky(kZZ).t)
+        
+        val Aj = kXZ * kZZinv
         val lambdaJ = Aj.t * Aj
         val u = gArray(j).u
         pow(w(i, j), 2) * trace(u.v * lambdaJ)
@@ -70,13 +76,15 @@ object calcLBLoglik {
         val kZX = kXZ.t
         val kXXDiag = covDiag(x, cogpModel.g(j).covFunc, cogpModel.g(j).covFuncParams)
 
+        val kZZinv = invchol(cholesky(kZZ).t)
+        
         //@TODO performance improvement:
         /**
          * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
          * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
          * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
          */
-        val kTildeDiagSum = sum(kXXDiag - diag(kXZ * inv(kZZ) * kZX))
+        val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
 
         pow(w(i, j), 2) * kTildeDiagSum
       }.sum
@@ -89,7 +97,9 @@ object calcLBLoglik {
         val z = cogpModel.g(j).z
         val kXZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams)
         val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-        val Aj = kXZ * inv(kZZ)
+        
+        val kZZinv = invchol(cholesky(kZZ).t)
+        val Aj = kXZ * kZZinv
 
         wAm + w(i, j) * Aj * gArray(j).u.m
       }
@@ -100,8 +110,8 @@ object calcLBLoglik {
 
       pTerm_i + logNTerm - 0.5 * beta(i) * traceQTerm - 0.5 * beta(i) * kTildeQTerm - tracePTerm - kTildePTerm
 
-      logNTerm - pTerm_i - tracePTerm - kTildePTerm - 0.5 * beta(i) * traceQTerm - 0.5 * beta(i) * kTildeQTerm
-
+      val pTerm = logNTerm - pTerm_i - tracePTerm - kTildePTerm - 0.5 * beta(i) * traceQTerm - 0.5 * beta(i) * kTildeQTerm
+      pTerm
     }.sum
 
     -qTerm + pTerm

@@ -5,6 +5,8 @@ import breeze.linalg.inv
 import dk.gp.math.MultivariateGaussian
 import breeze.linalg.InjectNumericOps
 import dk.gp.cogp.CogpModel
+import breeze.linalg.cholesky
+import dk.gp.math.invchol
 
 /**
  * Stochastic update for the parameters (mu,S) of p(v|y)
@@ -28,8 +30,9 @@ object stochasticUpdateV {
     val v = model.h.map(_.u)
 
     //natural parameters theta
-    val theta1 = inv(v(i).v) * v(i).m
-    val theta2 = -0.5 * inv(v(i).v)
+    val vInv = invchol(cholesky(v(i).v).t)
+    val theta1 = vInv * v(i).m
+    val theta2 = -0.5 * vInv
 
     val naturalGradEta1 = calcLBGradVEta1(i, model, x, y)
     val naturalGradEta2 = calcLBGradVEta2(i, model, x, y)
@@ -37,7 +40,7 @@ object stochasticUpdateV {
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2
 
-    val newS = -0.5 * inv(newTheta2)
+    val newS = -0.5 * inv(newTheta2) //@TODO use invchol with jitter
 
     //@TODO following Nguyen, why is that: a bit of hack to allow h_i to be input-dependent noise
     //val newM = newS * newTheta1

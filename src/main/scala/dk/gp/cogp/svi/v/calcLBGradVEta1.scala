@@ -5,6 +5,8 @@ import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.CogpModel
+import dk.gp.math.invchol
+import breeze.linalg.cholesky
 
 object calcLBGradVEta1 {
 
@@ -14,7 +16,9 @@ object calcLBGradVEta1 {
     val kZZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
     val kXZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams)
 
-    val Ai = kXZ_i * inv(kZZ_i)
+    val kZZiCholR = cholesky(kZZ_i).t
+    val kZZiInv = invchol(kZZiCholR)
+    val Ai = kXZ_i * kZZiInv
 
     val w = model.w
     val beta = model.beta
@@ -30,7 +34,10 @@ object calcLBGradVEta1 {
         val kXZ = model.g(jIndex).covFunc.cov(z, z, model.g(jIndex).covFuncParams)
         val kZZ = model.g(jIndex).covFunc.cov(z, z, model.g(jIndex).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
 
-        val Aj = kXZ * inv(kZZ)
+        val kZZcholR = cholesky(kZZ).t
+        val kZZinv = invchol(kZZcholR)
+        
+        val Aj = kXZ * kZZinv
 
         w(i, jIndex) * Aj * u(jIndex).m
       }
@@ -38,13 +45,16 @@ object calcLBGradVEta1 {
 
     val yVal = y(::, i) - wam
 
-    val grad = beta(i) * Ai.t * yVal - inv(v(i).v) * v(i).m
+    val vCholR = cholesky(v(i).v).t
+    val vInv = invchol(vCholR)
+    
+    val grad = beta(i) * Ai.t * yVal - vInv * v(i).m
 
     grad
   }
 
   implicit class DenseVectorOps(seq: Array[DenseVector[Double]]) {
-    def sum(): DenseVector[Double] = seq match {
+    def sum(): DenseVector[Double] = seq match { //@TODO this is not required anymorre, David Hall added ufunc for sum(.) to breeze
       case Array(x) => x
       case seq      => seq.reduceLeft((total, x) => total + x)
     }

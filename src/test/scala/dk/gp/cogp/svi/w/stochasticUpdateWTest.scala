@@ -9,29 +9,42 @@ import dk.gp.cov.CovSEiso
 import breeze.numerics.log
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.calcLBLoglik
+import dk.gp.cogp.testutils.createCogpModel
 
 class stochasticUpdateWTest {
-  
-  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 4, ::)
-  val x = data(::, 0).toDenseMatrix.t
-  val y = data(::, 1 to 2)
 
-  val covFuncG: Array[CovFunc] = Array(CovSEiso())
-  val cofFuncGParams = Array(DenseVector(log(1), log(1)))
+  @Test def test_5_data_points = {
 
-  val covFuncH: Array[CovFunc] = Array(CovSEiso(), CovSEiso())
-  val covFuncHParams = Array(DenseVector(log(1), log(1e-10)), DenseVector(log(1), log(1e-10)))
-  
-   @Test def test {
+    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 4, ::)
+    val x = data(::, 0).toDenseMatrix.t
+    val y = data(::, 1 to 2)
 
-    val model = CogpModel(x, y, covFuncG, cofFuncGParams, covFuncH, covFuncHParams)
+    val model = createCogpModel(x, y)
 
-   val (newW,newWDelta) = stochasticUpdateW(model,x,y)
+    val (newW, newWDelta) = stochasticUpdateW(model, x, y)
 
     val newModel = model.copy(w = newW)
 
     val loglik = calcLBLoglik(newModel, x, y)
-    assertEquals(-121201.190018266, loglik, 0.000001)
+    assertEquals(-121201.191568, loglik, 0.000001)
 
   }
+
+  @Test def test_40_data_points = {
+
+    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 39, ::)
+    val x = data(::, 0).toDenseMatrix.t
+    val y = data(::, 1 to 2)
+
+    val model = createCogpModel(x, y)
+
+    val (newW, newWDelta) = stochasticUpdateW(model, x, y)
+
+    val newModel = model.copy(w = newW)
+
+    val loglik = calcLBLoglik(newModel, x, y)
+    assertEquals(-9.21000394934e7, loglik, 0.0001)
+
+  }
+
 }

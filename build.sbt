@@ -20,9 +20,7 @@ lazy val root = (project in file(".")).
     unmanagedSourceDirectories in Test := (scalaSource in Test).value :: Nil,
     
     libraryDependencies ++= Seq(
-      "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.20",
       "org.scalanlp" %% "breeze" % "0.11.2",
-      "org.scalanlp" %% "breeze-natives" % "0.11.2",
       // test scoped
       "org.slf4j" % "slf4j-log4j12" % "1.7.2" % Test,
       "com.novocode" % "junit-interface" % "0.11" % Test

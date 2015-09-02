@@ -4,6 +4,8 @@ import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
 import dk.gp.cogp.CogpModel
+import breeze.linalg.cholesky
+import dk.gp.math.invchol
 
 object calcLBGradVEta2 {
 
@@ -13,14 +15,20 @@ object calcLBGradVEta2 {
     val kZZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
     val kXZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams)
 
-    val Ai = kXZ_i * inv(kZZ_i)
+    val kZZiCholR = cholesky(kZZ_i).t
+    val kZZiInv = invchol(kZZiCholR)
+
+    val Ai = kXZ_i * kZZiInv
 
     val v = model.h.map(_.u)
     val beta = model.beta
 
-    val lambda = inv(kZZ_i) + beta(i) * Ai.t * Ai
+    val lambda = kZZiInv + beta(i) * Ai.t * Ai
 
-    val grad = 0.5 * inv(v(i).v) - 0.5 * lambda
+    val vCholR = cholesky(v(i).v).t
+    val vInv = invchol(vCholR)
+
+    val grad = 0.5 * vInv - 0.5 * lambda
 
     grad
   }

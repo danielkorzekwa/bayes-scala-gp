@@ -6,6 +6,7 @@ import breeze.linalg.inv
 import breeze.linalg.cholesky
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.CogpModel
+import dk.gp.math.invchol
 
 /**
  * Stochastic update for the parameters (mu,S) of q(u|y)
@@ -36,8 +37,10 @@ object stochasticUpdateU {
 
     val u = model.g.map(_.u)
     //natural parameters theta
-    val theta1 = inv(u(j).v) * u(j).m
-    val theta2 = -0.5 * inv(u(j).v)
+    //val vInv = invchol(cholesky(u(j).v).t) //@TODO use chol with jitter for matrix inverse
+    val vInv = inv(u(j).v)
+    val theta1 = vInv * u(j).m
+    val theta2 = -0.5 * vInv
 
     /**
      * Natural gradient with respect to natural parameter is just a standard gradient with respect to expectation parameters.
@@ -50,7 +53,10 @@ object stochasticUpdateU {
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2
 
-    val newS = -0.5 * inv(newTheta2)
+   // val newTheta2Inv = invchol(cholesky(newTheta2).t)
+    val newTheta2Inv = inv(newTheta2) //use invchol with jitter
+    
+    val newS = -0.5 * newTheta2Inv
     val newM = newS * newTheta1
     MultivariateGaussian(newM, newS)
 

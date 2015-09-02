@@ -8,6 +8,7 @@ import dk.gp.cov.utils.covDiag
 import breeze.linalg.inv
 import breeze.stats._
 import breeze.linalg._
+import dk.gp.math.invchol
 
 case class CogpModel(g: Array[CogpGPVar], h: Array[CogpGPVar],
                      beta: DenseVector[Double], betaDelta: DenseVector[Double],
@@ -44,7 +45,7 @@ object CogpModel {
     val m = DenseVector.zeros[Double](y.size)
 
     val vInv = 0.1 * (1.0 / variance(y)) * DenseMatrix.eye[Double](y.size)
-    val v = inv(vInv)
+   val v = invchol(cholesky(vInv).t)
     MultivariateGaussian(m, v)
   }
 }

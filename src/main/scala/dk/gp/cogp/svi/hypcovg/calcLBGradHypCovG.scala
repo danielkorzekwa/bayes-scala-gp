@@ -8,6 +8,7 @@ import breeze.linalg.inv
 import dk.gp.cov.utils.covDiagD
 import breeze.numerics._
 import breeze.linalg._
+import dk.gp.math.invchol
 
 object calcLBGradHypCovG {
 
@@ -22,7 +23,9 @@ object calcLBGradHypCovG {
     val kZZdArray = model.g(j).covFunc.covD(z, model.g(j).covFuncParams)
     val kXZDArray = model.g(j).covFunc.covD(x, z, model.g(j).covFuncParams)
 
-    val Aj = kXZ * inv(kZZ)
+    val kZZCholR = cholesky(kZZ).t
+    val kZZinv = invchol(kZZCholR) 
+    val Aj = kXZ * kZZinv
     val kZX = kXZ.t
 
     val kXXDiagDArray = covDiagD(z, model.g(j).covFunc, model.g(j).covFuncParams)
@@ -38,8 +41,8 @@ object calcLBGradHypCovG {
       val kXZd = kXZDArray(k)
 
       val kXXDiagD = kXXDiagDArray(k)
-
-      val AjD = kXZd * inv(kZZ) - Aj * kZZd * inv(kZZ)
+      
+      val AjD = kXZd * kZZinv - Aj * kZZd * kZZinv
 
       val logTermPart = (0 until hArray.size).map { i =>
 
@@ -47,14 +50,21 @@ object calcLBGradHypCovG {
         val kZZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
         val kXZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams)
         val kZX2 = kXZ2.t
-        val Ai2 = kXZ2 * inv(kZZ2)
+        
+        val kZZ2CholR = cholesky(kZZ2).t
+        val kZZ2inv = invchol(kZZ2CholR)
+        val Ai2 = kXZ2 * kZZ2inv
 
         val wAm = (0 until gArray.size).foldLeft(DenseVector.zeros[Double](x.rows)) { (wAm, j) =>
 
           val z = model.g(j).z
           val kXZ = model.g(j).covFunc.cov(x, z, model.g(j).covFuncParams)
           val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-          val Aj = kXZ * inv(kZZ)
+
+          val kZZCholR = cholesky(kZZ).t
+          val kZZinv = invchol(kZZCholR)
+                    
+          val Aj = kXZ * kZZinv
 
           wAm + w(i, j) * Aj * gArray(j).u.m
         }
@@ -75,7 +85,7 @@ object calcLBGradHypCovG {
         0.5 * beta(i) * trace(pow(w(i, j), 2) * u.v * (AjD.t * Aj + Aj.t * AjD)) //@TODO performance improvement
       }.sum
 
-      val lklPart = 0.5 * trace(inv(kZZ) * kZZd) - 0.5 * trace(inv(kZZ) * kZZd * inv(kZZ) * (u.m * u.m.t + u.v))
+      val lklPart = 0.5 * trace(kZZinv * kZZd) - 0.5 * trace(kZZinv * kZZd * kZZinv * (u.m * u.m.t + u.v))
 
       logTermPart - tildeQPart - traceQPart - lklPart
 
