@@ -1,14 +1,13 @@
 package dk.gp.cogp.svi.hypcovg
 
-import org.junit._
-import Assert._
-import breeze.linalg._
 import java.io.File
-import dk.gp.cov.CovFunc
-import dk.gp.cov.CovSEiso
-import breeze.numerics.log
-import dk.gp.cogp.CogpModel
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+import breeze.linalg.csvread
 import dk.gp.cogp.calcLBLoglik
+import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.testutils.createCogpModel
 
 class stochasticUpdateHypCovGTest {
@@ -21,12 +20,12 @@ class stochasticUpdateHypCovGTest {
 
     val model = createCogpModel(x, y)
 
-    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, model, x, y)
+    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model,x),model, x, y)
 
     val newG = model.g.head.copy(covFuncParams = newHypParams, covFuncParamsDelta = newHypParamsDelta)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-209.55036, loglik, 0.00001)
   }
 
@@ -38,12 +37,12 @@ class stochasticUpdateHypCovGTest {
 
     val model = createCogpModel(x, y)
 
-    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, model, x, y)
+    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model,x),model, x, y)
 
     val newG = model.g.head.copy(covFuncParams = newHypParams, covFuncParamsDelta = newHypParamsDelta)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-6.710887560647833e10, loglik, 0.001)
   }
 

@@ -8,10 +8,11 @@ import breeze.numerics._
 import breeze.linalg._
 import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
+import dk.gp.cogp.lb.LowerBound
 
 object calcLBGradBeta {
 
-  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(lowerBound: LowerBound, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
 
     val dBeta = DenseVector.zeros[Double](model.beta.size)
 
@@ -22,12 +23,11 @@ object calcLBGradBeta {
 
     for (i <- 0 until model.beta.size) {
 
-      val z = model.h(i).z
-      val kZZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-      val kXZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams)
+      val kZZ2 = lowerBound.kZZi(i)
+      val kXZ2 = lowerBound.kXZi(i)
       val kZX2 = kXZ2.t
 
-      val kZZ2inv = invchol(cholesky(kZZ2).t)
+      val kZZ2inv = lowerBound.kZZiInv(i)
 
       val Ai2 = kXZ2 * kZZ2inv
       val lambdaI = Ai2.t * Ai2
@@ -41,11 +41,10 @@ object calcLBGradBeta {
 
       val wAm = (0 until gArray.size).foldLeft(DenseVector.zeros[Double](x.rows)) { (wAm, j) =>
 
-        val z = model.g(j).z
-        val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
-        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
 
-        val kZZinv = invchol(cholesky(kZZ).t)
+        val kZZinv = lowerBound.kZZjInv(j)
         val Aj = kXZ * kZZinv
 
         wAm + w(i, j) * Aj * gArray(j).u.m
@@ -57,13 +56,12 @@ object calcLBGradBeta {
 
       val kTildeQTerm = (0 until gArray.size).map { j =>
 
-        val z = model.g(j).z
-        val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
-        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
         val kZX = kXZ.t
         val kXXDiag = covDiag(x, model.g(j).covFunc, model.g(j).covFuncParams)
 
-        val kZZinv = invchol(cholesky(kZZ).t)
+        val kZZinv = lowerBound.kZZjInv(j)
         val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
 
         pow(w(i, j), 2) * kTildeDiagSum
@@ -73,12 +71,10 @@ object calcLBGradBeta {
 
       val traceQTerm = (0 until gArray.size).map { j =>
 
-        val z = model.g(j).z
-        val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
-        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-
-        val R = cholesky(kZZ).t
-        val kZZinv = invchol(R)
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
+        val kZZinv = lowerBound.kZZjInv(j)
+        
         val Aj = kXZ * kZZinv
         val lambdaJ = Aj.t * Aj
         val u = gArray(j).u

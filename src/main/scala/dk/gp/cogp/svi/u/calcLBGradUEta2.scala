@@ -8,17 +8,16 @@ import dk.gp.cogp.CogpModel
 import dk.gp.cogp.CogpModel
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
+import dk.gp.cogp.lb.LowerBound
 
 object calcLBGradUEta2 {
 
-  def apply(j: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def apply(j: Int, lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseMatrix[Double] = {
 
-    val z = model.g(j).z
-    val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
-    val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+    val kXZ = lowerBound.kXZj(j)
+    val kZZ = lowerBound.kZZj(j)
 
-    val kZZCholR = cholesky(kZZ).t
-    val kZZinv = invchol(kZZCholR)
+    val kZZinv = lowerBound.kZZjInv(j)
     
     val beta = model.beta
     val w = model.w

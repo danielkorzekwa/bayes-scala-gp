@@ -12,6 +12,7 @@ import dk.gp.cogp.CogpModel
 import dk.gp.cogp.svi.hypcovg.stochasticUpdateHypCovG
 import dk.gp.cogp.svi.hypcovh.stochasticUpdateHypCovH
 import dk.gp.math.MultivariateGaussian
+import dk.gp.cogp.lb.LowerBound
 
 object stochasticUpdateLB {
 
@@ -21,23 +22,25 @@ object stochasticUpdateLB {
 
     //@TODO when learning just the covParameters, at some iteration, loglik accuracy suddenly goes down, numerical stability issues? 
     //@TODO Given just gU and hypG are learned, learning first hypG then gU doesn't not converge (loglik is decreasing), why is that?
-    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, currModel, x, y) }.toArray
+    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, LowerBound(currModel, x), currModel, x, y) }.toArray
+
     currModel = withNewGu(newU, currModel)
 
-    val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, currModel, x, y) }.toArray
-    currModel = withNewCovParamsG(newHypCovG, currModel)
+    val lowerBound = LowerBound(currModel, x)
 
- 
-    val (newW, newWDelta) = stochasticUpdateW(currModel, x, y)
+    val (newW, newWDelta) = stochasticUpdateW(lowerBound, currModel, x, y)
+    val (newBeta, newBetaDelta) = stochasticUpdateBeta(lowerBound, currModel, x, y)
+    val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, lowerBound, currModel, x, y) }.toArray
+
+    currModel = withNewCovParamsG(newHypCovG, currModel)
     currModel = currModel.copy(w = newW, wDelta = newWDelta)
 
-    val (newBeta, newBetaDelta) = stochasticUpdateBeta(model, x, y)
     currModel = currModel.copy(beta = newBeta, betaDelta = newBetaDelta)
 
-    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, currModel, x, y) }.toArray
+    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, LowerBound(currModel, x), currModel, x, y) }.toArray
     currModel = withNewHu(newV, currModel)
 
-    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, currModel, x, y) }.toArray
+    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, LowerBound(currModel, x), currModel, x, y) }.toArray
     currModel = withNewCovParamsH(newHypCovH, currModel)
 
     currModel

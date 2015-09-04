@@ -8,6 +8,7 @@ import dk.gp.cov.CovFunc
 import dk.gp.cov.CovSEiso
 import breeze.numerics.log
 import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.lb.LowerBound
 
 class calcLBLoglikTest {
 
@@ -29,7 +30,7 @@ class calcLBLoglikTest {
 
     val model = createCogpModel(x, y)
 
-    val loglik = calcLBLoglik(model, x, y)
+    val loglik = calcLBLoglik(LowerBound(model,x),model, x, y)
     assertEquals(-121201.19157, loglik, 0.00001)
   }
 
@@ -41,7 +42,7 @@ class calcLBLoglikTest {
 
     val model = createCogpModel(x, y)
 
-    val loglik = calcLBLoglik(model, x, y)
+    val loglik = calcLBLoglik(LowerBound(model,x),model, x, y)
     assertEquals(-9.2100039493488e7, loglik, 0.00001)
   }
 

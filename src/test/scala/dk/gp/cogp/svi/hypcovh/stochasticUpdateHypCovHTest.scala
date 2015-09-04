@@ -10,6 +10,7 @@ import breeze.numerics.log
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.calcLBLoglik
 import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.lb.LowerBound
 
 class stochasticUpdateHypCovHTest {
 
@@ -21,15 +22,15 @@ class stochasticUpdateHypCovHTest {
 
     val model = createCogpModel(x, y)
     
-      val (newHypParams0, newHypParamsDelta0) = stochasticUpdateHypCovH(i = 0, model, x, y)
+      val (newHypParams0, newHypParamsDelta0) = stochasticUpdateHypCovH(i = 0, LowerBound(model,x),model, x, y)
     val newH0 = model.h(0).copy(covFuncParams = newHypParams0, covFuncParamsDelta = newHypParamsDelta0)
 
-    val (newHypParams1, newHypParamsDelta1) = stochasticUpdateHypCovH(i = 1, model, x, y)
+    val (newHypParams1, newHypParamsDelta1) = stochasticUpdateHypCovH(i = 1, LowerBound(model,x), model, x, y)
     val newH1 = model.h(1).copy(covFuncParams = newHypParams1, covFuncParamsDelta = newHypParamsDelta1)
 
     val newModel = model.copy(h = Array(newH0, newH1))
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-121201.191266, loglik, 0.00001)
   }
   
@@ -41,15 +42,15 @@ class stochasticUpdateHypCovHTest {
 
     val model = createCogpModel(x, y)
     
-      val (newHypParams0, newHypParamsDelta0) = stochasticUpdateHypCovH(i = 0, model, x, y)
+      val (newHypParams0, newHypParamsDelta0) = stochasticUpdateHypCovH(i = 0, LowerBound(model,x),model, x, y)
     val newH0 = model.h(0).copy(covFuncParams = newHypParams0, covFuncParamsDelta = newHypParamsDelta0)
 
-    val (newHypParams1, newHypParamsDelta1) = stochasticUpdateHypCovH(i = 1, model, x, y)
+    val (newHypParams1, newHypParamsDelta1) = stochasticUpdateHypCovH(i = 1,  LowerBound(model,x),model, x, y)
     val newH1 = model.h(1).copy(covFuncParams = newHypParams1, covFuncParamsDelta = newHypParamsDelta1)
 
     val newModel = model.copy(h = Array(newH0, newH1))
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-9.210003944724835e7, loglik, 0.00001)
   }
   

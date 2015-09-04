@@ -28,7 +28,10 @@ case class CovSEiso() extends CovFunc {
     val sf = covFuncParams(0)
     val ell = covFuncParams(1)
 
-    def op(v1: DenseVector[Double], v2: DenseVector[Double]): Double = cov(v1.toArray, v2.toArray, sf, ell)
+    def op(v1: DenseVector[Double], v2: DenseVector[Double]): Double = {
+       
+      cov(v1.toArray, v2.toArray, sf, ell)
+    }
     val covMatrix = covFunc(x1, x2, op)
     covMatrix
   }
@@ -37,6 +40,9 @@ case class CovSEiso() extends CovFunc {
 
     require(x1.size == x2.size, "Vectors x1 and x2 have different sizes")
     val expArg = -0.5 * distance(x1, x2, exp(2 * ell))
+    
+      
+    
     exp(2 * sf) * exp(expArg)
   }
 
@@ -49,7 +55,9 @@ case class CovSEiso() extends CovFunc {
       distance += pow(x1(i) - x2(i), 2) / l
       i += 1
     }
-
+ if( distance.isNaN()) {
+          println("nan:")
+        }
     distance
   }
 

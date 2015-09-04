@@ -9,6 +9,7 @@ import dk.gp.cov.CovSEiso
 import breeze.numerics.log
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.lb.LowerBound
 
 class calcLBGradBetaTest {
 
@@ -20,7 +21,7 @@ class calcLBGradBetaTest {
 
     val model = createCogpModel(x, y)
 
-    val betaGrad = calcLBGradBeta(model, x, y)
+    val betaGrad = calcLBGradBeta(LowerBound(model,x),model, x, y)
     assertEquals(-0.96381, betaGrad(0), 0.00001)
     assertEquals(-0.83919, betaGrad(1), 0.00001)
 
@@ -34,7 +35,7 @@ class calcLBGradBetaTest {
 
     val model = createCogpModel(x, y)
 
-    val betaGrad = calcLBGradBeta(model, x, y)
+    val betaGrad = calcLBGradBeta(LowerBound(model,x),model, x, y)
     assertEquals(-52.24800, betaGrad(0), 0.00001)
     assertEquals(-51.90286, betaGrad(1), 0.00001)
 

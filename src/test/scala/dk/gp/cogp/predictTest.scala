@@ -9,41 +9,62 @@ import breeze.linalg._
 import java.io.File
 import dk.gp.cov.CovSEiso
 import dk.gp.cov.CovFunc
-import dk.gp.cogp.svi.cogp
 import dk.gp.cogp.svi.stochasticUpdateLB
+import dk.gp.cogp.testutils.createCogpModel
+import org.junit._
+import Assert._
+import dk.gp.cogp.lb.LowerBound
 
 class predictTest {
 
-  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 4, ::)
-  val x = data(::, 0).toDenseMatrix.t
-  val y = data(::, 1 to 2)
+  @Test def test_5_data_points = {
 
-  //val x: DenseMatrix[Double] = DenseVector.rangeD(-10, 10, 1).toDenseMatrix.t
-  //val y = DenseVector.horzcat(DenseVector.zeros[Double](x.size) + 1d, DenseVector.zeros[Double](x.size) + 2d)
+    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 4, ::)
+    val x = data(::, 0).toDenseMatrix.t
+    val y = data(::, 1 to 2)
 
-  val covFuncG: Array[CovFunc] = Array(CovSEiso())
-  val covFuncGParams = Array(DenseVector(log(1), log(1)))
+    val model = createCogpModel(x, y)
+    val newModel = cogpTrain(x, y, model, iterNum = 20)
 
-  val covFuncH: Array[CovFunc] = Array(CovSEiso(), CovSEiso())
-  val covFuncHParams = Array(DenseVector(log(1), log(1e-10)), DenseVector(log(1), log(1e-10)))
+    val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
+    assertEquals(-109.61519, loglik, 0.00001)
+
+  }
+
+  @Test def test_40_data_points = {
+
+    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 39, ::)
+    val x = data(::, 0).toDenseMatrix.t
+    val y = data(::, 1 to 2)
+
+    val model = createCogpModel(x, y)
+    val newModel = cogpTrain(x, y, model, iterNum = 20)
+
+    val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
+    assertEquals(-1959.81749, loglik, 0.00001)
+
+  }
 
   @Test def test = {
 
-    val initialModel = CogpModel(x, y, covFuncG, covFuncGParams, covFuncH, covFuncHParams)
+    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 40, ::)
+    val x = data(::, 0).toDenseMatrix.t
+    val y = data(::, 1 to 2)
 
-    val finalModel = (1 to 20).foldLeft(initialModel) {
+    val initialModel = createCogpModel(x, y)
+
+    val finalModel = (1 to 50).foldLeft(initialModel) {
       case (currentModel, i) =>
         val newModel = stochasticUpdateLB(currentModel, x, y)
 
-        val loglik = calcLBLoglik(newModel, x, y)
+        val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
         println("LB loglik=" + loglik)
 
         newModel
     }
 
-    val s = x
-    val predictedY = predict(s, x, finalModel)
+    val predictedY = cogpPredict(x, finalModel)
 
-    println(predictedY)
+    //  println(predictedY)
   }
 }

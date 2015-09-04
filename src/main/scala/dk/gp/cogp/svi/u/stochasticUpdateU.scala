@@ -7,6 +7,7 @@ import breeze.linalg.cholesky
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.CogpModel
 import dk.gp.math.invchol
+import dk.gp.cogp.lb.LowerBound
 
 /**
  * Stochastic update for the parameters (mu,S) of q(u|y)
@@ -29,7 +30,7 @@ object stochasticUpdateU {
    * @param y [X x P]
    * @param l Learning rate
    */
-  def apply(j: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
+  def apply(j: Int, lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
 
     val z = model.g(j).z
     val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
@@ -47,8 +48,8 @@ object stochasticUpdateU {
      * Thus no need for inverse of Fisher information matrix. Sweet.
      *  Hensman et al. Gaussian Processes for Big Data, 2013
      */
-    val naturalGradEta1 = calcLBGradUEta1(j, model,x,y)
-    val naturalGradEta2 = calcLBGradUEta2(j, model,x,y)
+    val naturalGradEta1 = calcLBGradUEta1(j, lowerBound,model,x,y)
+    val naturalGradEta2 = calcLBGradUEta2(j, lowerBound,model,x,y)
 
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2

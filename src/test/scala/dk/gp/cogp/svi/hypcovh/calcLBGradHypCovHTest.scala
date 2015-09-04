@@ -1,14 +1,12 @@
 package dk.gp.cogp.svi.hypcovh
 
-import org.junit._
-import Assert._
-import breeze.linalg._
 import java.io.File
-import dk.gp.cov.CovFunc
-import dk.gp.cov.CovSEiso
-import breeze.numerics.log
+import org.junit._
+import org.junit.Assert._
+import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.lb.LowerBound
 
 class calcLBGradHypCovHTest {
 
@@ -20,11 +18,11 @@ class calcLBGradHypCovHTest {
 
     val model = createCogpModel(x, y)
 
-    val covParamsGrad0 = calcLBGradHypCovH(i = 0, model, x, y)
+    val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model,x),model, x, y)
     assertEquals(-3.79732, covParamsGrad0(0), 0.00001)
     assertEquals(0, covParamsGrad0(1), 0.00001)
 
-    val covParamsGrad1 = calcLBGradHypCovH(i = 1, model, x, y)
+    val covParamsGrad1 = calcLBGradHypCovH(i = 1, LowerBound(model,x),model, x, y)
     assertEquals(-4.01906, covParamsGrad1(0), 0.00001)
     assertEquals(0, covParamsGrad1(1), 0.00001)
 
@@ -38,11 +36,11 @@ class calcLBGradHypCovHTest {
 
     val model = createCogpModel(x, y)
 
-    val covParamsGrad0 = calcLBGradHypCovH(i = 0, model, x, y)
+    val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model,x),model, x, y)
     assertEquals(48.40694, covParamsGrad0(0), 0.00001)
     assertEquals(0, covParamsGrad0(1), 0.00001)
 
-    val covParamsGrad1 = calcLBGradHypCovH(i = 1, model, x, y)
+    val covParamsGrad1 = calcLBGradHypCovH(i = 1, LowerBound(model,x), model, x, y)
     assertEquals(47.79993, covParamsGrad1(0), 0.00001)
     assertEquals(0, covParamsGrad1(1), 0.00001)
 

@@ -7,17 +7,16 @@ import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.CogpModel
 import dk.gp.math.invchol
 import breeze.linalg.cholesky
+import dk.gp.cogp.lb.LowerBound
 
 object calcLBGradVEta1 {
 
-  def apply(i: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(i: Int, lowerBound: LowerBound, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
 
-    val z_i = model.h(i).z
-    val kZZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-    val kXZ_i = model.h(i).covFunc.cov(z_i, z_i, model.h(i).covFuncParams)
+    val kZZ_i = lowerBound.kZZi(i)
+    val kXZ_i = lowerBound.kXZi(i)
 
-    val kZZiCholR = cholesky(kZZ_i).t
-    val kZZiInv = invchol(kZZiCholR)
+    val kZZiInv = lowerBound.kZZiInv(i)
     val Ai = kXZ_i * kZZiInv
 
     val w = model.w
@@ -30,13 +29,11 @@ object calcLBGradVEta1 {
     else {
       (0 until w.cols).map { jIndex =>
 
-        val z = model.g(jIndex).z
-        val kXZ = model.g(jIndex).covFunc.cov(z, z, model.g(jIndex).covFuncParams)
-        val kZZ = model.g(jIndex).covFunc.cov(z, z, model.g(jIndex).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+        val kXZ = lowerBound.kXZj(jIndex)
+        val kZZ = lowerBound.kZZj(jIndex)
 
-        val kZZcholR = cholesky(kZZ).t
-        val kZZinv = invchol(kZZcholR)
-        
+        val kZZinv = lowerBound.kZZjInv(jIndex)
+
         val Aj = kXZ * kZZinv
 
         w(i, jIndex) * Aj * u(jIndex).m
@@ -47,7 +44,7 @@ object calcLBGradVEta1 {
 
     val vCholR = cholesky(v(i).v).t
     val vInv = invchol(vCholR)
-    
+
     val grad = beta(i) * Ai.t * yVal - vInv * v(i).m
 
     grad

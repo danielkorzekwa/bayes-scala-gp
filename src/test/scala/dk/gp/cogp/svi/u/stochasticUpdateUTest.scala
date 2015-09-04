@@ -1,15 +1,16 @@
 package dk.gp.cogp.svi.u
 
-import org.junit._
-import Assert._
-import breeze.linalg._
 import java.io.File
-import dk.gp.cov.CovFunc
-import dk.gp.cov.CovSEiso
-import breeze.numerics.log
+
+import org.junit._
+import org.junit.Assert._
+
+import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.calcLBLoglik
+import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cov.CovFunc
 
 class stochasticUpdateUTest {
 
@@ -21,12 +22,12 @@ class stochasticUpdateUTest {
 
     val model = createCogpModel(x, y)
 
-    val newU = stochasticUpdateU(j = 0, model, x, y)
+    val newU = stochasticUpdateU(j = 0, LowerBound(model,x),model, x, y)
 
     val newG = model.g.head.copy(u = newU)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-271.96523, loglik, 0.00001)
   }
 
@@ -38,12 +39,12 @@ class stochasticUpdateUTest {
 
     val model = createCogpModel(x, y)
 
-    val newU = stochasticUpdateU(j = 0, model, x, y)
+    val newU = stochasticUpdateU(j = 0,LowerBound(model,x), model, x, y)
 
     val newG = model.g.head.copy(u = newU)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-11855.84340, loglik, 0.00001)
   }
 

@@ -14,6 +14,8 @@ case class CogpModel(g: Array[CogpGPVar], h: Array[CogpGPVar],
                      beta: DenseVector[Double], betaDelta: DenseVector[Double],
                      w: DenseMatrix[Double], wDelta: DenseMatrix[Double]) {
 
+  
+  
 }
 
 object CogpModel {

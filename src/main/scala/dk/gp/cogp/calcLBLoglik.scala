@@ -14,10 +14,11 @@ import breeze.linalg.diag
 import dk.gp.cov.utils.covDiag
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
+import dk.gp.cogp.lb.LowerBound
 
 object calcLBLoglik {
 
-  def apply(cogpModel: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): Double = {
+  def apply(lowerBound: LowerBound, cogpModel: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): Double = {
 
     val gArray = cogpModel.g
     val hArray = cogpModel.h
@@ -26,9 +27,8 @@ object calcLBLoglik {
 
     val qTerm = (0 until gArray.size).map { j =>
 
-      val z = cogpModel.g(j).z
-      val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-      val kZZinv = invchol(cholesky(kZZ).t)
+      val kZZ = lowerBound.kZZj(j)
+      val kZZinv = lowerBound.kZZjInv(j)
 
       val u = gArray(j).u
       val qTerm_j = 0.5 * (logdet(kZZ)._2 + logdet(inv(u.v))._2) + 0.5 * trace(kZZinv * (u.m * u.m.t + u.v)) //is it better to compute log det using chol decomposition? look at cogp impl and alg 2.1 of Rasmussen book
@@ -41,7 +41,6 @@ object calcLBLoglik {
       val kZZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
       val kXZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams)
       val kZX2 = kXZ2.t
-      
       val kZZ2inv = invchol(cholesky(kZZ2).t)
       val Ai2 = kXZ2 * kZZ2inv
       val lambdaI = Ai2.t * Ai2
@@ -58,10 +57,9 @@ object calcLBLoglik {
         val z = cogpModel.g(j).z
 
         //@TODO use (x,z) instead of (z,z), similarly in other places in the project
-        val kXZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams)
-        val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-val kZZinv = invchol(cholesky(kZZ).t)
-        
+        val kXZ = lowerBound.kXZj(j)
+        val kZZinv = lowerBound.kZZjInv(j)
+
         val Aj = kXZ * kZZinv
         val lambdaJ = Aj.t * Aj
         val u = gArray(j).u
@@ -70,14 +68,13 @@ val kZZinv = invchol(cholesky(kZZ).t)
 
       val kTildeQTerm = (0 until gArray.size).map { j =>
 
-        val z = cogpModel.g(j).z
-        val kXZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams)
-        val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
         val kZX = kXZ.t
         val kXXDiag = covDiag(x, cogpModel.g(j).covFunc, cogpModel.g(j).covFuncParams)
 
-        val kZZinv = invchol(cholesky(kZZ).t)
-        
+        val kZZinv = lowerBound.kZZjInv(j)
+
         //@TODO performance improvement:
         /**
          * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
@@ -94,11 +91,10 @@ val kZZinv = invchol(cholesky(kZZ).t)
 
       val wAm = (0 until gArray.size).foldLeft(DenseVector.zeros[Double](x.rows)) { (wAm, j) =>
 
-        val z = cogpModel.g(j).z
-        val kXZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams)
-        val kZZ = cogpModel.g(j).covFunc.cov(z, z, cogpModel.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-        
-        val kZZinv = invchol(cholesky(kZZ).t)
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
+        val kZZinv = lowerBound.kZZjInv(j)
+
         val Aj = kXZ * kZZinv
 
         wAm + w(i, j) * Aj * gArray(j).u.m

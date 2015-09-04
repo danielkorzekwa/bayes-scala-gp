@@ -1,14 +1,14 @@
 package dk.gp.cogp.svi.w
 
-import org.junit._
-import Assert._
-import breeze.linalg._
 import java.io.File
-import dk.gp.cov.CovFunc
-import dk.gp.cov.CovSEiso
-import breeze.numerics.log
+
+import org.junit._
+import org.junit.Assert._
+
+import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.calcLBLoglik
+import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.testutils.createCogpModel
 
 class stochasticUpdateWTest {
@@ -21,11 +21,11 @@ class stochasticUpdateWTest {
 
     val model = createCogpModel(x, y)
 
-    val (newW, newWDelta) = stochasticUpdateW(model, x, y)
+    val (newW, newWDelta) = stochasticUpdateW(LowerBound(model,x),model, x, y)
 
     val newModel = model.copy(w = newW)
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-121201.191568, loglik, 0.000001)
 
   }
@@ -38,11 +38,11 @@ class stochasticUpdateWTest {
 
     val model = createCogpModel(x, y)
 
-    val (newW, newWDelta) = stochasticUpdateW(model, x, y)
+    val (newW, newWDelta) = stochasticUpdateW(LowerBound(model,x),model, x, y)
 
     val newModel = model.copy(w = newW)
 
-    val loglik = calcLBLoglik(newModel, x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
     assertEquals(-9.21000394934e7, loglik, 0.0001)
 
   }

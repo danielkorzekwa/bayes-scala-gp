@@ -12,10 +12,11 @@ import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
+import dk.gp.cogp.lb.LowerBound
 
 object calcLBGradW {
 
-  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def apply(lowerBound: LowerBound, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseMatrix[Double] = {
 
     val w = model.w
     val beta = model.beta
@@ -28,38 +29,32 @@ object calcLBGradW {
 
       val wAm = (0 until dw.cols).foldLeft(DenseVector.zeros[Double](x.rows)) { (wAm, j) =>
 
-        val z = model.g(j).z
-        val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
-        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-        
-        val kZZCholR = cholesky(kZZ).t
-        val kZZinv = invchol(kZZCholR)
-        
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
+        val kZZinv = lowerBound.kZZjInv(j)
+
         val Aj = kXZ * kZZinv
 
         wAm + w(i, j) * Aj * u(j).m
       }
 
-      val z = model.h(i).z
-      val kZZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-      val kXZ2 = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams)
+      val kZZ2 = lowerBound.kZZi(i)
+      val kXZ2 = lowerBound.kXZi(i)
       val kZX2 = kXZ2.t
-      
-      val kZZ2CholR = cholesky(kZZ2).t
-      val kZZ2inv = invchol(kZZ2CholR)
-      val Ai = kXZ2 * kZZ2inv 
+
+      val kZZ2inv = lowerBound.kZZiInv(i)
+      val Ai = kXZ2 * kZZ2inv
       val lambdaI = Ai.t * Ai
 
       for (j <- 0 until dw.cols) {
 
         val z = model.g(j).z
-        val kXZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams)
-        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
         val kXXDiag = covDiag(x, model.g(j).covFunc, model.g(j).covFuncParams)
 
-        val kZZCholR = cholesky(kZZ).t
-        val kZZinv = invchol(kZZCholR)
-        
+        val kZZinv = lowerBound.kZZjInv(j)
+
         val Aj = kXZ * kZZinv
         val lambdaJ = Aj.t * Aj
 

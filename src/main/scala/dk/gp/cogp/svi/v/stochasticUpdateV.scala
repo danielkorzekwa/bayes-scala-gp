@@ -7,6 +7,7 @@ import breeze.linalg.InjectNumericOps
 import dk.gp.cogp.CogpModel
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
+import dk.gp.cogp.lb.LowerBound
 
 /**
  * Stochastic update for the parameters (mu,S) of p(v|y)
@@ -18,7 +19,7 @@ object stochasticUpdateV {
 
   private val learningRate = 1e-2
 
-  def apply(i: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
+  def apply(i: Int, lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
 
     val z = x
     val kXZ = model.g.head.covFunc.cov(z, z, model.g.head.covFuncParams)
@@ -34,8 +35,8 @@ object stochasticUpdateV {
     val theta1 = vInv * v(i).m
     val theta2 = -0.5 * vInv
 
-    val naturalGradEta1 = calcLBGradVEta1(i, model, x, y)
-    val naturalGradEta2 = calcLBGradVEta2(i, model, x, y)
+    val naturalGradEta1 = calcLBGradVEta1(i, lowerBound,model, x, y)
+    val naturalGradEta2 = calcLBGradVEta2(i, lowerBound,model, x, y)
 
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2

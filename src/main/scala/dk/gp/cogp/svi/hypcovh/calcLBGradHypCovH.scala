@@ -10,25 +10,25 @@ import breeze.linalg.sum
 import breeze.linalg.diag
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
+import dk.gp.cogp.lb.LowerBound
 
 object calcLBGradHypCovH {
 
-  def apply(i: Int, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(i: Int, lowerBound: LowerBound, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
 
     val hArray = model.h
     val gArray = model.g
 
     val z = model.h(i).z
 
-    val kXZ = model.h(i).covFunc.cov(x, z, model.h(i).covFuncParams)
-    val kZZ = model.h(i).covFunc.cov(z, z, model.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+    val kXZ = lowerBound.kXZi(i)
+    val kZZ = lowerBound.kZZi(i)
     val kZZdArray = model.h(i).covFunc.covD(z, model.h(i).covFuncParams)
     val kXZDArray = model.h(i).covFunc.covD(x, z, model.h(i).covFuncParams)
 
     val dKxxDiagArray = covDiagD(z, model.h(i).covFunc, model.h(i).covFuncParams)
 
-    val kZZCholR = cholesky(kZZ).t
-    val kZZinv = invchol(kZZCholR)
+    val kZZinv = lowerBound.kZZiInv(i)
     val Ai = kXZ * kZZinv
     val kZX = kXZ.t
 
@@ -46,12 +46,9 @@ object calcLBGradHypCovH {
 
       val wAm = (0 until gArray.size).foldLeft(DenseVector.zeros[Double](x.rows)) { (wAm, j) =>
 
-        val z = model.g(j).z
-        val kXZ = model.g(j).covFunc.cov(x, z, model.g(j).covFuncParams)
-        val kZZ = model.g(j).covFunc.cov(z, z, model.g(j).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
-
-        val kZZCholR = cholesky(kZZ).t
-        val kZZinv = invchol(kZZCholR)
+        val kXZ = lowerBound.kXZj(j)
+        val kZZ = lowerBound.kZZj(j)
+        val kZZinv = lowerBound.kZZjInv(j)
 
         val Aj = kXZ * kZZinv
 
