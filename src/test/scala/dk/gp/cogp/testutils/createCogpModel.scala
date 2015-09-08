@@ -6,19 +6,25 @@ import dk.gp.cov.CovSEiso
 import breeze.linalg.DenseVector
 import dk.gp.cov.CovFunc
 import breeze.numerics._
+import dk.gp.cov.CovNoise
 
 object createCogpModel {
 
-  def apply(x: DenseMatrix[Double],y:DenseMatrix[Double]): CogpModel = {
-  
+  def apply( x: DenseMatrix[Double], y: DenseMatrix[Double],z: DenseMatrix[Double]): CogpModel = {
+
     val covFuncG: Array[CovFunc] = Array(CovSEiso())
     val cofFuncGParams = Array(DenseVector(log(1), log(1)))
 
-    val covFuncH: Array[CovFunc] = Array(CovSEiso(), CovSEiso())
-    val covFuncHParams = Array(DenseVector(log(1), log(1e-10)), DenseVector(log(1), log(1e-10)))
+    val covFuncH: Array[CovFunc] = Array(CovNoise(), CovNoise())
+    val covFuncHParams = Array(DenseVector(log(1)), DenseVector(log(1)))
 
-    val model = CogpModel(x, y, covFuncG, cofFuncGParams, covFuncH, covFuncHParams)
+    val model = CogpModel( x, y,z, covFuncG, cofFuncGParams, covFuncH, covFuncHParams)
 
     model
+  }
+
+  def apply(x: DenseMatrix[Double], y: DenseMatrix[Double]): CogpModel = {
+
+    createCogpModel(x, y,z=x)
   }
 }

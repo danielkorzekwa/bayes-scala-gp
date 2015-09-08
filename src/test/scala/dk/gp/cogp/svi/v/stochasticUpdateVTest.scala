@@ -7,8 +7,7 @@ import org.junit.Assert._
 
 import breeze.linalg._
 import dk.gp.cogp.CogpModel
-import dk.gp.cogp.calcLBLoglik
-import dk.gp.cogp.lb.LowerBound
+import dk.gp.cogp.lb._
 import dk.gp.cogp.testutils.createCogpModel
 import dk.gp.cov.CovFunc
 

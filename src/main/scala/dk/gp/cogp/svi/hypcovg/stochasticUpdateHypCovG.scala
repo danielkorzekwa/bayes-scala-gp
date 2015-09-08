@@ -12,11 +12,11 @@ object stochasticUpdateHypCovG {
   private val learningRate = 1e-5
   private val momentum = 0.9
 
-  def apply(j: Int, lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): (DenseVector[Double], DenseVector[Double]) = {
+  def apply(j: Int, lowerBound:LowerBound, y: DenseMatrix[Double]): (DenseVector[Double], DenseVector[Double]) = {
 
-    val hypParamsD = calcLBGradHypCovG(j, lowerBound,model, x, y)
+    val hypParamsD = calcLBGradHypCovG(j, lowerBound, y)
 
-    val (newHypParams, newHypParamsDelta) = classicalMomentum(model.g(j).covFuncParams, model.g(j).covFuncParamsDelta, learningRate, momentum, hypParamsD)
+    val (newHypParams, newHypParamsDelta) = classicalMomentum(lowerBound.model.g(j).covFuncParams, lowerBound.model.g(j).covFuncParamsDelta, learningRate, momentum, hypParamsD)
 
     (newHypParams, newHypParamsDelta)
   }

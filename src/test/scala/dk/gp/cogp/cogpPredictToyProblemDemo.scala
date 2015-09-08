@@ -8,12 +8,14 @@ import breeze.plot._
 
 object cogpPredictToyProblemDemo extends App {
 
-  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 40, ::)
+  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv")) //(0 to 40, ::)
   val x = data(::, 0).toDenseMatrix.t
   val y = data(::, 1 to 2)
 
+  val z = x(0 until x.rows by 10, ::)
+
   val now = System.currentTimeMillis()
-  val initialToyModel = createCogpModel(x, y)
+  val initialToyModel = createCogpModel(x, y, z)
   val trainedToyModel = cogpTrain(x, y, initialToyModel, iterNum = 500)
   println(System.currentTimeMillis() - now)
 
@@ -22,6 +24,14 @@ object cogpPredictToyProblemDemo extends App {
   val predictedOutput1 = predictedY(::, 1).map(_.m)
 
   plotPredictions()
+
+  // val figure = Figure()
+  //   figure.subplot(0).legend = true
+
+  println(trainedToyModel.h(1).u.v)
+
+  //figure.subplot(0) += plot(trainedToyModel.g(0).z(::,0),trainedToyModel.g(0).u.m)
+  //   figure.subplot(0) += plot(trainedToyModel.h(0).z(::,0),trainedToyModel.h(1).u.m)
 
   private def plotPredictions() = {
     val figure = Figure()

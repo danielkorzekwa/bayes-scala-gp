@@ -21,7 +21,7 @@ class calcLBGradWTest {
 
     val model = createCogpModel(x, y)
 
-    val wGrad = calcLBGradW(LowerBound(model,x),model, x, y)
+    val wGrad = calcLBGradW(LowerBound(model,x), y)
     assertEquals(-0.43606, wGrad(0, 0), 0.00001)
     assertEquals(-0.43606, wGrad(1, 0), 0.00001)
   }
@@ -34,7 +34,7 @@ class calcLBGradWTest {
 
     val model = createCogpModel(x, y)
 
-    val wGrad = calcLBGradW(LowerBound(model,x),model, x, y)
+    val wGrad = calcLBGradW(LowerBound(model,x), y)
     assertEquals(-0.92602, wGrad(0, 0), 0.00001)
     assertEquals(-0.92602, wGrad(1, 0), 0.00001) //@TODO write a test, where  wGrad(0, 0)!=wGrad(1, 0)
   }

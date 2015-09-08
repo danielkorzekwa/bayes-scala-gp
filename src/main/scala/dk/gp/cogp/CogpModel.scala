@@ -9,6 +9,7 @@ import breeze.linalg.inv
 import breeze.stats._
 import breeze.linalg._
 import dk.gp.math.invchol
+import scala.util.Random
 
 case class CogpModel(g: Array[CogpGPVar], h: Array[CogpGPVar],
                      beta: DenseVector[Double], betaDelta: DenseVector[Double],
@@ -20,7 +21,8 @@ case class CogpModel(g: Array[CogpGPVar], h: Array[CogpGPVar],
 
 object CogpModel {
 
-  def apply(x: DenseMatrix[Double], y: DenseMatrix[Double],
+  
+  def apply(x: DenseMatrix[Double], y: DenseMatrix[Double],z:DenseMatrix[Double],
             covFuncG: Array[CovFunc], covFuncGParams: Array[DenseVector[Double]],
             covFuncH: Array[CovFunc], covFuncHParams: Array[DenseVector[Double]]): CogpModel = {
 
@@ -33,20 +35,23 @@ object CogpModel {
     val wDelta = DenseMatrix.zeros[Double](w.rows, w.cols)
 
     val priorG = covFuncG.zip(covFuncGParams).map { case (covFunc, covFuncParams) => 
-      CogpGPVar(x, getInitialIndVarV(mean(y(*, ::))), covFunc, covFuncParams,DenseVector.zeros[Double](covFuncParams.size)) }
+      CogpGPVar(z, getInitialIndVarV(z,mean(y(*, ::))), covFunc, covFuncParams,DenseVector.zeros[Double](covFuncParams.size)) }
 
     val priorH = covFuncH.zip(covFuncHParams).zipWithIndex.map { case ((covFunc, covFuncParams), i) => 
-      CogpGPVar(x, getInitialIndVarV(y(::, i)), covFunc, covFuncParams,DenseVector.zeros[Double](covFuncParams.size)) }
+      CogpGPVar(z, getInitialIndVarV(z,y(::, i)), covFunc, covFuncParams,DenseVector.zeros[Double](covFuncParams.size)) }
 
     val lbState = CogpModel(priorG, priorH, beta, betaDelta, w, wDelta)
 
     lbState
   }
 
-  private def getInitialIndVarV(y: DenseVector[Double]): MultivariateGaussian = {
-    val m = DenseVector.zeros[Double](y.size)
+  private def getInitialIndVarV(z:DenseMatrix[Double],y: DenseVector[Double]): MultivariateGaussian = {
+    val m = DenseVector.zeros[Double](z.rows)
 
-    val vInv = 0.1 * (1.0 / variance(y)) * DenseMatrix.eye[Double](y.size)
+    val idx = Random.shuffle(List.range(0,y.size)).take(z.rows)
+    val yZ = y(idx)
+    
+    val vInv = 0.1 * (1.0 / variance(yZ)) * DenseMatrix.eye[Double](yZ.size)
    val v = invchol(cholesky(vInv).t)
     MultivariateGaussian(m, v)
   }

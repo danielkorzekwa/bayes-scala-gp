@@ -17,7 +17,7 @@ case class GprDiffFunction(initialGpModel: GprModel) extends DiffFunction[DenseV
     val f = -gprLoglik(gpModel.meanX, gpModel.kXX, gpModel.kXXInv, gpModel.y)
 
     //calculate partial derivatives
-    val covFuncCovElemWiseD = gpModel.covFunc.covD(gpModel.x,gpModel.covFuncParams)
+    val covFuncCovElemWiseD = gpModel.covFunc.covD(gpModel.x,gpModel.x,gpModel.covFuncParams)
     val noiseCovElemWiseD = 2 * exp(2 * noiseLogStdDev) * DenseMatrix.eye[Double](gpModel.x.rows)
     val allParamsCovElemWiseD = covFuncCovElemWiseD :+ noiseCovElemWiseD
 

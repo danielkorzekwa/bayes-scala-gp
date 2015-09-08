@@ -1,17 +1,15 @@
 package dk.gp.cogp.svi.beta
 
-import org.junit._
-import Assert._
-import breeze.linalg._
 import java.io.File
-import dk.gp.cov.CovFunc
-import dk.gp.cov.CovSEiso
-import breeze.numerics.log
+
+import org.junit._
+import org.junit.Assert._
+
+import breeze.linalg._
 import dk.gp.cogp.CogpModel
-import dk.gp.cogp.calcLBLoglik
-import dk.gp.cogp.svi.w.stochasticUpdateW
-import dk.gp.cogp.testutils.createCogpModel
 import dk.gp.cogp.lb.LowerBound
+import dk.gp.cogp.lb.calcLBLoglik
+import dk.gp.cogp.testutils.createCogpModel
 
 class stochasticUpdateBetaTest {
   
@@ -23,7 +21,7 @@ class stochasticUpdateBetaTest {
 
     val model = createCogpModel(x, y)
     
-     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x),model, x, y)
+     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x), y)
 
     val newModel = model.copy(beta = newBeta)
 
@@ -39,7 +37,7 @@ class stochasticUpdateBetaTest {
 
     val model = createCogpModel(x, y)
     
-     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x),model, x, y)
+     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x), y)
 
     val newModel = model.copy(beta = newBeta)
 

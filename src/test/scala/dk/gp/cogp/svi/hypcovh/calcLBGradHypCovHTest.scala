@@ -18,17 +18,15 @@ class calcLBGradHypCovHTest {
 
     val model = createCogpModel(x, y)
 
-    val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model,x),model, x, y)
+    val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model, x),  y)
     assertEquals(-3.79732, covParamsGrad0(0), 0.00001)
-    assertEquals(0, covParamsGrad0(1), 0.00001)
 
-    val covParamsGrad1 = calcLBGradHypCovH(i = 1, LowerBound(model,x),model, x, y)
+    val covParamsGrad1 = calcLBGradHypCovH(i = 1, LowerBound(model, x),  y)
     assertEquals(-4.01906, covParamsGrad1(0), 0.00001)
-    assertEquals(0, covParamsGrad1(1), 0.00001)
 
   }
-  
-   @Test def test_39_data_points = {
+
+  @Test def test_39_data_points = {
 
     val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 39, ::)
     val x = data(::, 0).toDenseMatrix.t
@@ -36,13 +34,11 @@ class calcLBGradHypCovHTest {
 
     val model = createCogpModel(x, y)
 
-    val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model,x),model, x, y)
+    val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model, x),  y)
     assertEquals(48.40694, covParamsGrad0(0), 0.00001)
-    assertEquals(0, covParamsGrad0(1), 0.00001)
 
-    val covParamsGrad1 = calcLBGradHypCovH(i = 1, LowerBound(model,x), model, x, y)
+    val covParamsGrad1 = calcLBGradHypCovH(i = 1, LowerBound(model, x),  y)
     assertEquals(47.79993, covParamsGrad1(0), 0.00001)
-    assertEquals(0, covParamsGrad1(1), 0.00001)
 
   }
 

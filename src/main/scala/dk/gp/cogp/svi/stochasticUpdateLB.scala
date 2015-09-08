@@ -28,9 +28,9 @@ object stochasticUpdateLB {
 
     val lowerBound = LowerBound(currModel, x)
 
-    val (newW, newWDelta) = stochasticUpdateW(lowerBound, currModel, x, y)
-    val (newBeta, newBetaDelta) = stochasticUpdateBeta(lowerBound, currModel, x, y)
-    val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, lowerBound, currModel, x, y) }.toArray
+    val (newW, newWDelta) = stochasticUpdateW(lowerBound, y)
+    val (newBeta, newBetaDelta) = stochasticUpdateBeta(lowerBound, y)
+    val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, lowerBound, y) }.toArray
 
     currModel = withNewCovParamsG(newHypCovG, currModel)
     currModel = currModel.copy(w = newW, wDelta = newWDelta)
@@ -40,7 +40,7 @@ object stochasticUpdateLB {
     val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, LowerBound(currModel, x), currModel, x, y) }.toArray
     currModel = withNewHu(newV, currModel)
 
-    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, LowerBound(currModel, x), currModel, x, y) }.toArray
+    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, LowerBound(currModel, x), y) }.toArray
     currModel = withNewCovParamsH(newHypCovH, currModel)
 
     currModel

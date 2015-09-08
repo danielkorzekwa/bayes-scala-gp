@@ -14,6 +14,7 @@ import dk.gp.cogp.testutils.createCogpModel
 import org.junit._
 import Assert._
 import dk.gp.cogp.lb.LowerBound
+import dk.gp.cogp.lb.calcLBLoglik
 
 class predictTest {
 

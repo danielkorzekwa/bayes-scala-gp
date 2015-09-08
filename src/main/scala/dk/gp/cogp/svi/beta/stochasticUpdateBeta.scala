@@ -11,11 +11,11 @@ object stochasticUpdateBeta {
   private val learningRate = 1e-5
   private val momentum = 0.9
 
-  def apply(lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): (DenseVector[Double], DenseVector[Double]) = {
+  def apply(lowerBound:LowerBound, y: DenseMatrix[Double]): (DenseVector[Double], DenseVector[Double]) = {
 
-    val betaGrad = calcLBGradBeta(lowerBound,model, x, y)
+    val betaGrad = calcLBGradBeta(lowerBound, y)
 
-    val (newBeta, newBetaDelta) = classicalMomentum(model.beta, model.betaDelta, learningRate, momentum, betaGrad)
+    val (newBeta, newBetaDelta) = classicalMomentum(lowerBound.model.beta, lowerBound.model.betaDelta, learningRate, momentum, betaGrad)
 
     (newBeta, newBetaDelta)
   }

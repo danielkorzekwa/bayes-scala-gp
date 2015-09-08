@@ -1,20 +1,21 @@
-package dk.gp.cogp
+package dk.gp.cogp.lb
 
-import dk.gp.math.MultivariateGaussian
-import breeze.numerics._
-import breeze.linalg.DenseMatrix
-import breeze.linalg.logdet
-import breeze.linalg.inv
-import breeze.linalg.trace
-import dk.gp.math.MultivariateGaussian
-import breeze.linalg.DenseVector
-import breeze.linalg.sum
 import scala.math.Pi
-import breeze.linalg.diag
-import dk.gp.cov.utils.covDiag
+
+import breeze.linalg.DenseMatrix
+import breeze.linalg.DenseVector
+import breeze.linalg.InjectNumericOps
 import breeze.linalg.cholesky
+import breeze.linalg.diag
+import breeze.linalg.inv
+import breeze.linalg.logdet
+import breeze.linalg.sum
+import breeze.linalg.trace
+import breeze.numerics.log
+import breeze.numerics.pow
+import dk.gp.cogp.CogpModel
+import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
-import dk.gp.cogp.lb.LowerBound
 
 object calcLBLoglik {
 

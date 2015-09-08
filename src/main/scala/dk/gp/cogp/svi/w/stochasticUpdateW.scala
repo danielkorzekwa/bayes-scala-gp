@@ -13,11 +13,11 @@ object stochasticUpdateW {
   /**
    * Returns [new w, w delta]
    */
-  def apply(lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): (DenseMatrix[Double], DenseMatrix[Double]) = {
+  def apply(lowerBound:LowerBound, y: DenseMatrix[Double]): (DenseMatrix[Double], DenseMatrix[Double]) = {
 
-    val wGrad = calcLBGradW(lowerBound,model, x, y)
+    val wGrad = calcLBGradW(lowerBound, y)
 
-    val (newW, newWDelta) = classicalMomentum(model.w, model.wDelta, learningRate, momentum, wGrad)
+    val (newW, newWDelta) = classicalMomentum(lowerBound.model.w, lowerBound.model.wDelta, learningRate, momentum, wGrad)
 
     (newW, newWDelta)
   }

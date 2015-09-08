@@ -6,7 +6,7 @@ import scala.collection._
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
 
-class LowerBound(model: CogpModel, x: DenseMatrix[Double]) {
+class LowerBound(val model: CogpModel, val x: DenseMatrix[Double]) {
 
   private val kZZjMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()
   private val kZZjInvMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()

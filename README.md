@@ -1,11 +1,7 @@
-# Algorithms for Gaussian Process
+# Algorithms for Gaussian Processes
 
-Work in progress:
-- refactoring of gp code from bayes-scala to bayes-scala-gp
-- implementing of cogp
+List of algorithms:
+* [Collaborative multi-output Gaussian Process](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/cogp/cogp.md)
+* [Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/gpr/gpr.md)
 
-Scala implementation of Gaussian Processes. This project is related to a more general purpose Bayesian library [Bayes-scala](https://github.com/danielkorzekwa/bayes-scala)
-
-Algorithms
-* Nguyen et al. Collaborative Multi-output Gaussian Processes, 2014
-
+This project is related to a [Bayes-scala](https://github.com/danielkorzekwa/bayes-scala) library

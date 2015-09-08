@@ -13,7 +13,9 @@ object covDiagD {
 
     for (i <- 0 until x.rows) {
 
-      val covD = covFunc.covD(x(i, ::).t.toDenseMatrix, covFuncParams)
+      val xi = x(i, ::).t.toDenseMatrix
+      
+      val covD = covFunc.covD(xi,xi, covFuncParams)
       covD.zipWithIndex.foreach { case (covD, index) => covDArray(index)(i) = covD(0, 0) }
     }
 

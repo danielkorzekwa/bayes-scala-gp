@@ -55,26 +55,10 @@ case class CovSEiso() extends CovFunc {
       distance += pow(x1(i) - x2(i), 2) / l
       i += 1
     }
- if( distance.isNaN()) {
-          println("nan:")
-        }
+ 
     distance
   }
 
-   //@TODO delete this method
-  def covD(x: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]] = {
-
-    val sf = covFuncParams(0)
-    val ell = covFuncParams(1)
-
-    def dfDsf(v1: DenseVector[Double], v2: DenseVector[Double]): Double = df_dSf(v1.toArray, v2.toArray, sf, ell)
-    val covMatrixDSf = covFunc(x, x, dfDsf)
-
-    def dfDEll(v1: DenseVector[Double], v2: DenseVector[Double]): Double = df_dEll(v1.toArray, v2.toArray, sf, ell)
-    val covMatrixDEll = covFunc(x, x, dfDEll)
-
-    Array(covMatrixDSf, covMatrixDEll)
-  }
   
    def covD(x1: DenseMatrix[Double],x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]] = {
 
