@@ -8,7 +8,7 @@ import dk.gp.cov.CovFunc
 import dk.gp.cov.CovSEiso
 import breeze.numerics.log
 import dk.gp.cogp.CogpModel
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.lb.LowerBound
 
 class calcLBGradWTest {
@@ -19,7 +19,7 @@ class calcLBGradWTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val wGrad = calcLBGradW(LowerBound(model,x), y)
     assertEquals(-0.43606, wGrad(0, 0), 0.00001)
@@ -32,7 +32,7 @@ class calcLBGradWTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val wGrad = calcLBGradW(LowerBound(model,x), y)
     assertEquals(-0.92602, wGrad(0, 0), 0.00001)

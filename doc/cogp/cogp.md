@@ -12,13 +12,23 @@ Based on Nguyen et al. Collaborative Multi-output Gaussian Processes, 2014
 
 ![cogp_toy_prediction_model](https://raw.github.com/danielkorzekwa/bayes-scala-gp/master/doc/cogp/cogp_toy_prediction_model.png)
 
-** Training the model and predicting of *y1* and *y2*
+**Training the model and predicting *y1(x)* and *y2(x)***,
+[source code](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/src/test/scala/dk/gp/cogp/cogpPredictToyProblemDemo.scala):
 
 ```scala
-...
-...
+  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))
+  
+  val x = data(::, 0).toDenseMatrix.t
+  val y = data(::, 1 to 2)
+  val z = x(0 until x.rows by 10, ::) // u and v inducing variables
+  
+  val initialToyModel = createCogpToyModel(x, y, z)
+  val trainedToyModel = cogpTrain(x, y, initialToyModel, iterNum = 500)
+
+  val predictedY:DenseMatrix[UnivariateGaussian] = cogpPredict(x, trainedToyModel)
 ```
 
 ** Prediction plots
 
+![cogp_toy_problem_prediction_plot](https://raw.github.com/danielkorzekwa/bayes-scala-gp/master/doc/cogp/cogp_toy_problem_prediction_plot.png)
 

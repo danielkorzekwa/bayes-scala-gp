@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import breeze.linalg.csvread
 import dk.gp.cogp.lb.LowerBound
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.lb.calcLBLoglik
 
 class stochasticUpdateHypCovGTest {
@@ -16,7 +16,7 @@ class stochasticUpdateHypCovGTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model,x), y)
 
@@ -33,7 +33,7 @@ class stochasticUpdateHypCovGTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model,x), y)
 

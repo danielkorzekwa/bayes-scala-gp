@@ -9,7 +9,7 @@ import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.calcLBLoglik
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cov.CovFunc
 
 class stochasticUpdateUTest {
@@ -20,7 +20,7 @@ class stochasticUpdateUTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val newU = stochasticUpdateU(j = 0, LowerBound(model,x),model, x, y)
 
@@ -37,7 +37,7 @@ class stochasticUpdateUTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val newU = stochasticUpdateU(j = 0,LowerBound(model,x), model, x, y)
 

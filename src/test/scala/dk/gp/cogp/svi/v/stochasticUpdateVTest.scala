@@ -8,7 +8,7 @@ import org.junit.Assert._
 import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.lb._
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cov.CovFunc
 
 class stochasticUpdateVTest {
@@ -19,7 +19,7 @@ class stochasticUpdateVTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val newH0 = model.h(0).copy(u = stochasticUpdateV(i = 0, LowerBound(model,x), model, x, y))
     val newH1 = model.h(1).copy(u = stochasticUpdateV(i = 1, LowerBound(model,x), model, x, y))
@@ -37,7 +37,7 @@ class stochasticUpdateVTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val newH0 = model.h(0).copy(u = stochasticUpdateV(i = 0, LowerBound(model,x), model, x, y))
     val newH1 = model.h(1).copy(u = stochasticUpdateV(i = 1, LowerBound(model,x), model, x, y))

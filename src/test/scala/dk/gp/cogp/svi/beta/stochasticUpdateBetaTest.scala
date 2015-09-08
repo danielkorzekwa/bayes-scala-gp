@@ -9,7 +9,7 @@ import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.calcLBLoglik
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 
 class stochasticUpdateBetaTest {
   
@@ -19,7 +19,7 @@ class stochasticUpdateBetaTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
     
      val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x), y)
 
@@ -35,7 +35,7 @@ class stochasticUpdateBetaTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
     
      val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x), y)
 

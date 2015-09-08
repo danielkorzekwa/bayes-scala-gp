@@ -6,7 +6,7 @@ import org.junit.Assert._
 import breeze.linalg._
 import dk.gp.cogp.CogpModel
 import dk.gp.cogp.lb.LowerBound
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.lb.calcLBLoglik
 
 class stochasticUpdateWTest {
@@ -17,7 +17,7 @@ class stochasticUpdateWTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val (newW, newWDelta) = stochasticUpdateW(LowerBound(model, x), y)
 
@@ -34,7 +34,7 @@ class stochasticUpdateWTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val (newW, newWDelta) = stochasticUpdateW(LowerBound(model, x), y)
 

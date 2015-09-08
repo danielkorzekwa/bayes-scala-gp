@@ -5,7 +5,7 @@ import org.junit._
 import org.junit.Assert._
 import breeze.linalg._
 import dk.gp.cogp.CogpModel
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.lb.LowerBound
 
 class calcLBGradHypCovHTest {
@@ -16,7 +16,7 @@ class calcLBGradHypCovHTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model, x),  y)
     assertEquals(-3.79732, covParamsGrad0(0), 0.00001)
@@ -32,7 +32,7 @@ class calcLBGradHypCovHTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val covParamsGrad0 = calcLBGradHypCovH(i = 0, LowerBound(model, x),  y)
     assertEquals(48.40694, covParamsGrad0(0), 0.00001)

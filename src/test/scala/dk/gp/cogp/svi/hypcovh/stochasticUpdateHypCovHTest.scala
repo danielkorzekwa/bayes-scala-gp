@@ -8,7 +8,7 @@ import dk.gp.cov.CovFunc
 import dk.gp.cov.CovSEiso
 import breeze.numerics.log
 import dk.gp.cogp.CogpModel
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.calcLBLoglik
 
@@ -20,7 +20,7 @@ class stochasticUpdateHypCovHTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
     
       val (newHypParams0, newHypParamsDelta0) = stochasticUpdateHypCovH(i = 0, LowerBound(model,x), y)
     val newH0 = model.h(0).copy(covFuncParams = newHypParams0, covFuncParamsDelta = newHypParamsDelta0)
@@ -40,7 +40,7 @@ class stochasticUpdateHypCovHTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
     
       val (newHypParams0, newHypParamsDelta0) = stochasticUpdateHypCovH(i = 0, LowerBound(model,x), y)
     val newH0 = model.h(0).copy(covFuncParams = newHypParams0, covFuncParamsDelta = newHypParamsDelta0)

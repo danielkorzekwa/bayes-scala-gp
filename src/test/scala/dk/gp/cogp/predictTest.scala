@@ -10,7 +10,7 @@ import java.io.File
 import dk.gp.cov.CovSEiso
 import dk.gp.cov.CovFunc
 import dk.gp.cogp.svi.stochasticUpdateLB
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import org.junit._
 import Assert._
 import dk.gp.cogp.lb.LowerBound
@@ -24,7 +24,7 @@ class predictTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
     val newModel = cogpTrain(x, y, model, iterNum = 20)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
@@ -38,7 +38,7 @@ class predictTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
     val newModel = cogpTrain(x, y, model, iterNum = 20)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
@@ -52,7 +52,7 @@ class predictTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val initialModel = createCogpModel(x, y)
+    val initialModel = createCogpToyModel(x, y)
 
     val finalModel = (1 to 50).foldLeft(initialModel) {
       case (currentModel, i) =>

@@ -6,7 +6,7 @@ import org.junit.Test
 import breeze.linalg.DenseVector
 import breeze.linalg.csvread
 import breeze.numerics.log
-import dk.gp.cogp.testutils.createCogpModel
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cov.CovFunc
 import dk.gp.cov.CovSEiso
 import dk.gp.cogp.lb.LowerBound
@@ -30,7 +30,7 @@ class calcLBLoglikTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val loglik = calcLBLoglik(LowerBound(model,x),model, x, y)
     assertEquals(-121201.19157, loglik, 0.00001)
@@ -42,7 +42,7 @@ class calcLBLoglikTest {
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
 
-    val model = createCogpModel(x, y)
+    val model = createCogpToyModel(x, y)
 
     val loglik = calcLBLoglik(LowerBound(model,x),model, x, y)
     assertEquals(-9.2100039493488e7, loglik, 0.00001)
