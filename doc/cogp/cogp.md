@@ -12,7 +12,7 @@ Based on Nguyen et al. Collaborative Multi-output Gaussian Processes, 2014
 
 ![cogp_toy_prediction_model](https://raw.github.com/danielkorzekwa/bayes-scala-gp/master/doc/cogp/cogp_toy_prediction_model.png)
 
-**Training the model and predicting *y1(x)* and *y2(x)***,
+**Training the model and predicting *y1(x)* and *y2(x)*,**
 [source code](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/src/test/scala/dk/gp/cogp/cogpPredictToyProblemDemo.scala):
 
 ```scala
