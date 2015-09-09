@@ -9,7 +9,7 @@ import breeze.linalg._
  *
  * @param x1 [D x N]
  * @param x1 [D x M]
- * @returns matrix of square distances [N x M]
+ * @return matrix of square distances [N x M]
  */
 object sqDist {
 
