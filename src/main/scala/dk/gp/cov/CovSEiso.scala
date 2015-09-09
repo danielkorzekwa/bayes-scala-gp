@@ -32,7 +32,13 @@ case class CovSEiso() extends CovFunc {
        
       cov(v1.toArray, v2.toArray, sf, ell)
     }
-    val covMatrix = covFunc(x1, x2, op)
+//    
+//     def op(v1: DenseVector[Double], v2: DenseVector[Double]): Double = {
+//       
+//      cov(v1.toArray, v2.toArray, sf, ell)
+//    }
+    
+    val covMatrix =   exp(2 * sf) *covFunc(x1, x2, op)
     covMatrix
   }
 
@@ -43,7 +49,7 @@ case class CovSEiso() extends CovFunc {
     
       
     
-    exp(2 * sf) * exp(expArg)
+   exp(expArg)
   }
 
   private def distance(x1: Array[Double], x2: Array[Double], l: Double): Double = {
@@ -99,12 +105,12 @@ case class CovSEiso() extends CovFunc {
 
     for (rowIndex <- 0 until x1.rows) {
 
-      val x1Val = x1(rowIndex, ::).t
+      val x1Val = x1(rowIndex, ::)
 
       for (colIndex <- 0 until x2.rows) {
-        val x2Val = x2(colIndex, ::).t
+        val x2Val = x2(colIndex, ::)
 
-        matrix(rowIndex, colIndex) = op(x1Val, x2Val)
+        matrix(rowIndex, colIndex) = 0d//op(x1Val, x2Val)
       }
     }
 
