@@ -4,12 +4,12 @@ import breeze.linalg.DenseMatrix
 import breeze.linalg._
 
 /**
- * Computes matrix of square distances between corresponding rows of matrices x1 and x2.
- * Implemnentation based on sq_dist function from gpml library for Gaussian processes
+ * Computes matrix of square distances between corresponding columns of matrices x1 and x2.
+ * Implementation based on sq_dist function from gpml library for Gaussian processes
  *
  * @param x1 [D x N]
  * @param x1 [D x M]
- * @returns [M x M]
+ * @returns matrix of square distances [N x M]
  */
 object sqDist {
 
