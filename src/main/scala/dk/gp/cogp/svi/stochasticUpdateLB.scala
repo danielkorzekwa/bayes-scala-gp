@@ -1,16 +1,10 @@
 package dk.gp.cogp.svi
 
 import breeze.linalg.DenseMatrix
-import dk.gp.cogp.svi.v.stochasticUpdateV
-import dk.gp.cogp.svi.u.stochasticUpdateU
 import dk.gp.cov.CovFunc
-import dk.gp.cogp.svi.w.stochasticUpdateW
-import dk.gp.cogp.svi.beta.stochasticUpdateBeta
 import breeze.linalg.DenseVector
 import dk.gp.cov.utils.covDiag
 import dk.gp.cogp.CogpModel
-import dk.gp.cogp.svi.hypcovg.stochasticUpdateHypCovG
-import dk.gp.cogp.svi.hypcovh.stochasticUpdateHypCovH
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.lb.LowerBound
 

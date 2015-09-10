@@ -19,101 +19,119 @@ import breeze.linalg.Axis
 
 object calcLBLoglik {
 
-  def apply(lowerBound: LowerBound, cogpModel: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): Double = {
+  def apply(lowerBound: LowerBound, y: DenseMatrix[Double]): Double = {
 
-    val gArray = cogpModel.g
-    val hArray = cogpModel.h
-    val beta = cogpModel.beta
-    val w = cogpModel.w
+    val beta = lowerBound.model.beta
 
-    val qTerm = (0 until gArray.size).map { j =>
+    val pTerm = (0 until lowerBound.model.h.size).map { i =>
 
-      val kZZ = lowerBound.kZZj(j)
-      val kZZinv = lowerBound.kZZjInv(j)
+      val pTerm = logNTerm(i, lowerBound, y) -
+        pTerm_i(i, lowerBound) - tracePTerm(i, lowerBound) -
+        kTildePTerm(i, lowerBound) -
+        0.5 * beta(i) * traceQTerm(i, lowerBound) -
+        0.5 * beta(i) * kTildeQTerm(i, lowerBound)
+      pTerm
 
-      val u = gArray(j).u
+    }.sum
+
+    -qTerm(lowerBound) + pTerm
+  }
+
+  private def qTerm(lb: LowerBound): Double = {
+    val qTerm = (0 until lb.model.g.size).map { j =>
+
+      val kZZ = lb.kZZj(j)
+      val kZZinv = lb.kZZjInv(j)
+
+      val u = lb.model.g(j).u
       val qTerm_j = 0.5 * (logdet(kZZ)._2 + logdet(inv(u.v))._2) + 0.5 * trace(kZZinv * (u.m * u.m.t + u.v)) //is it better to compute log det using chol decomposition? look at cogp impl and alg 2.1 of Rasmussen book
       qTerm_j
     }.sum
 
-    val pTerm = (0 until hArray.size).map { i =>
+    qTerm
+  }
+  private def pTerm_i(i: Int, lb: LowerBound): Double = {
 
-      val z = cogpModel.h(i).z
-      val kZZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](z.size)
-      val kXZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams)
-      val kZX2 = kXZ2.t
-      val kZZ2inv = invchol(cholesky(kZZ2).t)
-      val Ai2 = kXZ2 * kZZ2inv
-      val lambdaI = Ai2.t * Ai2
+    val kZZ2 = lb.kZZi(i)
+    val kZZ2inv = lb.kZZiInv(i)
 
-      val kXXDiag_i = covDiag(x, cogpModel.h(i).covFunc, cogpModel.h(i).covFuncParams)
+    val v = lb.model.h(i).u
 
-      val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ2 * kZZ2inv * kZX2))
+    val pTerm_i = 0.5 * (logdet(kZZ2)._2 - logdet(v.v)._2) + 0.5 * trace(kZZ2inv * ((v.m * v.m.t + v.v)))
 
-      val v = hArray(i).u
-      val pTerm_i = 0.5 * (logdet(kZZ2)._2 - logdet(v.v)._2) + 0.5 * trace(kZZ2inv * ((v.m * v.m.t + v.v)))
+    pTerm_i
+  }
 
-      val traceQTerm = (0 until gArray.size).map { j =>
+  private def logNTerm(i: Int, lb: LowerBound, y: DenseMatrix[Double]): Double = {
 
-        val z = cogpModel.g(j).z
+    val Ai = lb.calcAi(i)
 
-        //@TODO use (x,z) instead of (z,z), similarly in other places in the project
-        val kXZ = lowerBound.kXZj(j)
-        val kZZinv = lowerBound.kZZjInv(j)
+    val yTerm = y(::, i) - wAm(i, lb) - Ai * lb.model.h(i).u.m
+    val logNTerm = -0.5 * y.rows * log(2 * Pi / lb.model.beta(i)) - 0.5 * lb.model.beta(i) * sum(pow(yTerm, 2))
 
-        val Aj = kXZ * kZZinv
-        val lambdaJ = Aj.t * Aj
-        val u = gArray(j).u
-        pow(w(i, j), 2) * trace(u.v * lambdaJ)
-      }.sum
+    logNTerm
+  }
 
-      val kTildeQTerm = (0 until gArray.size).map { j =>
+  private def kTildePTerm(i: Int, lb: LowerBound): Double = {
+    val kXZ2 = lb.kXZi(i)
+    val kZX2 = kXZ2.t
+    val kZZ2inv = lb.kZZiInv(i)
 
-        val kXZ = lowerBound.kXZj(j)
-        val kZZ = lowerBound.kZZj(j)
-        val kZX = kXZ.t
-        val kXXDiag = covDiag(x, cogpModel.g(j).covFunc, cogpModel.g(j).covFuncParams)
+    val kXXDiag_i = covDiag(lb.x, lb.model.h(i).covFunc, lb.model.h(i).covFuncParams)
 
-        val kZZinv = lowerBound.kZZjInv(j)
+    val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ2 * kZZ2inv * kZX2))
 
-        //@TODO performance improvement:
-        /**
-         * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
-         * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
-         * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
-         */
-        val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
-      //   val kTildeDiagSum = sum(kXXDiag - sum((kXZ*kZZinv):*kZX,Axis._1)) 
-     //    val kTildeDiagSum = sum(kXXDiag - trace(kZX*kXZ*kZZinv))
-        pow(w(i, j), 2) * kTildeDiagSum
-      }.sum
+    val kTildePTerm = 0.5 * lb.model.beta(i) * kTildeDiagSum_i
+    kTildePTerm
+  }
 
-      val tracePTerm = beta(i) * 0.5 * trace(v.v * lambdaI)
-      val kTildePTerm = 0.5 * beta(i) * kTildeDiagSum_i
+  private def tracePTerm(i: Int, lb: LowerBound): Double = {
 
-      val wAm = (0 until gArray.size).foldLeft(DenseVector.zeros[Double](x.rows)) { (wAm, j) =>
+    val Ai = lb.calcAi(i)
+    val lambdaI = Ai.t * Ai
 
-        val kXZ = lowerBound.kXZj(j)
-        val kZZ = lowerBound.kZZj(j)
-        val kZZinv = lowerBound.kZZjInv(j)
+    val v = lb.model.h(i).u
+    lb.model.beta(i) * 0.5 * trace(v.v * lambdaI)
+  }
 
-        val Aj = kXZ * kZZinv
+  private def traceQTerm(i: Int, lb: LowerBound): Double = {
+    val traceQTerm = (0 until lb.model.g.size).map { j =>
 
-        wAm + w(i, j) * Aj * gArray(j).u.m
-      }
+      val kXZ = lb.kXZj(j)
+      val kZZinv = lb.kZZjInv(j)
 
-      val yTerm = y(::, i) - wAm - Ai2 * hArray(i).u.m
-
-      val logNTerm = -0.5 * y.rows * log(2 * Pi / beta(i)) - 0.5 * beta(i) * sum(pow(yTerm, 2))
-
-
-      val pTerm = logNTerm - pTerm_i - tracePTerm - kTildePTerm - 0.5 * beta(i) * traceQTerm - 0.5 * beta(i) * kTildeQTerm
-      pTerm
-      
-     
+      val Aj = kXZ * kZZinv
+      val lambdaJ = Aj.t * Aj
+      val u = lb.model.g(j).u
+      pow(lb.model.w(i, j), 2) * trace(u.v * lambdaJ)
     }.sum
 
-    -qTerm + pTerm
+    traceQTerm
+  }
+
+  private def kTildeQTerm(i: Int, lb: LowerBound): Double = {
+    val kTildeQTerm = (0 until lb.model.g.size).map { j =>
+
+      val kXZ = lb.kXZj(j)
+      val kZZ = lb.kZZj(j)
+      val kZX = kXZ.t
+      val kXXDiag = covDiag(lb.x, lb.model.g(j).covFunc, lb.model.g(j).covFuncParams)
+
+      val kZZinv = lb.kZZjInv(j)
+
+      //@TODO performance improvement:
+      /**
+       * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
+       * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
+       * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
+       */
+      val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
+      //   val kTildeDiagSum = sum(kXXDiag - sum((kXZ*kZZinv):*kZX,Axis._1)) 
+      //    val kTildeDiagSum = sum(kXXDiag - trace(kZX*kXZ*kZZinv))
+      pow(lb.model.w(i, j), 2) * kTildeDiagSum
+    }.sum
+
+    kTildeQTerm
   }
 
 }
