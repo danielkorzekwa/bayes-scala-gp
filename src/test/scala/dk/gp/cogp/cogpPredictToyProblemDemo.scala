@@ -9,7 +9,7 @@ import dk.gp.cogp.testutils.createCogpToyModel
 
 object cogpPredictToyProblemDemo extends App {
 
-  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 40,::)
+  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))//(0 to 40,::)
   val x = data(::, 0).toDenseMatrix.t
   val y = data(::, 1 to 2)
   val z = x(0 until x.rows by 10, ::) // inducing points for u and v inducing variables

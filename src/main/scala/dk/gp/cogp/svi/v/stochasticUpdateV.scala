@@ -19,11 +19,8 @@ object stochasticUpdateV {
 
   private val learningRate = 1e-2
 
-  def apply(i: Int, lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
+  def apply(i: Int, lb:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
 
-    val z = x
-    val kXZ = model.g.head.covFunc.cov(z, z, model.g.head.covFuncParams)
-    val kZZ = model.g.head.covFunc.cov(z, z, model.g.head.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
 
     val m = model
 
@@ -35,8 +32,8 @@ object stochasticUpdateV {
     val theta1 = vInv * v(i).m
     val theta2 = -0.5 * vInv
 
-    val naturalGradEta1 = calcLBGradVEta1(i, lowerBound,model, x, y)
-    val naturalGradEta2 = calcLBGradVEta2(i, lowerBound,model, x, y)
+    val naturalGradEta1 = calcLBGradVEta1(i, lb,model, x, y)
+    val naturalGradEta2 = calcLBGradVEta2(i, lb,model, x, y)
 
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2

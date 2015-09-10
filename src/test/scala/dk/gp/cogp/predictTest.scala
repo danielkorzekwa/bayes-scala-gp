@@ -28,7 +28,7 @@ class predictTest {
     val newModel = cogpTrain(x, y, model, iterNum = 20)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
-    assertEquals(-109.61519, loglik, 0.00001)
+    assertEquals(-109.61520, loglik, 0.00001)
 
   }
 
@@ -42,7 +42,7 @@ class predictTest {
     val newModel = cogpTrain(x, y, model, iterNum = 20)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
-    assertEquals(-1959.81749, loglik, 0.00001)
+    assertEquals(-1959.81784, loglik, 0.00001)
 
   }
 

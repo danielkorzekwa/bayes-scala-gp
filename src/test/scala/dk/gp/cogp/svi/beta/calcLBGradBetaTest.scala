@@ -36,8 +36,8 @@ class calcLBGradBetaTest {
     val model = createCogpToyModel(x, y)
 
     val betaGrad = calcLBGradBeta(LowerBound(model,x), y)
-    assertEquals(-52.24800, betaGrad(0), 0.00001)
-    assertEquals(-51.90286, betaGrad(1), 0.00001)
+    assertEquals(-52.24807, betaGrad(0), 0.00001)
+    assertEquals(-51.90292, betaGrad(1), 0.00001)
 
   }
 }

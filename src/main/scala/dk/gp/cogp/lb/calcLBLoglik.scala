@@ -1,7 +1,6 @@
 package dk.gp.cogp.lb
 
 import scala.math.Pi
-
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import breeze.linalg.InjectNumericOps
@@ -16,6 +15,7 @@ import breeze.numerics.pow
 import dk.gp.cogp.CogpModel
 import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
+import breeze.linalg.Axis
 
 object calcLBLoglik {
 
@@ -39,7 +39,7 @@ object calcLBLoglik {
     val pTerm = (0 until hArray.size).map { i =>
 
       val z = cogpModel.h(i).z
-      val kZZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](x.size)
+      val kZZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams) + 1e-10 * DenseMatrix.eye[Double](z.size)
       val kXZ2 = cogpModel.h(i).covFunc.cov(z, z, cogpModel.h(i).covFuncParams)
       val kZX2 = kXZ2.t
       val kZZ2inv = invchol(cholesky(kZZ2).t)
@@ -83,7 +83,8 @@ object calcLBLoglik {
          * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
          */
         val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
-
+      //   val kTildeDiagSum = sum(kXXDiag - sum((kXZ*kZZinv):*kZX,Axis._1)) 
+     //    val kTildeDiagSum = sum(kXXDiag - trace(kZX*kXZ*kZZinv))
         pow(w(i, j), 2) * kTildeDiagSum
       }.sum
 
@@ -105,10 +106,11 @@ object calcLBLoglik {
 
       val logNTerm = -0.5 * y.rows * log(2 * Pi / beta(i)) - 0.5 * beta(i) * sum(pow(yTerm, 2))
 
-      pTerm_i + logNTerm - 0.5 * beta(i) * traceQTerm - 0.5 * beta(i) * kTildeQTerm - tracePTerm - kTildePTerm
 
       val pTerm = logNTerm - pTerm_i - tracePTerm - kTildePTerm - 0.5 * beta(i) * traceQTerm - 0.5 * beta(i) * kTildeQTerm
       pTerm
+      
+     
     }.sum
 
     -qTerm + pTerm

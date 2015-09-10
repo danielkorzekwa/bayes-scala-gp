@@ -31,7 +31,7 @@ class stochasticUpdateHypCovHTest {
     val newModel = model.copy(h = Array(newH0, newH1))
 
     val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
-    assertEquals(-121201.191266, loglik, 0.00001)
+    assertEquals(-121201.056426, loglik, 0.00001)
   }
   
     @Test def test_40_data_points = {
@@ -51,7 +51,7 @@ class stochasticUpdateHypCovHTest {
     val newModel = model.copy(h = Array(newH0, newH1))
 
     val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
-    assertEquals(-9.210003944724835e7, loglik, 0.00001)
+    assertEquals(-9.210001184817e7, loglik, 0.00001)
   }
   
 

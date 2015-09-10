@@ -27,7 +27,7 @@ class stochasticUpdateVTest {
     val newModel = model.copy(h = Array(newH0, newH1))
 
     val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
-    assertEquals(-121182.826893, loglik, 0.00001)
+    assertEquals(-121182.692052, loglik, 0.00001)
 
   }
 
@@ -45,7 +45,7 @@ class stochasticUpdateVTest {
     val newModel = model.copy(h = Array(newH0, newH1))
 
     val loglik = calcLBLoglik(LowerBound(newModel, x), newModel, x, y)
-    assertEquals(-9.2093955871883e7, loglik, 0.0001)
+    assertEquals(-9.209392827281e7, loglik, 0.0001)
 
   }
 

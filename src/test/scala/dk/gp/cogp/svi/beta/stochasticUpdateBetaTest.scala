@@ -26,7 +26,7 @@ class stochasticUpdateBetaTest {
     val newModel = model.copy(beta = newBeta)
 
     val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
-    assertEquals(-121201.191556, loglik, 0.000001)
+    assertEquals(-121201.05671, loglik, 0.0001)
   }
    
      @Test def test_40_data_points = {
@@ -42,7 +42,7 @@ class stochasticUpdateBetaTest {
     val newModel = model.copy(beta = newBeta)
 
     val loglik = calcLBLoglik(LowerBound(newModel,x),newModel, x, y)
-    assertEquals(-9.21000394392e7, loglik, 0.0001)
+    assertEquals(-9.210001184018e7, loglik, 0.0001)
   }
   
   

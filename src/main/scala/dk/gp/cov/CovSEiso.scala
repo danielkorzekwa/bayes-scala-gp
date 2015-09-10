@@ -1,8 +1,9 @@
 package dk.gp.cov
 
-import scala.math._
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
+import dk.gp.math.sqDist
+import breeze.numerics._
 
 /**
  * Implementation based 'http://www.gaussianprocess.org/gpml/code/matlab/doc/index.html'
@@ -25,95 +26,29 @@ case class CovSEiso() extends CovFunc {
 
   def cov(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): DenseMatrix[Double] = {
 
-    val sf = covFuncParams(0)
-    val ell = covFuncParams(1)
+    val logSf = covFuncParams(0)
+    val logEll = covFuncParams(1)
+    val ell = exp(logEll)
 
-    def op(v1: DenseVector[Double], v2: DenseVector[Double]): Double = {
-       
-      cov(v1.toArray, v2.toArray, sf, ell)
-    }
-//    
-//     def op(v1: DenseVector[Double], v2: DenseVector[Double]): Double = {
-//       
-//      cov(v1.toArray, v2.toArray, sf, ell)
-//    }
-    
-    val covMatrix =   exp(2 * sf) *covFunc(x1, x2, op)
+    val sqDistMatrix = sqDist(x1.t / ell, x2.t / ell)
+    val covMatrix = exp(2 * logSf) * exp(-0.5 * sqDistMatrix)
     covMatrix
   }
 
-  def cov(x1: Array[Double], x2: Array[Double], sf: Double, ell: Double): Double = {
+  def covD(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]] = {
 
-    require(x1.size == x2.size, "Vectors x1 and x2 have different sizes")
-    val expArg = -0.5 * distance(x1, x2, exp(2 * ell))
-    
-      
-    
-   exp(expArg)
-  }
+    val logSf = covFuncParams(0)
+    val logEll = covFuncParams(1)
+    val ell = exp(logEll)
 
-  private def distance(x1: Array[Double], x2: Array[Double], l: Double): Double = {
+    val sqDistMatrix = sqDist(x1.t / ell, x2.t / ell)
 
-    var distance = 0d
-    var i = 0
+    val expSqDistMatrix = exp(-0.5 * sqDistMatrix)
 
-    while (i < x1.size) {
-      distance += pow(x1(i) - x2(i), 2) / l
-      i += 1
-    }
- 
-    distance
-  }
-
-  
-   def covD(x1: DenseMatrix[Double],x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]] = {
-
-    val sf = covFuncParams(0)
-    val ell = covFuncParams(1)
-
-    def dfDsf(v1: DenseVector[Double], v2: DenseVector[Double]): Double = df_dSf(v1.toArray, v2.toArray, sf, ell)
-    val covMatrixDSf = covFunc(x1, x2, dfDsf)
-
-    def dfDEll(v1: DenseVector[Double], v2: DenseVector[Double]): Double = df_dEll(v1.toArray, v2.toArray, sf, ell)
-    val covMatrixDEll = covFunc(x1, x2, dfDEll)
+    val covMatrixDSf = 2 * exp(2 * logSf) * expSqDistMatrix
+    val covMatrixDEll = exp(2 * logSf) * expSqDistMatrix :* sqDistMatrix
 
     Array(covMatrixDSf, covMatrixDEll)
   }
 
-  def df_dSf(x1: Array[Double], x2: Array[Double], sf: Double, ell: Double): Double = {
-    require(x1.size == x2.size, "Vectors x1 and x2 have different sizes")
-
-    val expArg = -0.5 * distance(x1, x2, exp(2 * ell))
-    2 * exp(2 * sf) * exp(expArg)
-  }
-
-  def df_dEll(x1: Array[Double], x2: Array[Double], sf: Double, ell: Double): Double = {
-    require(x1.size == x2.size, "Vectors x1 and x2 have different sizes")
-
-    val dfDEll = if (x1.size == 1 && x2.size == 1 && x1(0) == x2(0)) 0
-    else {
-      val expArg = -0.5 * distance(x1, x2, exp(2 * ell))
-      val d = -0.5 * distance(x1, x2, exp(2 * ell) / (-2d))
-
-      exp(2 * sf) * exp(expArg) * d
-    }
-    dfDEll
-  }
-
-  private def covFunc(x1: DenseMatrix[Double], x2: DenseMatrix[Double], op: (DenseVector[Double], DenseVector[Double]) => Double): DenseMatrix[Double] = {
-    val matrix = DenseMatrix.zeros[Double](x1.rows, x2.rows)
-
-    for (rowIndex <- 0 until x1.rows) {
-
-      val x1Val = x1(rowIndex, ::)
-
-      for (colIndex <- 0 until x2.rows) {
-        val x2Val = x2(colIndex, ::)
-
-        matrix(rowIndex, colIndex) = 0d//op(x1Val, x2Val)
-      }
-    }
-
-    matrix
-  }
 }
