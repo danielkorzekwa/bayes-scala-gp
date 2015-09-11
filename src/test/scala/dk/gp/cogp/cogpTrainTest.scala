@@ -9,12 +9,13 @@ import breeze.linalg._
 import java.io.File
 import dk.gp.cov.CovSEiso
 import dk.gp.cov.CovFunc
-import dk.gp.cogp.svi.stochasticUpdateLB
 import dk.gp.cogp.testutils.createCogpToyModel
 import org.junit._
 import Assert._
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.calcLBLoglik
+import dk.gp.cogp.svi.stochasticUpdateCogpModel
+import scala.util.Random
 
 class cogpTrainTest {
 
@@ -44,28 +45,34 @@ class cogpTrainTest {
     val loglik = calcLBLoglik(LowerBound(newModel, x), y)
     assertEquals(-1959.79424, loglik, 0.00001)
 
+    val predictedY = cogpPredict(x, model)
+
+    assertEquals(0, predictedY(10, 0).m, 0.0001)
+
   }
 
-  @Test def test = {
+  @Test def test_40_data_points_500_iter = {
 
-    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 40, ::)
+    Random.setSeed(4676)
+
+    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 39, ::)
     val x = data(::, 0).toDenseMatrix.t
     val y = data(::, 1 to 2)
+    val z = x(0 until x.rows by 10, ::) // inducing points for u and v inducing variables
+    val model = createCogpToyModel(x, y, z)
+    val newModel = cogpTrain(x, y, model, iterNum = 500)
 
-    val initialModel = createCogpToyModel(x, y)
+    val loglik = calcLBLoglik(LowerBound(newModel, x), y)
+    assertEquals(76.4803, loglik, 0.0001)
 
-    val finalModel = (1 to 50).foldLeft(initialModel) {
-      case (currentModel, i) =>
-        val newModel = stochasticUpdateLB(currentModel, x, y)
+    val predictedY = cogpPredict(x, newModel)
 
-        val loglik = calcLBLoglik(LowerBound(newModel, x), y)
-        println("LB loglik=" + loglik)
+    assertEquals(-0.4271, predictedY(10, 0).m, 0.0001)
+    assertEquals(0.00257, predictedY(10, 0).v, 0.0001)
 
-        newModel
-    }
+    assertEquals(0.4260, predictedY(10, 1).m, 0.0001)
+    assertEquals(0.00257, predictedY(10, 1).v, 0.0001)
 
-    val predictedY = cogpPredict(x, finalModel)
-
-    //  println(predictedY)
   }
+
 }

@@ -31,4 +31,3 @@ Based on Nguyen et al. Collaborative Multi-output Gaussian Processes, 2014
 **Prediction plots**
 
 ![cogp_toy_problem_prediction_plot](https://raw.github.com/danielkorzekwa/bayes-scala-gp/master/doc/cogp/cogp_toy_problem_prediction_plot.png)
-

@@ -1,9 +1,7 @@
 package dk.gp.cogp.svi
 
 import breeze.linalg.DenseMatrix
-import dk.gp.cogp.CogpModel
 import dk.gp.cogp.lb.LowerBound
-import dk.gp.cogp.svi.classicalMomentum
 import dk.gp.cogp.lb.grad.calcLBGradW
 
 object stochasticUpdateW {

@@ -1,10 +1,10 @@
 package dk.gp.cogp.lb
 
-import dk.gp.cogp.CogpModel
 import breeze.linalg.DenseMatrix
 import scala.collection._
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
+import dk.gp.cogp.model.CogpModel
 
 class LowerBound(val model: CogpModel, val x: DenseMatrix[Double]) {
 

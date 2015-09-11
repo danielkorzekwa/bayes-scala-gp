@@ -1,11 +1,11 @@
 package dk.gp.cogp.lb.grad
 
 import breeze.linalg.DenseMatrix
-import dk.gp.cogp.CogpModel
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
 import dk.gp.cogp.lb.LowerBound
 import breeze.linalg.InjectNumericOps
+import dk.gp.cogp.model.CogpModel
 
 object calcLBGradVEta2 {
 

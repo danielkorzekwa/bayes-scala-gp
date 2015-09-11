@@ -3,10 +3,9 @@ package dk.gp.cogp.lb.grad
 import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
 import breeze.numerics._
-import dk.gp.cogp.CogpModel
-import dk.gp.cogp.CogpModel
 import dk.gp.cogp.lb.LowerBound
 import breeze.linalg.InjectNumericOps
+import dk.gp.cogp.model.CogpModel
 
 object calcLBGradUEta2 {
 

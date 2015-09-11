@@ -12,7 +12,6 @@ import breeze.linalg.sum
 import breeze.linalg.trace
 import breeze.numerics.log
 import breeze.numerics.pow
-import dk.gp.cogp.CogpModel
 import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
 import breeze.linalg.Axis

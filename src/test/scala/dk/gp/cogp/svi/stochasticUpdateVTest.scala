@@ -6,7 +6,6 @@ import org.junit._
 import org.junit.Assert._
 
 import breeze.linalg._
-import dk.gp.cogp.CogpModel
 import dk.gp.cogp.lb._
 import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cov.CovFunc

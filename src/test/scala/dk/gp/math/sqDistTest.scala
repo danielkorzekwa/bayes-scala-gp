@@ -3,6 +3,7 @@ package dk.gp.math
 import org.junit._
 import Assert._
 import breeze.linalg.DenseMatrix
+import breeze.linalg.DenseVector
 
 class sqDistTest {
 

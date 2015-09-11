@@ -4,11 +4,11 @@ import breeze.linalg.DenseMatrix
 import dk.gp.cov.CovFunc
 import breeze.linalg.DenseVector
 import dk.gp.cov.utils.covDiag
-import dk.gp.cogp.CogpModel
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.lb.LowerBound
+import dk.gp.cogp.model.CogpModel
 
-object stochasticUpdateLB {
+object stochasticUpdateCogpModel {
 
   def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): CogpModel = {
 

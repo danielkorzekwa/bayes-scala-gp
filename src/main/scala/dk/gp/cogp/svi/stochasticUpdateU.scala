@@ -5,11 +5,11 @@ import breeze.linalg.DenseVector
 import breeze.linalg.inv
 import breeze.linalg.cholesky
 import dk.gp.math.MultivariateGaussian
-import dk.gp.cogp.CogpModel
 import dk.gp.math.invchol
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.grad.calcLBGradUEta1
 import dk.gp.cogp.lb.grad.calcLBGradUEta2
+import dk.gp.cogp.model.CogpModel
 
 /**
  * Stochastic update for the parameters (mu,S) of q(u|y)

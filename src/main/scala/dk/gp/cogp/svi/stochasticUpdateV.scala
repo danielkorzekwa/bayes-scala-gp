@@ -4,12 +4,12 @@ import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
 import dk.gp.math.MultivariateGaussian
 import breeze.linalg.InjectNumericOps
-import dk.gp.cogp.CogpModel
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.grad.calcLBGradVEta1
 import dk.gp.cogp.lb.grad.calcLBGradVEta2
+import dk.gp.cogp.model.CogpModel
 
 /**
  * Stochastic update for the parameters (mu,S) of p(v|y)
