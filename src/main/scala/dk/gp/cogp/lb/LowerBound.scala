@@ -25,6 +25,7 @@ class LowerBound(val model: CogpModel, val x: DenseMatrix[Double]) {
   def kXZi(i: Int): DenseMatrix[Double] = kXZiMap.getOrElseUpdate(i, calckXZi(i))
 
   def calcAi(i: Int):DenseMatrix[Double] = kXZi(i) * kZZiInv(i)
+  def calcAj(j:Int):DenseMatrix[Double] = kXZj(j)*kZZjInv(j)
   
   private def calckZZj(j: Int): DenseMatrix[Double] = {
 

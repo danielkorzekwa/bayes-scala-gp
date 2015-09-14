@@ -18,7 +18,7 @@ class stochasticUpdateUTest {
 
     val model = createCogpToyModel(x, y)
 
-    val newU = stochasticUpdateU(j = 0, LowerBound(model,x),model, x, y)
+    val newU = stochasticUpdateU(j = 0, LowerBound(model,x), y)
 
     val newG = model.g.head.copy(u = newU)
     val newModel = model.copy(g = Array(newG))
@@ -35,7 +35,7 @@ class stochasticUpdateUTest {
 
     val model = createCogpToyModel(x, y)
 
-    val newU = stochasticUpdateU(j = 0,LowerBound(model,x), model, x, y)
+    val newU = stochasticUpdateU(j = 0,LowerBound(model,x),  y)
 
     val newG = model.g.head.copy(u = newU)
     val newModel = model.copy(g = Array(newG))

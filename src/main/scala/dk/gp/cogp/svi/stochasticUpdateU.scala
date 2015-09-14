@@ -32,9 +32,9 @@ object stochasticUpdateU {
    * @param y [X x P]
    * @param l Learning rate
    */
-  def apply(j: Int, lb:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): MultivariateGaussian = {
+  def apply(j: Int, lb: LowerBound, y: DenseMatrix[Double]): MultivariateGaussian = {
 
-    val u = model.g.map(_.u)
+    val u = lb.model.g.map(_.u)
     //natural parameters theta
     //val vInv = invchol(cholesky(u(j).v).t) //@TODO use chol with jitter for matrix inverse
     val vInv = inv(u(j).v)
@@ -46,15 +46,15 @@ object stochasticUpdateU {
      * Thus no need for inverse of Fisher information matrix. Sweet.
      *  Hensman et al. Gaussian Processes for Big Data, 2013
      */
-    val naturalGradEta1 = calcLBGradUEta1(j, lb,model,x,y)
-    val naturalGradEta2 = calcLBGradUEta2(j, lb,model,x,y)
+    val naturalGradEta1 = calcLBGradUEta1(j, lb, y)
+    val naturalGradEta2 = calcLBGradUEta2(j, lb, y)
 
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2
 
-   // val newTheta2Inv = invchol(cholesky(newTheta2).t)
+    // val newTheta2Inv = invchol(cholesky(newTheta2).t)
     val newTheta2Inv = inv(newTheta2) //use invchol with jitter
-    
+
     val newS = -0.5 * newTheta2Inv
     val newM = newS * newTheta1
     MultivariateGaussian(newM, newS)

@@ -34,8 +34,8 @@ object stochasticUpdateV {
     val theta1 = vInv * v(i).m
     val theta2 = -0.5 * vInv
 
-    val naturalGradEta1 = calcLBGradVEta1(i, lb,model, x, y)
-    val naturalGradEta2 = calcLBGradVEta2(i, lb,model, x, y)
+    val naturalGradEta1 = calcLBGradVEta1(i, lb, y)
+    val naturalGradEta2 = calcLBGradVEta2(i, lb, y)
 
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2

@@ -16,20 +16,14 @@ object stochasticUpdateCogpModel {
 
     //@TODO when learning just the covParameters, at some iteration, loglik accuracy suddenly goes down, numerical stability issues? 
     //@TODO Given just gU and hypG are learned, learning first hypG then gU doesn't not converge (loglik is decreasing), why is that?
-    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, LowerBound(currModel, x), currModel, x, y) }.toArray
-
+    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, LowerBound(currModel, x),  y) }.toArray
     currModel = withNewGu(newU, currModel)
 
     val lowerBound = LowerBound(currModel, x)
-
     val (newW, newWDelta) = stochasticUpdateW(lowerBound, y)
     val (newBeta, newBetaDelta) = stochasticUpdateBeta(lowerBound, y)
     val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, lowerBound, y) }.toArray
-
-    currModel = withNewCovParamsG(newHypCovG, currModel)
-    currModel = currModel.copy(w = newW, wDelta = newWDelta)
-
-    currModel = currModel.copy(beta = newBeta, betaDelta = newBetaDelta)
+    currModel = withNewCovParamsG(newHypCovG, currModel).copy(w = newW, wDelta = newWDelta,beta = newBeta, betaDelta = newBetaDelta)
 
     val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, LowerBound(currModel, x), currModel, x, y) }.toArray
     currModel = withNewHu(newV, currModel)

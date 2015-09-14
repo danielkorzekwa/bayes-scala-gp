@@ -7,12 +7,14 @@ import breeze.linalg.cholesky
 import dk.gp.cogp.lb.LowerBound
 import breeze.linalg.InjectNumericOps
 import dk.gp.cogp.model.CogpModel
+import breeze.linalg._
 
 object calcLBGradVEta1 {
 
-  def apply(i: Int, lowerBound: LowerBound, model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(i: Int, lb: LowerBound,  y: DenseMatrix[Double]): DenseVector[Double] = {
 
-    val Ai = lowerBound.calcAi(i)
+    val model = lb.model
+    val Ai = lb.calcAi(i)
 
     val w = model.w
     val beta = model.beta
@@ -21,19 +23,14 @@ object calcLBGradVEta1 {
     val v = model.h.map(_.u)
 
     val wam = if (w.size == 0) DenseVector.zeros[Double](y.size)
-    else {
+    else sum{
       (0 until w.cols).map { jIndex =>
 
-        val kXZ = lowerBound.kXZj(jIndex)
-        val kZZ = lowerBound.kZZj(jIndex)
-
-        val kZZinv = lowerBound.kZZjInv(jIndex)
-
-        val Aj = kXZ * kZZinv
+        val Aj = lb.calcAj(jIndex)
 
         w(i, jIndex) * Aj * u(jIndex).m
       }
-    }.toArray.sum
+    }
 
     val yVal = y(::, i) - wam
 
@@ -45,10 +42,5 @@ object calcLBGradVEta1 {
     grad
   }
 
-  implicit class DenseVectorOps(seq: Array[DenseVector[Double]]) {
-    def sum(): DenseVector[Double] = seq match { //@TODO this is not required anymorre, David Hall added ufunc for sum(.) to breeze
-      case Array(x) => x
-      case seq      => seq.reduceLeft((total, x) => total + x)
-    }
-  }
+  
 }

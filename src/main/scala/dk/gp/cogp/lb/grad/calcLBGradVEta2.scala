@@ -9,11 +9,13 @@ import dk.gp.cogp.model.CogpModel
 
 object calcLBGradVEta2 {
 
-  def apply(i: Int, lowerBound:LowerBound,model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def apply(i: Int, lb:LowerBound, y: DenseMatrix[Double]): DenseMatrix[Double] = {
     
-    val kZZiInv = lowerBound.kZZiInv(i)
+    val model = lb.model
+    
+    val kZZiInv = lb.kZZiInv(i)
 
-    val Ai = lowerBound.calcAi(i)
+    val Ai = lb.calcAi(i)
 
     val v = model.h.map(_.u)
     val beta = model.beta

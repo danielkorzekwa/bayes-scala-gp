@@ -14,9 +14,9 @@ object calcLBGradBeta {
 
   def apply(lb: LowerBound, y: DenseMatrix[Double]): DenseVector[Double] = {
 
-    val dBeta = DenseVector.zeros[Double](lb.model.beta.size)
-    for (i <- 0 until lb.model.beta.size) {
-      dBeta(i) = logTermD(i, lb, y) - 0.5 * kTildeQTermD(i, lb) - 0.5 * kTildeDiagSumi(i, lb) - 0.5 * traceQTermD(i, lb) - tracePD(i, lb)
+    val dBeta = lb.model.beta.mapPairs {
+      case (i, beta) =>
+        logTermD(i, lb, y) - 0.5 * kTildeQTermD(i, lb) - 0.5 * kTildeDiagSumi(i, lb) - 0.5 * traceQTermD(i, lb) - tracePD(i, lb)
     }
 
     dBeta
@@ -59,17 +59,13 @@ object calcLBGradBeta {
   private def traceQTermD(i: Int, lb: LowerBound) = {
     val traceQTermD = (0 until lb.model.g.size).map { j =>
 
-      val kXZ = lb.kXZj(j)
-      val kZZ = lb.kZZj(j)
-      val kZZinv = lb.kZZjInv(j)
-
-      val Aj = kXZ * kZZinv
+      val Aj = lb.calcAj(j)
       val lambdaJ = Aj.t * Aj
-      val u = lb.model.g(j).u
+      val gU = lb.model.g(j).u
 
-      val traceQ = trace(u.v * lambdaJ)
+      val traceQ = trace(gU.v * lambdaJ)
 
-      pow(lb.model.w(i, j), 2) * trace(u.v * lambdaJ)
+      pow(lb.model.w(i, j), 2) * trace(gU.v * lambdaJ)
     }.sum
 
     traceQTermD
@@ -80,7 +76,6 @@ object calcLBGradBeta {
     val kTildeQTerm = (0 until lb.model.g.size).map { j =>
 
       val kXZ = lb.kXZj(j)
-      val kZZ = lb.kZZj(j)
       val kZX = kXZ.t
       val kXXDiag = covDiag(lb.x, lb.model.g(j).covFunc, lb.model.g(j).covFuncParams)
 
@@ -92,6 +87,5 @@ object calcLBGradBeta {
 
     kTildeQTerm
   }
-
 
 }

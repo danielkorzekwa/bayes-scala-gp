@@ -22,6 +22,8 @@ object sqDist extends UFunc {
       val t2 = t1(*, ::) + sum(x2 :* x2, Axis._0).t
 
       t2(::, *) + sum(x1 :* x1, Axis._0).t
+      
+ 
     }
   }
 }

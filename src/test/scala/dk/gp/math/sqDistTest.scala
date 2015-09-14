@@ -7,6 +7,22 @@ import breeze.linalg.DenseVector
 
 class sqDistTest {
 
+  @Test def test_david = {
+    val x = DenseVector.rangeD(0, 4000, 1).toDenseMatrix
+
+    val now = System.currentTimeMillis();
+    for (i <- 1 to 10) sqDist(x, x)
+    println("[1x4000]" + (System.currentTimeMillis() - now))
+  }
+
+  @Test def test_david2 = {
+    val x = DenseMatrix.rand(5, 200)
+
+    val now = System.currentTimeMillis();
+    for (i <- 1 to 1000) sqDist(x, x)
+    println("[5x200]" + (System.currentTimeMillis() - now))
+  }
+
   @Test def test_xx_1D = {
 
     val x = DenseMatrix(1.0, 2.0, 3.0).t

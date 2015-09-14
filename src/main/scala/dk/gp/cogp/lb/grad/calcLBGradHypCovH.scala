@@ -16,9 +16,6 @@ object calcLBGradHypCovH {
     val model = lb.model
     val x = lb.x
     
-    val hArray = model.h
-    val gArray = model.g
-
     val z = model.h(i).z
 
     val kXZ = lb.kXZi(i)
@@ -44,8 +41,7 @@ object calcLBGradHypCovH {
 
       val dAi = dKxz * kZZinv - Ai * dKzz * kZZinv
 
-    
-      val yTerm = y(::, i) - wAm(i,lb) - Ai * hArray(i).u.m
+      val yTerm = y(::, i) - wAm(i,lb) - Ai *  model.h(i).u.m
       val logTerm = beta(i) * (yTerm.t * dAi * u.m) //@TODO performance improvement
 
       val tildeP = 0.5 * beta(i) * sum(dKxxDiag - diag(dAi * kZX) - diag(Ai * dKxz.t)) //@TODO performance improvement
