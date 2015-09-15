@@ -18,13 +18,13 @@ import breeze.linalg.Axis
 
 object calcLBLoglik {
 
-  def apply(lowerBound: LowerBound, y: DenseMatrix[Double]): Double = {
+  def apply(lowerBound: LowerBound): Double = {
 
     val beta = lowerBound.model.beta
 
     val pTerm = (0 until lowerBound.model.h.size).map { i =>
 
-      val pTerm = logNTerm(i, lowerBound, y) -
+      val pTerm = logNTerm(i, lowerBound) -
         pTerm_i(i, lowerBound) - tracePTerm(i, lowerBound) -
         kTildePTerm(i, lowerBound) -
         0.5 * beta(i) * traceQTerm(i, lowerBound) -
@@ -61,12 +61,14 @@ object calcLBLoglik {
     pTerm_i
   }
 
-  private def logNTerm(i: Int, lb: LowerBound, y: DenseMatrix[Double]): Double = {
+  private def logNTerm(i: Int, lb: LowerBound): Double = {
 
     val Ai = lb.calcAi(i)
-
-    val yTerm = y(::, i) - wAm(i, lb) - Ai * lb.model.h(i).u.m
-    val logNTerm = -0.5 * y.rows * log(2 * Pi / lb.model.beta(i)) - 0.5 * lb.model.beta(i) * sum(pow(yTerm, 2))
+ 
+    val y = lb.yi(i)
+    
+    val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
+    val logNTerm = -0.5 * y.size * log(2 * Pi / lb.model.beta(i)) - 0.5 * lb.model.beta(i) * sum(pow(yTerm, 2))
 
     logNTerm
   }
@@ -96,10 +98,7 @@ object calcLBLoglik {
   private def traceQTerm(i: Int, lb: LowerBound): Double = {
     val traceQTerm = (0 until lb.model.g.size).map { j =>
 
-      val kXZ = lb.kXZj(j)
-      val kZZinv = lb.kZZjInv(j)
-
-      val Aj = kXZ * kZZinv
+      val Aj = lb.calcAj(j)
       val lambdaJ = Aj.t * Aj
       val u = lb.model.g(j).u
       pow(lb.model.w(i, j), 2) * trace(u.v * lambdaJ)

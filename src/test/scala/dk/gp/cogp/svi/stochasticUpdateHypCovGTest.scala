@@ -18,12 +18,12 @@ class stochasticUpdateHypCovGTest {
 
     val model = createCogpToyModel(x, y)
 
-    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model, x), y)
+    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model, x,y))
 
     val newG = model.g.head.copy(covFuncParams = newHypParams, covFuncParamsDelta = newHypParamsDelta)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(LowerBound(newModel, x),  y)
+    val loglik = calcLBLoglik(LowerBound(newModel, x,y))
     assertEquals(-209.55036, loglik, 0.00001)
   }
 
@@ -35,12 +35,12 @@ class stochasticUpdateHypCovGTest {
 
     val model = createCogpToyModel(x, y)
 
-    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model, x), y)
+    val (newHypParams, newHypParamsDelta) = stochasticUpdateHypCovG(j = 0, LowerBound(model, x,y))
 
     val newG = model.g.head.copy(covFuncParams = newHypParams, covFuncParamsDelta = newHypParamsDelta)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(LowerBound(newModel, x), y)
+    val loglik = calcLBLoglik(LowerBound(newModel, x,y))
     assertEquals(-6693.0626, loglik, 0.0001)
   }
 

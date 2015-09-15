@@ -11,16 +11,16 @@ import dk.gp.cogp.lb.wAm
 
 object calcLBGradHypCovH {
 
-  def apply(i: Int, lb: LowerBound,  y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(i: Int, lb: LowerBound): DenseVector[Double] = {
 
     val model = lb.model
     val x = lb.x
-    
+
     val z = model.h(i).z
 
     val kXZ = lb.kXZi(i)
     val kZZ = lb.kZZi(i)
-    val kZZdArray = model.h(i).covFunc.covD(z,z, model.h(i).covFuncParams)
+    val kZZdArray = model.h(i).covFunc.covD(z, z, model.h(i).covFuncParams)
     val kXZDArray = model.h(i).covFunc.covD(x, z, model.h(i).covFuncParams)
 
     val dKxxDiagArray = covDiagD(x, model.h(i).covFunc, model.h(i).covFuncParams)
@@ -41,7 +41,8 @@ object calcLBGradHypCovH {
 
       val dAi = dKxz * kZZinv - Ai * dKzz * kZZinv
 
-      val yTerm = y(::, i) - wAm(i,lb) - Ai *  model.h(i).u.m
+      val y = lb.yi(i)
+      val yTerm = y - wAm(i, lb) - Ai * model.h(i).u.m
       val logTerm = beta(i) * (yTerm.t * dAi * u.m) //@TODO performance improvement
 
       val tildeP = 0.5 * beta(i) * sum(dKxxDiag - diag(dAi * kZX) - diag(Ai * dKxz.t)) //@TODO performance improvement

@@ -11,7 +11,7 @@ import breeze.linalg._
 
 object calcLBGradUEta1 {
 
-  def apply(j: Int, lb: LowerBound, y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(j: Int, lb: LowerBound): DenseVector[Double] = {
 
     val model = lb.model
     val beta = model.beta
@@ -24,15 +24,16 @@ object calcLBGradUEta1 {
     val tmp = (0 until beta.size).map { i =>
       val betaVal = beta(i)
       val wVal = w(i, j)
-
+val y = lb.yi(i)
+      
       val othersJIdx = (0 until w.cols).filter(jIndex => jIndex != j)
       val wAm = if (othersJIdx.size > 0) {
         sum(othersJIdx.map { jIndex => w(i, jIndex) * Aj * u(jIndex).m })
-      } else DenseVector.zeros[Double](y.rows)
+      } else DenseVector.zeros[Double](y.size)
 
       val Ai = lb.calcAi(i)
 
-      val yVal = y(::, i) - Ai * v(i).m - wAm
+      val yVal = y - Ai * v(i).m - wAm
 
       betaVal * wVal * Aj.t * yVal
     }.reduceLeft((total, x) => total + x)

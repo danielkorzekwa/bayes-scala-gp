@@ -20,19 +20,7 @@ object stochasticUpdateU {
 
   private val learningRate = 1e-2
 
-  /**
-   * @param j Index of Q variable
-   * @param beta [P x 1]
-   * @param w [P x Q]
-   * @param mQ [Z x Q]
-   * @param mP [Z x P]
-   * @param S [Z x Z]
-   * @param kZZ [Z x Z]
-   * @param kXZ [X x Z]
-   * @param y [X x P]
-   * @param l Learning rate
-   */
-  def apply(j: Int, lb: LowerBound, y: DenseMatrix[Double]): MultivariateGaussian = {
+  def apply(j: Int, lb: LowerBound): MultivariateGaussian = {
 
     val u = lb.model.g.map(_.u)
     //natural parameters theta
@@ -46,8 +34,8 @@ object stochasticUpdateU {
      * Thus no need for inverse of Fisher information matrix. Sweet.
      *  Hensman et al. Gaussian Processes for Big Data, 2013
      */
-    val naturalGradEta1 = calcLBGradUEta1(j, lb, y)
-    val naturalGradEta2 = calcLBGradUEta2(j, lb, y)
+    val naturalGradEta1 = calcLBGradUEta1(j, lb)
+    val naturalGradEta2 = calcLBGradUEta2(j, lb)
 
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2

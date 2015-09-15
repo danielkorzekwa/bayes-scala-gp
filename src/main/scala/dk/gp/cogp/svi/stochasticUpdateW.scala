@@ -12,9 +12,9 @@ object stochasticUpdateW {
   /**
    * Returns [new w, w delta]
    */
-  def apply(lowerBound:LowerBound, y: DenseMatrix[Double]): (DenseMatrix[Double], DenseMatrix[Double]) = {
+  def apply(lowerBound:LowerBound): (DenseMatrix[Double], DenseMatrix[Double]) = {
 
-    val wGrad = calcLBGradW(lowerBound, y)
+    val wGrad = calcLBGradW(lowerBound)
 
     val (newW, newWDelta) = classicalMomentum(lowerBound.model.w, lowerBound.model.wDelta, learningRate, momentum, wGrad)
 

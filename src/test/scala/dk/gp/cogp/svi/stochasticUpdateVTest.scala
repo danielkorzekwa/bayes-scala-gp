@@ -20,12 +20,12 @@ class stochasticUpdateVTest {
 
     val model = createCogpToyModel(x, y)
 
-    val newH0 = model.h(0).copy(u = stochasticUpdateV(i = 0, LowerBound(model,x), model, x, y))
-    val newH1 = model.h(1).copy(u = stochasticUpdateV(i = 1, LowerBound(model,x), model, x, y))
+    val newH0 = model.h(0).copy(u = stochasticUpdateV(i = 0, LowerBound(model, x, y)))
+    val newH1 = model.h(1).copy(u = stochasticUpdateV(i = 1, LowerBound(model, x, y)))
 
     val newModel = model.copy(h = Array(newH0, newH1))
 
-    val loglik = calcLBLoglik(LowerBound(newModel, x),  y)
+    val loglik = calcLBLoglik(LowerBound(newModel, x, y))
     assertEquals(-121182.692052, loglik, 0.00001)
 
   }
@@ -38,12 +38,12 @@ class stochasticUpdateVTest {
 
     val model = createCogpToyModel(x, y)
 
-    val newH0 = model.h(0).copy(u = stochasticUpdateV(i = 0, LowerBound(model,x), model, x, y))
-    val newH1 = model.h(1).copy(u = stochasticUpdateV(i = 1, LowerBound(model,x), model, x, y))
+    val newH0 = model.h(0).copy(u = stochasticUpdateV(i = 0, LowerBound(model, x, y)))
+    val newH1 = model.h(1).copy(u = stochasticUpdateV(i = 1, LowerBound(model, x, y)))
 
     val newModel = model.copy(h = Array(newH0, newH1))
 
-    val loglik = calcLBLoglik(LowerBound(newModel, x),  y)
+    val loglik = calcLBLoglik(LowerBound(newModel, x, y))
     assertEquals(-9.209392827281e7, loglik, 0.0001)
 
   }

@@ -12,11 +12,13 @@ import dk.gp.cogp.lb.wAm
 
 object calcLBGradBeta {
 
-  def apply(lb: LowerBound, y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(lb: LowerBound): DenseVector[Double] = {
 
     val dBeta = lb.model.beta.mapPairs {
       case (i, beta) =>
-        logTermD(i, lb, y) - 0.5 * kTildeQTermD(i, lb) - 0.5 * kTildeDiagSumi(i, lb) - 0.5 * traceQTermD(i, lb) - tracePD(i, lb)
+        
+      
+        logTermD(i, lb) - 0.5 * kTildeQTermD(i, lb) - 0.5 * kTildeDiagSumi(i, lb) - 0.5 * traceQTermD(i, lb) - tracePD(i, lb)
     }
 
     dBeta
@@ -32,14 +34,16 @@ object calcLBGradBeta {
     tracePD
   }
 
-  private def logTermD(i: Int, lb: LowerBound, y: DenseMatrix[Double]): Double = {
+  private def logTermD(i: Int, lb: LowerBound): Double = {
 
     val beta = lb.model.beta(i)
 
     val Ai = lb.calcAi(i)
 
-    val yTerm = y(::, i) - wAm(i, lb) - Ai * lb.model.h(i).u.m
-    val logTermD = (0.5 * y.rows) / beta - 0.5 * sum(pow(yTerm, 2))
+    val y = lb.yi(i)
+    
+    val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
+    val logTermD = (0.5 * y.size) / beta - 0.5 * sum(pow(yTerm, 2))
 
     logTermD
   }

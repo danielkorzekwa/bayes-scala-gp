@@ -18,12 +18,12 @@ class stochasticUpdateUTest {
 
     val model = createCogpToyModel(x, y)
 
-    val newU = stochasticUpdateU(j = 0, LowerBound(model,x), y)
+    val newU = stochasticUpdateU(j = 0, LowerBound(model,x,y))
 
     val newG = model.g.head.copy(u = newU)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(LowerBound(newModel,x), y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x,y))
     assertEquals(-271.96521, loglik, 0.0001)
   }
 
@@ -35,12 +35,12 @@ class stochasticUpdateUTest {
 
     val model = createCogpToyModel(x, y)
 
-    val newU = stochasticUpdateU(j = 0,LowerBound(model,x),  y)
+    val newU = stochasticUpdateU(j = 0,LowerBound(model,x,y))
 
     val newG = model.g.head.copy(u = newU)
     val newModel = model.copy(g = Array(newG))
 
-    val loglik = calcLBLoglik(LowerBound(newModel,x), y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x,y))
     assertEquals(-11855.87165, loglik, 0.00001)
   }
 

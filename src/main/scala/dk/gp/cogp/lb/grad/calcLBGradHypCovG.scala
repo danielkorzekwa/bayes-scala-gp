@@ -11,7 +11,7 @@ import dk.gp.cogp.lb.wAm
 
 object calcLBGradHypCovG {
 
-  def apply(j: Int, lb: LowerBound, y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(j: Int, lb: LowerBound): DenseVector[Double] = {
 
     val x = lb.x
     val z = lb.model.g(j).z
@@ -30,14 +30,14 @@ object calcLBGradHypCovG {
       val kXXDiagD = kXXDiagDArray(k)
       val AjD = kXZd * kZZinv - Aj * kZZd * kZZinv
 
-      logTermPart(j, lb, y, AjD) - tildeQPart(j, lb, AjD, kXXDiagD, kXZd) - traceQPart(j, lb, AjD) - lklPart(j, lb, kZZd)
+      logTermPart(j, lb,  AjD) - tildeQPart(j, lb, AjD, kXXDiagD, kXZd) - traceQPart(j, lb, AjD) - lklPart(j, lb, kZZd)
 
     }.toArray
 
     DenseVector(covParamsD)
   }
 
-  private def logTermPart(j: Int, lb: LowerBound, y: DenseMatrix[Double], AjD: DenseMatrix[Double]): Double = {
+  private def logTermPart(j: Int, lb: LowerBound, AjD: DenseMatrix[Double]): Double = {
 
     val beta = lb.model.beta
     val w = lb.model.w
@@ -46,7 +46,9 @@ object calcLBGradHypCovG {
     val logTermPart = (0 until lb.model.h.size).map { i =>
 
       val Ai = lb.calcAi(i)
-      val yTerm = y(::, i) - wAm(i, lb) - Ai * lb.model.h(i).u.m
+      val y = lb.yi(i)
+      
+      val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
       beta(i) * w(i, j) * (yTerm.t * AjD * u.m)
 
     }.sum

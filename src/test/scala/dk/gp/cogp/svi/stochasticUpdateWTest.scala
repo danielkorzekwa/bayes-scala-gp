@@ -18,11 +18,11 @@ class stochasticUpdateWTest {
 
     val model = createCogpToyModel(x, y)
 
-    val (newW, newWDelta) = stochasticUpdateW(LowerBound(model, x), y)
+    val (newW, newWDelta) = stochasticUpdateW(LowerBound(model, x,y))
 
     val newModel = model.copy(w = newW)
 
-    val loglik = calcLBLoglik(LowerBound(newModel, x), y)
+    val loglik = calcLBLoglik(LowerBound(newModel, x,y))
     assertEquals(-121201.056728, loglik, 0.000001)
 
   }
@@ -35,11 +35,11 @@ class stochasticUpdateWTest {
 
     val model = createCogpToyModel(x, y)
 
-    val (newW, newWDelta) = stochasticUpdateW(LowerBound(model, x), y)
+    val (newW, newWDelta) = stochasticUpdateW(LowerBound(model, x,y))
 
     val newModel = model.copy(w = newW)
 
-    val loglik = calcLBLoglik(LowerBound(newModel, x),  y)
+    val loglik = calcLBLoglik(LowerBound(newModel, x,y))
     assertEquals(-9.210001189439e7, loglik, 0.0001)
 
   }

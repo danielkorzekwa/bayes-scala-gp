@@ -5,8 +5,9 @@ import scala.collection._
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
 import dk.gp.cogp.model.CogpModel
+import breeze.linalg.DenseVector
 
-class LowerBound(val model: CogpModel, val x: DenseMatrix[Double]) {
+class LowerBound(val model: CogpModel, val x: DenseMatrix[Double], val y: DenseMatrix[Double]) {
 
   private val kZZjMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()
   private val kZZjInvMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()
@@ -24,9 +25,13 @@ class LowerBound(val model: CogpModel, val x: DenseMatrix[Double]) {
   def kZZiInv(i: Int): DenseMatrix[Double] = kZZiInvMap.getOrElseUpdate(i, calckZZiInv(i))
   def kXZi(i: Int): DenseMatrix[Double] = kXZiMap.getOrElseUpdate(i, calckXZi(i))
 
-  def calcAi(i: Int):DenseMatrix[Double] = kXZi(i) * kZZiInv(i)
-  def calcAj(j:Int):DenseMatrix[Double] = kXZj(j)*kZZjInv(j)
-  
+  def calcAi(i: Int): DenseMatrix[Double] = kXZi(i) * kZZiInv(i)
+  def calcAj(j: Int): DenseMatrix[Double] = kXZj(j) * kZZjInv(j)
+
+  def yi(i:Int):DenseVector[Double] = {
+    y(::, i)
+  }
+
   private def calckZZj(j: Int): DenseMatrix[Double] = {
 
     val z = model.g(j).z
@@ -65,5 +70,5 @@ class LowerBound(val model: CogpModel, val x: DenseMatrix[Double]) {
 }
 
 object LowerBound {
-  def apply(model: CogpModel, x: DenseMatrix[Double]): LowerBound = new LowerBound(model, x)
+  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): LowerBound = new LowerBound(model, x, y)
 }

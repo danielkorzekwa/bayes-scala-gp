@@ -9,7 +9,7 @@ import dk.gp.cogp.model.CogpModel
 
 object calcLBGradVEta2 {
 
-  def apply(i: Int, lb:LowerBound, y: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def apply(i: Int, lb:LowerBound): DenseMatrix[Double] = {
     
     val model = lb.model
     

@@ -11,7 +11,7 @@ import breeze.linalg._
 
 object calcLBGradVEta1 {
 
-  def apply(i: Int, lb: LowerBound,  y: DenseMatrix[Double]): DenseVector[Double] = {
+  def apply(i: Int, lb: LowerBound): DenseVector[Double] = {
 
     val model = lb.model
     val Ai = lb.calcAi(i)
@@ -22,6 +22,7 @@ object calcLBGradVEta1 {
     val u = model.g.map(_.u)
     val v = model.h.map(_.u)
 
+    val y = lb.yi(i)
     val wam = if (w.size == 0) DenseVector.zeros[Double](y.size)
     else sum{
       (0 until w.cols).map { jIndex =>
@@ -32,7 +33,7 @@ object calcLBGradVEta1 {
       }
     }
 
-    val yVal = y(::, i) - wam
+    val yVal = y - wam
 
     val vCholR = cholesky(v(i).v).t
     val vInv = invchol(vCholR)

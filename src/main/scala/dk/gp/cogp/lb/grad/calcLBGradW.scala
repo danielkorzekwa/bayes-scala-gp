@@ -11,11 +11,11 @@ import dk.gp.cov.utils.covDiag
 
 object calcLBGradW {
 
-  def apply(lb: LowerBound, y: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def apply(lb: LowerBound): DenseMatrix[Double] = {
 
     val dw = lb.model.w.mapPairs {
       case ((i, j), w) =>
-        logNormalTerm(i, j, lb, y) - tildeTerm(i, j, lb) - traceTerm(i, j, lb)
+        logNormalTerm(i, j, lb) - tildeTerm(i, j, lb) - traceTerm(i, j, lb)
     }
 
     dw
@@ -60,7 +60,7 @@ object calcLBGradW {
     tildeTerm
   }
 
-  private def logNormalTerm(i: Int, j: Int, lb: LowerBound, y: DenseMatrix[Double]): Double = {
+  private def logNormalTerm(i: Int, j: Int, lb: LowerBound): Double = {
 
     val Ai = lb.calcAi(i)
     val Aj = lb.calcAj(j)
@@ -68,9 +68,10 @@ object calcLBGradW {
     val w = lb.model.w
     val g = lb.model.g
     val h = lb.model.h
+    val y = lb.yi(i)
 
     //log normal term
-    val logNormalTerm1 = beta(i) * ((y(::, i) - wAm(i, lb) - Ai * h(i).u.m + w(i, j) * (Aj * g(j).u.m)).t * (Aj * g(j).u.m)) //wAm (j'!= j) = wAm - wAjmj 
+    val logNormalTerm1 = beta(i) * ((y - wAm(i, lb) - Ai * h(i).u.m + w(i, j) * (Aj * g(j).u.m)).t * (Aj * g(j).u.m)) //wAm (j'!= j) = wAm - wAjmj 
     val logNormalTerm2 = beta(i) * w(i, j) * sum(pow(Aj * g(j).u.m, 2))
     val logNormalTerm = logNormalTerm1 - logNormalTerm2
 

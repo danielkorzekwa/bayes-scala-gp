@@ -18,11 +18,11 @@ class stochasticUpdateBetaTest {
 
     val model = createCogpToyModel(x, y)
     
-     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x), y)
+     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x,y))
 
     val newModel = model.copy(beta = newBeta)
 
-    val loglik = calcLBLoglik(LowerBound(newModel,x), y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x,y))
     assertEquals(-121201.05671, loglik, 0.0001)
   }
    
@@ -34,11 +34,11 @@ class stochasticUpdateBetaTest {
 
     val model = createCogpToyModel(x, y)
     
-     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x), y)
+     val (newBeta, newBetaDelta) = stochasticUpdateBeta(LowerBound(model,x,y))
 
     val newModel = model.copy(beta = newBeta)
 
-    val loglik = calcLBLoglik(LowerBound(newModel,x), y)
+    val loglik = calcLBLoglik(LowerBound(newModel,x,y))
     assertEquals(-9.210001184018e7, loglik, 0.0001)
   }
   

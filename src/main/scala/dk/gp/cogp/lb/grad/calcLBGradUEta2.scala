@@ -9,7 +9,7 @@ import dk.gp.cogp.model.CogpModel
 
 object calcLBGradUEta2 {
 
-  def apply(j: Int, lb: LowerBound, y: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def apply(j: Int, lb: LowerBound): DenseMatrix[Double] = {
 
     val model = lb.model
     val kZZinv = lb.kZZjInv(j)

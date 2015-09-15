@@ -32,7 +32,7 @@ class calcLBLoglikTest {
 
     val model = createCogpToyModel(x, y)
 
-    val loglik = calcLBLoglik(LowerBound(model,x), y)
+    val loglik = calcLBLoglik(LowerBound(model,x,y))
     assertEquals(-121201.05673, loglik, 0.00001)
   }
 
@@ -44,7 +44,7 @@ class calcLBLoglikTest {
 
     val model = createCogpToyModel(x, y)
 
-    val loglik = calcLBLoglik(LowerBound(model,x), y)
+    val loglik = calcLBLoglik(LowerBound(model,x,y))
     assertEquals(-9.210001189441e7, loglik, 0.0001)
   }
 
