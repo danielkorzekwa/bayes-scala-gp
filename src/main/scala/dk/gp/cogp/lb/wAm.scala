@@ -1,16 +1,20 @@
 package dk.gp.cogp.lb
 
 import breeze.linalg.DenseVector
+import breeze.linalg._
+import breeze.numerics._
 
 object wAm {
 
   def apply(i: Int, lb: LowerBound): DenseVector[Double] = {
-    val wAm = (0 until lb.model.g.size).foldLeft(DenseVector.zeros[Double](lb.x.rows)) { (wAm, j) =>
 
-      val Aj = lb.calcAj(j)
-      wAm + lb.model.w(i, j) * Aj * lb.model.g(j).u.m
-    }
+    val wAm = lb.model.g.zipWithIndex.map {
+      case (g, j) =>
 
-    wAm
+        val Aj = lb.calcAj(i, j)
+        lb.model.w(i, j) * Aj * g.u.m
+    }.toSeq
+
+    sum(wAm)
   }
 }

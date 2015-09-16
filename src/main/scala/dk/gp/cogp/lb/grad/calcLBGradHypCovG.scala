@@ -19,25 +19,19 @@ object calcLBGradHypCovG {
     val kXZDArray = lb.model.g(j).covFunc.covD(x, z, lb.model.g(j).covFuncParams)
 
     val kZZinv = lb.kZZjInv(j)
-    val Aj = lb.calcAj(j)
-
-    val kXXDiagDArray = covDiagD(x, lb.model.g(j).covFunc, lb.model.g(j).covFuncParams)
 
     val covParamsD = lb.model.g(j).covFuncParams.mapPairs { (k, param) =>
 
       val kZZd = kZZdArray(k)
-      val kXZd = kXZDArray(k)
-      val kXXDiagD = kXXDiagDArray(k)
-      val AjD = kXZd * kZZinv - Aj * kZZd * kZZinv
 
-      logTermPart(j, lb,  AjD) - tildeQPart(j, lb, AjD, kXXDiagD, kXZd) - traceQPart(j, lb, AjD) - lklPart(j, lb, kZZd)
+      logTermPart(j, k,lb) - tildeQPart(j, k, lb) - traceQPart(j, k,lb) - lklPart(j, lb, kZZd)
 
     }.toArray
 
     DenseVector(covParamsD)
   }
 
-  private def logTermPart(j: Int, lb: LowerBound, AjD: DenseMatrix[Double]): Double = {
+  private def logTermPart(j: Int, k:Int,lb: LowerBound): Double = {
 
     val beta = lb.model.beta
     val w = lb.model.w
@@ -45,9 +39,10 @@ object calcLBGradHypCovG {
 
     val logTermPart = (0 until lb.model.h.size).map { i =>
 
+      val AjD = lb.calcdAj(i, j,k)
       val Ai = lb.calcAi(i)
       val y = lb.yi(i)
-      
+
       val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
       beta(i) * w(i, j) * (yTerm.t * AjD * u.m)
 
@@ -64,16 +59,22 @@ object calcLBGradHypCovG {
     0.5 * trace(kZZinv * kZZd) - 0.5 * trace(kZZinv * kZZd * kZZinv * (u.m * u.m.t + u.v))
   }
 
-  private def tildeQPart(j: Int, lb: LowerBound, AjD: DenseMatrix[Double], kXXDiagD: DenseVector[Double], kXZd: DenseMatrix[Double]): Double = {
+  private def tildeQPart(j: Int, k: Int, lb: LowerBound): Double = {
     val beta = lb.model.beta
     val w = lb.model.w
-    val Aj = lb.calcAj(j)
-
-    val kZX = lb.kXZj(j).t
 
     val tildeQPart = (0 until lb.model.h.size).map { i =>
 
-      val tilde = 0.5 * beta(i) * pow(w(i, j), 2) * sum(kXXDiagD - diag(AjD * kZX) - diag(Aj * kXZd.t))
+      val dKxz = lb.calcdKxzj(i, j, k)
+
+      val kZX = lb.kXZj(i, j).t
+
+      val AjD = lb.calcdAj(i, j, k)
+      val Aj = lb.calcAj(i, j)
+
+      val dKxxDiag = lb.calcdKxxDiagj(i, j, k)
+
+      val tilde = 0.5 * beta(i) * pow(w(i, j), 2) * sum(dKxxDiag - diag(AjD * kZX) - diag(Aj * dKxz.t))
       tilde
 
     }.sum
@@ -81,17 +82,20 @@ object calcLBGradHypCovG {
     tildeQPart
   }
 
-  private def traceQPart(j: Int, lb: LowerBound, AjD: DenseMatrix[Double]): Double = {
+  private def traceQPart(j: Int, k:Int,lb: LowerBound): Double = {
 
     val w = lb.model.w
     val beta = lb.model.beta
     val u = lb.model.g(j).u
 
-    val kXZ = lb.kXZj(j)
     val kZZinv = lb.kZZjInv(j)
-    val Aj = lb.calcAj(j)
 
     val traceQPart = (0 until lb.model.h.size).map { i =>
+
+      val kXZ = lb.kXZj(i, j)
+
+      val AjD = lb.calcdAj(i, j,k)
+      val Aj = lb.calcAj(i, j)
       beta(i) * trace(pow(w(i, j), 2) * u.v * (AjD.t * Aj)) //@TODO performance improvement
     }.sum
 

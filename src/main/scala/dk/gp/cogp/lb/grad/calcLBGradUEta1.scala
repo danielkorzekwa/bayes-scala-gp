@@ -19,13 +19,13 @@ object calcLBGradUEta1 {
     val u = model.g.map(_.u)
     val v = model.h.map(_.u)
 
-    val Aj = lb.calcAj(j)
-
     val tmp = (0 until beta.size).map { i =>
       val betaVal = beta(i)
       val wVal = w(i, j)
-val y = lb.yi(i)
-      
+      val y = lb.yi(i)
+
+      val Aj = lb.calcAj(i, j)
+
       val othersJIdx = (0 until w.cols).filter(jIndex => jIndex != j)
       val wAm = if (othersJIdx.size > 0) {
         sum(othersJIdx.map { jIndex => w(i, jIndex) * Aj * u(jIndex).m })

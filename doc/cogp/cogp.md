@@ -16,7 +16,7 @@ Based on Nguyen et al. Collaborative Multi-output Gaussian Processes, 2014
 [source code](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/src/test/scala/dk/gp/cogp/cogpPredictToyProblemDemo.scala):
 
 ```scala
-  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))
+  val data: DenseMatrix[Double] = loadToyModelDataIncomplete()
   
   val x = data(::, 0).toDenseMatrix.t
   val y = data(::, 1 to 2)

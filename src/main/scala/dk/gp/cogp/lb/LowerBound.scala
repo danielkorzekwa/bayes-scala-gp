@@ -6,6 +6,8 @@ import breeze.linalg.cholesky
 import dk.gp.math.invchol
 import dk.gp.cogp.model.CogpModel
 import breeze.linalg.DenseVector
+import dk.gp.cov.utils.covDiagD
+import dk.gp.cov.utils.covDiag
 
 class LowerBound(val model: CogpModel, val x: DenseMatrix[Double], val y: DenseMatrix[Double]) {
 
@@ -19,17 +21,147 @@ class LowerBound(val model: CogpModel, val x: DenseMatrix[Double], val y: DenseM
 
   def kZZj(j: Int): DenseMatrix[Double] = kZZjMap.getOrElseUpdate(j, calckZZj(j))
   def kZZjInv(j: Int): DenseMatrix[Double] = kZZjInvMap.getOrElseUpdate(j, calckZZjInv(j))
-  def kXZj(j: Int): DenseMatrix[Double] = kXZjMap.getOrElseUpdate(j, calckXZj(j))
+  def kXZj(i: Int, j: Int): DenseMatrix[Double] = {
+
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    kXZjMap.getOrElseUpdate(j, calckXZj(j))(idx, ::).toDenseMatrix
+  }
 
   def kZZi(i: Int): DenseMatrix[Double] = kZZiMap.getOrElseUpdate(i, calckZZi(i))
   def kZZiInv(i: Int): DenseMatrix[Double] = kZZiInvMap.getOrElseUpdate(i, calckZZiInv(i))
-  def kXZi(i: Int): DenseMatrix[Double] = kXZiMap.getOrElseUpdate(i, calckXZi(i))
+  def kXZi(i: Int): DenseMatrix[Double] = {
 
-  def calcAi(i: Int): DenseMatrix[Double] = kXZi(i) * kZZiInv(i)
-  def calcAj(j: Int): DenseMatrix[Double] = kXZj(j) * kZZjInv(j)
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
 
-  def yi(i:Int):DenseVector[Double] = {
-    y(::, i)
+    kXZiMap.getOrElseUpdate(i, calckXZi(i))(idx, ::).toDenseMatrix
+  }
+
+  def calcKxxDiagi(i: Int): DenseVector[Double] = {
+
+    val kXXiDiag = covDiag(x, model.h(i).covFunc, model.h(i).covFuncParams)
+
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    kXXiDiag(idx).toDenseVector
+  }
+
+  def calcKxxDiagj(i: Int, j: Int): DenseVector[Double] = {
+    val kXXDiag = covDiag(x, model.g(j).covFunc, model.g(j).covFuncParams)
+
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    kXXDiag(idx).toDenseVector
+  }
+  /**
+   * @param k k-derivative
+   */
+  def calcdKxxDiagj(i: Int, j: Int, k: Int): DenseVector[Double] = {
+    val dKxxDiagArray = covDiagD(x, model.g(j).covFunc, model.g(j).covFuncParams)
+    val dKxxDiag = dKxxDiagArray(k)
+
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    dKxxDiag(idx).toDenseVector
+  }
+
+  def calcdKxxDiagi(i: Int, k: Int): DenseVector[Double] = {
+    val dKxxDiagArray = covDiagD(x, model.h(i).covFunc, model.h(i).covFuncParams)
+    val dKxxDiag = dKxxDiagArray(k)
+
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    dKxxDiag(idx).toDenseVector
+  }
+
+  def calcAi(i: Int): DenseMatrix[Double] = {
+
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+    val Ai = kXZi(i) * kZZiInv(i)
+
+    Ai
+  }
+
+  def calcdKxzj(i: Int, j: Int, k: Int): DenseMatrix[Double] = {
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    val z = model.g(j).z
+    val kXZDArray = model.g(j).covFunc.covD(x, z, model.g(j).covFuncParams)
+    val dKxz = kXZDArray(k)(idx, ::).toDenseMatrix
+
+    dKxz
+  }
+
+  def calcdKxzi(i: Int, k: Int): DenseMatrix[Double] = {
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    val z = model.h(i).z
+    val kXZDArray = model.h(i).covFunc.covD(x, z, model.h(i).covFuncParams)
+
+    val dKxz = kXZDArray(k)(idx, ::).toDenseMatrix
+
+    dKxz
+  }
+
+  def calcAj(i: Int, j: Int): DenseMatrix[Double] = {
+
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+    val Aj = kXZj(i, j) * kZZjInv(j)
+    Aj
+
+  }
+
+  def calcdAj(i: Int, j: Int, k: Int): DenseMatrix[Double] = {
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    val z = model.g(j).z
+
+    val kZZdArray = model.g(j).covFunc.covD(z, z, model.g(j).covFuncParams)
+    val kXZDArray = model.g(j).covFunc.covD(x, z, model.g(j).covFuncParams)
+
+    val kZZinv = kZZjInv(j)
+
+    val dKxz = kXZDArray(k)(idx, ::).toDenseMatrix
+
+    val Aj = calcAj(i, j)
+    val AjD = dKxz * kZZinv - Aj * kZZdArray(k) * kZZinv
+
+    AjD
+  }
+
+  def calcdAi(i: Int, k: Int): DenseMatrix[Double] = {
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    val z = model.h(i).z
+    val kXZDArray = model.h(i).covFunc.covD(x, z, model.h(i).covFuncParams)
+    val kZZdArray = model.h(i).covFunc.covD(z, z, model.h(i).covFuncParams)
+
+    val dKxz = kXZDArray(k)(idx, ::).toDenseMatrix
+
+    val kZZinv = kZZiInv(i)
+    val Ai = calcAi(i)
+
+    val dAi = dKxz * kZZinv - Ai * kZZdArray(k) * kZZinv
+
+    dAi
+  }
+  def yi(i: Int): DenseVector[Double] = {
+    val y_i = y(::, i)
+    val idx = y_i.findAll { !_.isNaN() }
+
+    y_i(idx).toDenseVector
   }
 
   private def calckZZj(j: Int): DenseMatrix[Double] = {

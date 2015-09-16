@@ -67,6 +67,7 @@ object calcLBLoglik {
  
     val y = lb.yi(i)
     
+  
     val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
     val logNTerm = -0.5 * y.size * log(2 * Pi / lb.model.beta(i)) - 0.5 * lb.model.beta(i) * sum(pow(yTerm, 2))
 
@@ -78,7 +79,7 @@ object calcLBLoglik {
     val kZX2 = kXZ2.t
     val kZZ2inv = lb.kZZiInv(i)
 
-    val kXXDiag_i = covDiag(lb.x, lb.model.h(i).covFunc, lb.model.h(i).covFuncParams)
+    val kXXDiag_i = lb.calcKxxDiagi(i)
 
     val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ2 * kZZ2inv * kZX2))
 
@@ -98,7 +99,7 @@ object calcLBLoglik {
   private def traceQTerm(i: Int, lb: LowerBound): Double = {
     val traceQTerm = (0 until lb.model.g.size).map { j =>
 
-      val Aj = lb.calcAj(j)
+      val Aj = lb.calcAj(i,j)
       val lambdaJ = Aj.t * Aj
       val u = lb.model.g(j).u
       pow(lb.model.w(i, j), 2) * trace(u.v * lambdaJ)
@@ -110,10 +111,10 @@ object calcLBLoglik {
   private def kTildeQTerm(i: Int, lb: LowerBound): Double = {
     val kTildeQTerm = (0 until lb.model.g.size).map { j =>
 
-      val kXZ = lb.kXZj(j)
+      val kXZ = lb.kXZj(i,j)
       val kZZ = lb.kZZj(j)
       val kZX = kXZ.t
-      val kXXDiag = covDiag(lb.x, lb.model.g(j).covFunc, lb.model.g(j).covFuncParams)
+      val kXXDiag = lb.calcKxxDiagj(i, j)
 
       val kZZinv = lb.kZZjInv(j)
 

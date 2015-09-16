@@ -27,7 +27,7 @@ object calcLBGradW {
     val w = lb.model.w
     val g = lb.model.g
 
-    val Aj = lb.calcAj(j)
+    val Aj = lb.calcAj(i,j)
     val lambdaJ = Aj.t * Aj
 
     //trace term
@@ -41,7 +41,7 @@ object calcLBGradW {
     val beta = lb.model.beta
     val w = lb.model.w
 
-    val kXZ = lb.kXZj(j)
+    val kXZ = lb.kXZj(i,j)
 
     val kZZinv = lb.kZZjInv(j)
 
@@ -63,7 +63,7 @@ object calcLBGradW {
   private def logNormalTerm(i: Int, j: Int, lb: LowerBound): Double = {
 
     val Ai = lb.calcAi(i)
-    val Aj = lb.calcAj(j)
+    val Aj = lb.calcAj(i,j)
     val beta = lb.model.beta
     val w = lb.model.w
     val g = lb.model.g
@@ -71,6 +71,7 @@ object calcLBGradW {
     val y = lb.yi(i)
 
     //log normal term
+  
     val logNormalTerm1 = beta(i) * ((y - wAm(i, lb) - Ai * h(i).u.m + w(i, j) * (Aj * g(j).u.m)).t * (Aj * g(j).u.m)) //wAm (j'!= j) = wAm - wAjmj 
     val logNormalTerm2 = beta(i) * w(i, j) * sum(pow(Aj * g(j).u.m, 2))
     val logNormalTerm = logNormalTerm1 - logNormalTerm2

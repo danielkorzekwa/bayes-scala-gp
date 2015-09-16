@@ -1,17 +1,19 @@
 package dk.gp.cogp
 
-import org.junit.Test
-import breeze.linalg._
-import java.io.File
-import breeze.plot._
-import dk.gp.math.UnivariateGaussian
+import breeze.linalg.DenseMatrix
+import breeze.plot.Figure
+import breeze.plot.plot
 import dk.gp.cogp.testutils.createCogpToyModel
+import dk.gp.cogp.testutils.loadToyModelDataIncomplete
+import dk.gp.math.UnivariateGaussian
 
 object cogpPredictToyProblemDemo extends App {
 
-  val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))//(0 to 40,::)
+  val data: DenseMatrix[Double] = loadToyModelDataIncomplete()
+
   val x = data(::, 0).toDenseMatrix.t
   val y = data(::, 1 to 2)
+
   val z = x(0 until x.rows by 10, ::) // inducing points for u and v inducing variables
 
   val now = System.currentTimeMillis()
@@ -31,10 +33,10 @@ object cogpPredictToyProblemDemo extends App {
     val figure = Figure()
     figure.subplot(0).legend = true
 
-    figure.subplot(0) += plot(x(::, 0), y(::, 0), name = "actual output 1")
+    figure.subplot(0) += plot(x(::, 0), y(::, 0), '.', name = "actual output 1")
     figure.subplot(0) += plot(x(::, 0), predictedOutput1, name = "predicted output 1")
 
-    figure.subplot(0) += plot(x(::, 0), y(::, 1), name = "actual output 2")
+    figure.subplot(0) += plot(x(::, 0), y(::, 1), '.', name = "actual output 2")
     figure.subplot(0) += plot(x(::, 0), predictedOutput2, name = "predicted output 2")
 
   }

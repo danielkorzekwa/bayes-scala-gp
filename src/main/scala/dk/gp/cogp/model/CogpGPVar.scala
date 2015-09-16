@@ -21,6 +21,7 @@ object CogpGPVar {
   }
 
   private def getInitialIndVar(y: DenseVector[Double], z: DenseMatrix[Double]): MultivariateGaussian = {
+        
     val m = DenseVector.zeros[Double](z.rows)
 
     val yZ = if (z.rows < y.size) {

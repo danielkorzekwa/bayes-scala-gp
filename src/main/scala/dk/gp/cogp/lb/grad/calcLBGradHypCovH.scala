@@ -23,7 +23,6 @@ object calcLBGradHypCovH {
     val kZZdArray = model.h(i).covFunc.covD(z, z, model.h(i).covFuncParams)
     val kXZDArray = model.h(i).covFunc.covD(x, z, model.h(i).covFuncParams)
 
-    val dKxxDiagArray = covDiagD(x, model.h(i).covFunc, model.h(i).covFuncParams)
 
     val kZZinv = lb.kZZiInv(i)
     val Ai = lb.calcAi(i)
@@ -36,10 +35,10 @@ object calcLBGradHypCovH {
     val covParamsD = (0 until model.h(i).covFuncParams.size).map { k =>
 
       val dKzz = kZZdArray(k)
-      val dKxz = kXZDArray(k)
-      val dKxxDiag = dKxxDiagArray(k)
+      val dKxz = lb.calcdKxzi(i, k)
+      val dKxxDiag = lb.calcdKxxDiagi(i, k)
 
-      val dAi = dKxz * kZZinv - Ai * dKzz * kZZinv
+      val dAi = lb.calcdAi(i, k)
 
       val y = lb.yi(i)
       val yTerm = y - wAm(i, lb) - Ai * model.h(i).u.m

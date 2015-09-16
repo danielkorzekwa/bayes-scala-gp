@@ -16,8 +16,7 @@ object calcLBGradBeta {
 
     val dBeta = lb.model.beta.mapPairs {
       case (i, beta) =>
-        
-      
+
         logTermD(i, lb) - 0.5 * kTildeQTermD(i, lb) - 0.5 * kTildeDiagSumi(i, lb) - 0.5 * traceQTermD(i, lb) - tracePD(i, lb)
     }
 
@@ -41,7 +40,7 @@ object calcLBGradBeta {
     val Ai = lb.calcAi(i)
 
     val y = lb.yi(i)
-    
+
     val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
     val logTermD = (0.5 * y.size) / beta - 0.5 * sum(pow(yTerm, 2))
 
@@ -53,7 +52,7 @@ object calcLBGradBeta {
     val kXZi = lb.kXZi(i)
     val kZXi = kXZi.t
 
-    val kXXiDiag = covDiag(lb.x, lb.model.h(i).covFunc, lb.model.h(i).covFuncParams)
+    val kXXiDiag = lb.calcKxxDiagi(i)
 
     val kTildeDiagSumi = sum(kXXiDiag - diag(kXZi * kZZiInv * kZXi))
 
@@ -63,7 +62,7 @@ object calcLBGradBeta {
   private def traceQTermD(i: Int, lb: LowerBound) = {
     val traceQTermD = (0 until lb.model.g.size).map { j =>
 
-      val Aj = lb.calcAj(j)
+      val Aj = lb.calcAj(i, j)
       val lambdaJ = Aj.t * Aj
       val gU = lb.model.g(j).u
 
@@ -79,9 +78,9 @@ object calcLBGradBeta {
 
     val kTildeQTerm = (0 until lb.model.g.size).map { j =>
 
-      val kXZ = lb.kXZj(j)
+      val kXZ = lb.kXZj(i, j)
       val kZX = kXZ.t
-      val kXXDiag = covDiag(lb.x, lb.model.g(j).covFunc, lb.model.g(j).covFuncParams)
+      val kXXDiag = lb.calcKxxDiagj(i, j)
 
       val kZZinv = lb.kZZjInv(j)
       val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
