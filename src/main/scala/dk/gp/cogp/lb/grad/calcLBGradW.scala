@@ -45,7 +45,7 @@ object calcLBGradW {
 
     val kZZinv = lb.kZZjInv(j)
 
-    val kXXDiag = covDiag(lb.x, model.g(j).covFunc, model.g(j).covFuncParams)
+    val kXXDiag = lb.calcKxxDiagj(i, j)
 
     /**
      * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))

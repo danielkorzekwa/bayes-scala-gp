@@ -13,17 +13,11 @@ object calcLBGradHypCovG {
 
   def apply(j: Int, lb: LowerBound): DenseVector[Double] = {
 
-    val x = lb.x
     val z = lb.model.g(j).z
     val kZZdArray = lb.model.g(j).covFunc.covD(z, z, lb.model.g(j).covFuncParams)
-    val kXZDArray = lb.model.g(j).covFunc.covD(x, z, lb.model.g(j).covFuncParams)
-
-    val kZZinv = lb.kZZjInv(j)
-
     val covParamsD = lb.model.g(j).covFuncParams.mapPairs { (k, param) =>
 
       val kZZd = kZZdArray(k)
-
       logTermPart(j, k,lb) - tildeQPart(j, k, lb) - traceQPart(j, k,lb) - lklPart(j, lb, kZZd)
 
     }.toArray
