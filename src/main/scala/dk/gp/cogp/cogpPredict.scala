@@ -13,18 +13,22 @@ import breeze.linalg._
 //@TODO performance improvement, do not compute covariance  and inv(cov) for every single test point
 object cogpPredict {
 
-  def apply(sMatrix: DenseMatrix[Double], model: CogpModel): DenseMatrix[UnivariateGaussian] = sMatrix(*, ::).map(r => cogpPredict(r, model))
+  def apply(x: DenseVector[Double], model: CogpModel): DenseMatrix[UnivariateGaussian] = {
+    cogpPredict(x.toDenseMatrix.t, model)
+  }
 
-  def apply(s: DenseVector[Double], model: CogpModel): DenseVector[UnivariateGaussian] = {
+  def apply(x: DenseMatrix[Double], model: CogpModel): DenseMatrix[UnivariateGaussian] = x(*, ::).map(r => pointPredict(r, model))
+
+  def pointPredict(x: DenseVector[Double], model: CogpModel): DenseVector[UnivariateGaussian] = {
 
     val w = model.w
     val w2 = pow(w, 2)
 
-    val predMj = predMean_j(s, model)
-    val predVarj = predVar_j(s, model)
+    val predMj = predMean_j(x, model)
+    val predVarj = predVar_j(x, model)
 
-    val predMi = predMean_i(s, model)
-    val predVari = predVar_i(s, model)
+    val predMi = predMean_i(x, model)
+    val predVari = predVar_i(x, model)
 
     val predictedOutputs = (0 until model.h.size).map { i =>
 

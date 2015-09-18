@@ -9,7 +9,7 @@ class sqDistTest {
 
   @Test def test_xx_1D = {
 
-    val x = DenseMatrix(1.0, 2.0, 3.0).t
+    val x = DenseVector(1.0, 2.0, 3.0).toDenseMatrix
 
     val expected = DenseMatrix((0.0, 1.0, 4.0), (1.0, 0.0, 1.0), (4.0, 1.0, 0.0))
     assertEquals(expected, sqDist(x, x))
@@ -26,8 +26,8 @@ class sqDistTest {
 
   @Test def test_x1_x2_1D = {
 
-    val x1 = DenseMatrix(1.0, 2.0, 3.0).t
-    val x2 = DenseMatrix(4.0, 5.0).t
+    val x1 = DenseVector(1.0, 2.0, 3.0).toDenseMatrix
+    val x2 = DenseVector(4.0, 5.0).toDenseMatrix
 
     val expected = DenseMatrix((9.0, 16.0), (4.0, 9.0), (1.0, 4.0))
     assertEquals(expected, sqDist(x1, x2))

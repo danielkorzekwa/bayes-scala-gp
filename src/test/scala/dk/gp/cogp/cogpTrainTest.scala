@@ -91,14 +91,14 @@ class cogpTrainTest {
     val newModel = cogpTrain(x, y, model, iterNum = 500)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x, y))
-    assertEquals(41.3827, loglik, 0.0001)
+    assertEquals(60.1350, loglik, 0.0001)
 
     val predictedY = cogpPredict(x, newModel)
 
-    assertEquals(-0.3658, predictedY(10, 0).m, 0.0001)
+    assertEquals(-0.4279, predictedY(10, 0).m, 0.0001)
     assertEquals(0.00378, predictedY(10, 0).v, 0.0001)
 
-    assertEquals(0.36245, predictedY(10, 1).m, 0.0001)
+    assertEquals(0.4276, predictedY(10, 1).m, 0.0001)
     assertEquals(0.00294, predictedY(10, 1).v, 0.0001)
 
   }

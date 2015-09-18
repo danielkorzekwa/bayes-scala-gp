@@ -15,9 +15,9 @@ class predictTest {
 
   @Test def test_1d_inputs = {
 
-    val x = DenseMatrix(1d, 2, 3)
+    val x = DenseVector(1d, 2, 3).toDenseMatrix.t
     val y = DenseVector(1d, 4, 9)
-    val z = DenseMatrix(1d, 2, 3, 4, 50)
+    val z = DenseVector(1d, 2, 3, 4, 50).toDenseMatrix.t
 
     val gpModel = GprModel(x, y, covFunc, covFuncParams, noiseLogStdDev)
     val prediction = predict(z, gpModel)

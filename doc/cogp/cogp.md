@@ -18,9 +18,9 @@ Based on Nguyen et al. Collaborative Multi-output Gaussian Processes, 2014
 ```scala
   val data: DenseMatrix[Double] = loadToyModelDataIncomplete()
   
-  val x = data(::, 0).toDenseMatrix.t
+  val x = data(::, 0)
   val y = data(::, 1 to 2)
-  val z = x(0 until x.rows by 10, ::) // inducing points for u and v inducing variables
+  val z = x(0 until x.size by 10) // inducing points for u and v inducing variables
   
   val initialToyModel = createCogpToyModel(x, y, z)
   val trainedToyModel = cogpTrain(x, y, initialToyModel, iterNum = 500)

@@ -13,6 +13,10 @@ import dk.gp.cogp.model.CogpModel
 
 object createCogpToyModel {
 
+  def apply(x: DenseVector[Double], y: DenseMatrix[Double], z: DenseVector[Double]): CogpModel = {
+  createCogpToyModel(x.toDenseMatrix.t,y,z.toDenseMatrix.t)
+  }
+  
   def apply(x: DenseMatrix[Double], y: DenseMatrix[Double], z: DenseMatrix[Double]): CogpModel = {
 
     val yNoNan = y(::, *).map { yi =>
