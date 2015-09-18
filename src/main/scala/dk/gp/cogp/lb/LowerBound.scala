@@ -32,56 +32,60 @@ class LowerBound(val model: CogpModel, val x: DenseMatrix[Double], val y: DenseM
 
   def calcKxxDiagi(i: Int): DenseVector[Double] = {
 
-    val kXXiDiag = covDiag(x, model.h(i).covFunc, model.h(i).covFuncParams)
-    kXXiDiag(yIdx(i)).toDenseVector
+    val xi = x(yIdx(i), ::).toDenseMatrix
+    val kXXiDiag = covDiag(xi, model.h(i).covFunc, model.h(i).covFuncParams)
+    kXXiDiag
   }
 
   def calcKxxDiagj(i: Int, j: Int): DenseVector[Double] = {
-    val kXXDiag = covDiag(x, model.g(j).covFunc, model.g(j).covFuncParams)
-    kXXDiag(yIdx(i)).toDenseVector
+    val xi = x(yIdx(i), ::).toDenseMatrix
+    val kXXDiag = covDiag(xi, model.g(j).covFunc, model.g(j).covFuncParams)
+    kXXDiag
   }
+
+  def calcAi(i: Int): DenseMatrix[Double] = kXZi(i) * kZZiInv(i)
+  def calcAj(i: Int, j: Int): DenseMatrix[Double] = kXZj(i, j) * kZZjInv(j)
+
   /**
    * @param k k-derivative
    */
   def calcdKxxDiagj(i: Int, j: Int, k: Int): DenseVector[Double] = {
-    val dKxxDiagArray = covDiagD(x, model.g(j).covFunc, model.g(j).covFuncParams)
-    val dKxxDiag = dKxxDiagArray(k)
-    dKxxDiag(yIdx(i)).toDenseVector
+    val xi = x(yIdx(i), ::).toDenseMatrix
+    val dKxxDiagArray = covDiagD(xi, model.g(j).covFunc, model.g(j).covFuncParams)
+    dKxxDiagArray(k)
   }
 
   def calcdKxxDiagi(i: Int, k: Int): DenseVector[Double] = {
-    val dKxxDiagArray = covDiagD(x, model.h(i).covFunc, model.h(i).covFuncParams)
-    val dKxxDiag = dKxxDiagArray(k)
-    dKxxDiag(yIdx(i)).toDenseVector
+    val xi = x(yIdx(i), ::).toDenseMatrix
+    val dKxxDiagArray = covDiagD(xi, model.h(i).covFunc, model.h(i).covFuncParams)
+    dKxxDiagArray(k)
   }
 
-  def calcAi(i: Int): DenseMatrix[Double] = kXZi(i) * kZZiInv(i)
-
   def calcdKxzj(i: Int, j: Int, k: Int): DenseMatrix[Double] = {
+
+    val xi = x(yIdx(i), ::).toDenseMatrix
     val z = model.g(j).z
-    val kXZDArray = model.g(j).covFunc.covD(x, z, model.g(j).covFuncParams)
-    val dKxz = kXZDArray(k)(yIdx(i), ::).toDenseMatrix
-    dKxz
+
+    val kXZDArray = model.g(j).covFunc.covD(xi, z, model.g(j).covFuncParams)
+    kXZDArray(k)
   }
 
   def calcdKxzi(i: Int, k: Int): DenseMatrix[Double] = {
 
+    val xi = x(yIdx(i), ::).toDenseMatrix
     val z = model.h(i).z
-    val kXZDArray = model.h(i).covFunc.covD(x, z, model.h(i).covFuncParams)
-    val dKxz = kXZDArray(k)(yIdx(i), ::).toDenseMatrix
-    dKxz
-  }
+    val kXZDArray = model.h(i).covFunc.covD(xi, z, model.h(i).covFuncParams)
+    kXZDArray(k)
 
-  def calcAj(i: Int, j: Int): DenseMatrix[Double] = kXZj(i, j) * kZZjInv(j)
+  }
 
   def calcdAj(i: Int, j: Int, k: Int): DenseMatrix[Double] = {
 
     val z = model.g(j).z
     val kZZdArray = model.g(j).covFunc.covD(z, z, model.g(j).covFuncParams)
-    val kXZDArray = model.g(j).covFunc.covD(x, z, model.g(j).covFuncParams)
     val kZZinv = kZZjInv(j)
 
-    val dKxz = kXZDArray(k)(yIdx(i), ::).toDenseMatrix
+    val dKxz = calcdKxzj(i,j,k)
 
     val Aj = calcAj(i, j)
     val AjD = dKxz * kZZinv - Aj * kZZdArray(k) * kZZinv
@@ -92,10 +96,8 @@ class LowerBound(val model: CogpModel, val x: DenseMatrix[Double], val y: DenseM
   def calcdAi(i: Int, k: Int): DenseMatrix[Double] = {
 
     val z = model.h(i).z
-    val kXZDArray = model.h(i).covFunc.covD(x, z, model.h(i).covFuncParams)
     val kZZdArray = model.h(i).covFunc.covD(z, z, model.h(i).covFuncParams)
-
-    val dKxz = kXZDArray(k)(yIdx(i), ::).toDenseMatrix
+    val dKxz = calcdKxzi(i,k)
 
     val kZZinv = kZZiInv(i)
     val Ai = calcAi(i)
@@ -104,7 +106,7 @@ class LowerBound(val model: CogpModel, val x: DenseMatrix[Double], val y: DenseM
 
     dAi
   }
-  
+
   def yi(i: Int): DenseVector[Double] = {
     val y_i = y(::, i)
     y_i(yIdx(i)).toDenseVector

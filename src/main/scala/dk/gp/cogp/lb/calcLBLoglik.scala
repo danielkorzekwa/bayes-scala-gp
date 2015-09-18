@@ -64,10 +64,8 @@ object calcLBLoglik {
   private def logNTerm(i: Int, lb: LowerBound): Double = {
 
     val Ai = lb.calcAi(i)
- 
     val y = lb.yi(i)
     
-  
     val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
     val logNTerm = -0.5 * y.size * log(2 * Pi / lb.model.beta(i)) - 0.5 * lb.model.beta(i) * sum(pow(yTerm, 2))
 
@@ -75,13 +73,14 @@ object calcLBLoglik {
   }
 
   private def kTildePTerm(i: Int, lb: LowerBound): Double = {
-    val kXZ2 = lb.kXZi(i)
-    val kZX2 = kXZ2.t
-    val kZZ2inv = lb.kZZiInv(i)
+    
+    val kXZ = lb.kXZi(i)
+    val kZX = kXZ.t
+    val kZZinv = lb.kZZiInv(i)
 
     val kXXDiag_i = lb.calcKxxDiagi(i)
 
-    val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ2 * kZZ2inv * kZX2))
+    val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ * kZZinv * kZX))
 
     val kTildePTerm = 0.5 * lb.model.beta(i) * kTildeDiagSum_i
     kTildePTerm
