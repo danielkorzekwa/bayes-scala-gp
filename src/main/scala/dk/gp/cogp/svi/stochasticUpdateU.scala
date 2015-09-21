@@ -10,6 +10,9 @@ import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.grad.calcLBGradUEta1
 import dk.gp.cogp.lb.grad.calcLBGradUEta2
 import dk.gp.cogp.model.CogpModel
+import breeze.linalg.eig
+import breeze.linalg.diag
+import breeze.linalg._
 
 /**
  * Stochastic update for the parameters (mu,S) of q(u|y)
@@ -40,11 +43,12 @@ object stochasticUpdateU {
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2
 
-    // val newTheta2Inv = invchol(cholesky(newTheta2).t)
-    val newTheta2Inv = inv(newTheta2) //use invchol with jitter
+    val newTheta2Eig = eig(newTheta2)
+    val newTheta2Inv = newTheta2Eig.eigenvectors * diag(1.0 :/ newTheta2Eig.eigenvalues) * newTheta2Eig.eigenvectors.t
 
     val newS = -0.5 * newTheta2Inv
     val newM = newS * newTheta1
+   
     MultivariateGaussian(newM, newS)
 
   }

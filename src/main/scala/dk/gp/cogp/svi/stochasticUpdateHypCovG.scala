@@ -11,7 +11,7 @@ object stochasticUpdateHypCovG {
   private val learningRate = 1e-5
   private val momentum = 0.9
 
-  def apply(j: Int, lowerBound:LowerBound): (DenseVector[Double], DenseVector[Double]) = {
+  def apply(j: Int, lowerBound: LowerBound): (DenseVector[Double], DenseVector[Double]) = {
 
     val hypParamsD = calcLBGradHypCovG(j, lowerBound)
 

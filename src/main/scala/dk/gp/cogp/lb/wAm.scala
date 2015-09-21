@@ -15,6 +15,7 @@ object wAm {
         lb.model.w(i, j) * Aj * g.u.m
     }.toSeq
 
-    sum(wAm)
+    if (wAm.size > 0) sum(wAm)
+    else DenseVector.zeros(lb.yIdx(i).size)
   }
 }

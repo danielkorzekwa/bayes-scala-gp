@@ -12,12 +12,9 @@ import dk.gp.cogp.lb.wAm
 object calcLBGradHypCovG {
 
   def apply(j: Int, lb: LowerBound): DenseVector[Double] = {
-
-    val z = lb.model.g(j).z
-    val kZZdArray = lb.model.g(j).covFunc.covD(z, z, lb.model.g(j).covFuncParams)
-    val covParamsD = lb.model.g(j).covFuncParams.mapPairs { (k, param) =>
-
-      val kZZd = kZZdArray(k)
+   
+    val covParamsD = lb.model.g(j).covFuncParams.mapPairs { (k, param) =>      
+      val kZZd = lb.dKzzj(j, k)
       logTermPart(j, k,lb) - tildeQPart(j, k, lb) - traceQPart(j, k,lb) - lklPart(j, lb, kZZd)
 
     }.toArray
@@ -59,7 +56,7 @@ object calcLBGradHypCovG {
 
     val tildeQPart = (0 until lb.model.h.size).map { i =>
 
-      val dKxz = lb.calcdKxzj(i, j, k)
+      val dKxz = lb.dKxzj(i, j, k)
 
       val kZX = lb.kXZj(i, j).t
 

@@ -10,7 +10,7 @@ import dk.gp.cogp.lb.calcLBLoglik
 
 object cogpTrain extends LazyLogging{
 
-  def apply(x: DenseVector[Double], y: DenseMatrix[Double], model: CogpModel, iterNum: Int):CogpModel = {
+  def apply(x: DenseVector[Double], y: DenseMatrix[Double], model: CogpModel,iterNum : Int):CogpModel = {
     cogpTrain(x.toDenseMatrix.t,y,model,iterNum)
   }
   
@@ -19,7 +19,7 @@ object cogpTrain extends LazyLogging{
       case (currModel, iter) => 
         val newModel = stochasticUpdateCogpModel(currModel, x, y)
           val lb = LowerBound(newModel, x, y)
-          logger.info("llh=%.3f".format(calcLBLoglik(lb)))
+          logger.info("iter=%d/%d, llh=%.3f".format(iter,iterNum,calcLBLoglik(lb)))
           newModel
       }
     finalModel

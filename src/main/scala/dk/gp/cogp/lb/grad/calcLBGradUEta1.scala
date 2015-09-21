@@ -8,6 +8,7 @@ import breeze.linalg.InjectNumericOps
 import dk.gp.cogp.model.CogpModel
 import breeze.numerics._
 import breeze.linalg._
+import dk.gp.math.invchol
 
 object calcLBGradUEta1 {
 
@@ -40,10 +41,7 @@ object calcLBGradUEta1 {
 
     //@TODO why u(j).v is used here instead of [..] term from eq 19. Computing gradient with respect to natural parameters using chain rule indicates that [...] should be used.
     // Is it because u(j).v=Sj is a maximiser of [....] when setting derivative of Lower bound with respect to Sj to 0?
-
-    // val vCholR = cholesky(u(j).v).t
-    // val vInv = invchol(vCholR)
-    val vInv = inv(u(j).v) //@TODO use cholesky with jitter here
+     val vInv = invchol( cholesky(u(j).v).t)
     val eta1Grad = tmp - vInv * u(j).m
     eta1Grad
   }

@@ -16,6 +16,10 @@ import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.calcLBLoglik
 import dk.gp.cogp.svi.stochasticUpdateCogpModel
 import scala.util.Random
+import dk.gp.cogp.testutils.loadToyModelData
+import dk.gp.cogp.testutils.createSingleHZeroGModel
+import dk.gp.cogp.testutils.createOneHOneGModel
+import dk.gp.cogp.testutils.createOneHCovSEisoOneCovNoiseGModel
 
 class cogpTrainTest {
 
@@ -43,7 +47,7 @@ class cogpTrainTest {
     val newModel = cogpTrain(x, y, model, iterNum = 20)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x, y))
-    assertEquals(-1959.79424, loglik, 0.00001)
+    assertEquals(-1959.81838, loglik, 0.00001)
 
     val predictedY = cogpPredict(x, model)
 
@@ -75,7 +79,7 @@ class cogpTrainTest {
 
   }
 
-  @Test def test_40_data_points_500_iter_missing_points = {
+  @Test def test_with_inducing_points_500_iter_missing_points = {
 
     Random.setSeed(4676)
 
@@ -100,6 +104,68 @@ class cogpTrainTest {
 
     assertEquals(0.4276, predictedY(10, 1).m, 0.0001)
     assertEquals(0.00294, predictedY(10, 1).v, 0.0001)
+
+  }
+
+  @Test def test_single_h_zero_g = {
+
+    Random.setSeed(4676)
+    val data = loadToyModelData()
+    val x = data(::, 0)
+    val y = data(::, 1 to 1)
+
+    val z = x(0 until x.size by 10) // inducing points for u and v inducing variables
+    val model = createSingleHZeroGModel(x, y, z)
+    val newModel = cogpTrain(x, y, model, iterNum = 200)
+
+    val loglik = calcLBLoglik(LowerBound(newModel, x, y))
+    assertEquals(207.6311, loglik, 0.0001)
+
+    val predictedY = cogpPredict(x, newModel)
+
+    assertEquals(-0.41389, predictedY(10, 0).m, 0.0001)
+    assertEquals(0.001100, predictedY(10, 0).v, 0.0001)
+
+  }
+
+  @Test def test_single_h_single_g = {
+
+    Random.setSeed(4676)
+    val data = loadToyModelData()
+    val x = data(::, 0)
+    val y = data(::, 1 to 1)
+
+    val z = x(0 until x.size by 10) // inducing points for u and v inducing variables
+    val model = createOneHOneGModel(x, y, z)
+    val newModel = cogpTrain(x, y, model, iterNum = 200)
+
+    val loglik = calcLBLoglik(LowerBound(newModel, x, y))
+    assertEquals(191.8406, loglik, 0.0001)
+
+    val predictedY = cogpPredict(x, newModel)
+
+    assertEquals(-0.4127, predictedY(10, 0).m, 0.0001)
+    assertEquals(0.0016, predictedY(10, 0).v, 0.0001)
+
+  }
+
+  @Test def test_40_data_points_500_iter_single_h_covseiso_single_g_cov_noise = {
+
+    val data = loadToyModelData()(0 to 39, ::)
+    val x = data(::, 0)
+    val y = data(::, 1 to 1)
+
+    val z = x
+    val model = createOneHCovSEisoOneCovNoiseGModel(x, y, z)
+    val newModel = cogpTrain(x, y, model, iterNum = 200)
+
+    val loglik = calcLBLoglik(LowerBound(newModel, x, y))
+    assertEquals(-42.197, loglik, 0.01)
+
+    val predictedY = cogpPredict(x, newModel)
+
+    assertEquals(-0.39595, predictedY(10, 0).m, 0.0001)
+    assertEquals(0.00579, predictedY(10, 0).v, 0.0001)
 
   }
 

@@ -6,6 +6,8 @@ import breeze.numerics._
 import dk.gp.cogp.lb.LowerBound
 import breeze.linalg.InjectNumericOps
 import dk.gp.cogp.model.CogpModel
+import breeze.linalg.cholesky
+import dk.gp.math.invchol
 
 object calcLBGradUEta2 {
 
@@ -24,9 +26,7 @@ object calcLBGradUEta2 {
 
     val lambda = kZZinv + tmp
 
-    //  val vCholR = cholesky(u(j).v).t
-    //  val vInv = invchol(vCholR)
-    val vInv = inv(g(j).u.v) //@TODO use cholesky with jitter here
+    val vInv = invchol(cholesky(lb.model.g(j).u.v).t)
     val eta2Grad = 0.5 * vInv - 0.5 * lambda
 
     eta2Grad

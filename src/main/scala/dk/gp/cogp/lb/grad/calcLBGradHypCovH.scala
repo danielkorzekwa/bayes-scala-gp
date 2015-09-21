@@ -14,11 +14,9 @@ object calcLBGradHypCovH {
   def apply(i: Int, lb: LowerBound): DenseVector[Double] = {
 
     val model = lb.model
-    val z = model.h(i).z
 
     val kXZ = lb.kXZi(i)
     val kZZ = lb.kZZi(i)
-    val kZZdArray = model.h(i).covFunc.covD(z, z, model.h(i).covFuncParams)
 
     val kZZinv = lb.kZZiInv(i)
     val Ai = lb.calcAi(i)
@@ -30,8 +28,8 @@ object calcLBGradHypCovH {
 
     val covParamsD = (0 until model.h(i).covFuncParams.size).map { k =>
 
-      val dKzz = kZZdArray(k)
-      val dKxz = lb.calcdKxzi(i, k)
+      val dKzz = lb.dKzzi(i, k)
+      val dKxz = lb.dKxzi(i, k)
       val dKxxDiag = lb.calcdKxxDiagi(i, k)
 
       val dAi = lb.calcdAi(i, k)

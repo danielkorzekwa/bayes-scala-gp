@@ -10,6 +10,9 @@ import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.grad.calcLBGradVEta1
 import dk.gp.cogp.lb.grad.calcLBGradVEta2
 import dk.gp.cogp.model.CogpModel
+import breeze.linalg.eig
+import breeze.linalg.diag
+import dk.gp.cov.CovNoise
 
 /**
  * Stochastic update for the parameters (mu,S) of p(v|y)
@@ -30,7 +33,7 @@ object stochasticUpdateV {
     val v = model.h.map(_.u)
 
     //natural parameters theta
-    val vInv = invchol(cholesky(v(i).v).t)
+    val vInv = inv(v(i).v)//invchol(cholesky(v(i).v).t)
     val theta1 = vInv * v(i).m
     val theta2 = -0.5 * vInv
 
@@ -40,11 +43,17 @@ object stochasticUpdateV {
     val newTheta1 = theta1 + learningRate * naturalGradEta1
     val newTheta2 = theta2 + learningRate * naturalGradEta2
 
-    val newS = -0.5 * inv(newTheta2) //@TODO use invchol with jitter
+    val newTheta2Eig = eig(newTheta2)
+    val invNewTheta2 = newTheta2Eig.eigenvectors * diag(1.0 :/ newTheta2Eig.eigenvalues) * newTheta2Eig.eigenvectors.t
+
+    val newS = -0.5 * invNewTheta2 //@TODO use invchol with jitter
 
     //@TODO following Nguyen, why is that: a bit of hack to allow h_i to be input-dependent noise
-    //val newM = newS * newTheta1
-    val newM = v(i).m
+    val newM = lb.model.h(i).covFunc match {
+      case covFunc:CovNoise =>  v(i).m
+      case _ => newS * newTheta1
+    }
+   
     MultivariateGaussian(newM, newS)
   }
 }

@@ -13,8 +13,15 @@ import scala.util.Random
 
 case class CogpModel(g: Array[CogpGPVar], h: Array[CogpGPVar],
                      beta: DenseVector[Double], betaDelta: DenseVector[Double],
-                     w: DenseMatrix[Double], wDelta: DenseMatrix[Double]) 
-                     
+                     w: DenseMatrix[Double], wDelta: DenseMatrix[Double]) {
+  
+  if(g.size>0) {  
+  require(w.rows == h.size, "w.rows must equal to h.size")
+  require(w.cols == g.size, "w.cols must equal to g.size")
+  }
+  else  require(w.size==0, "w.rows must be empty if g.size==0")
+}
+
 object CogpModel {
 
   def apply(x: DenseMatrix[Double], y: DenseMatrix[Double], z: DenseMatrix[Double], gVariables: Array[CogpGPVar], hVariables: Array[CogpGPVar],

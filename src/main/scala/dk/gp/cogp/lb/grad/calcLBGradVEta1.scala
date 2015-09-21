@@ -35,8 +35,7 @@ object calcLBGradVEta1 {
 
     val yVal = y - wam
 
-    val vCholR = cholesky(v(i).v).t
-    val vInv = invchol(vCholR)
+    val vInv = invchol( cholesky(v(i).v).t)
 
     val grad = beta(i) * Ai.t * yVal - vInv * v(i).m
 

@@ -32,8 +32,11 @@ object cogpPredict {
 
     val predictedOutputs = (0 until model.h.size).map { i =>
 
-      val outputM = w(i, ::) * predMj + predMi(i)
-      val outputVar = w2(i, ::) * predVarj + predVari(i)
+      val (outputM, outputVar) = if (model.g.size > 0) {
+        val outputM = w(i, ::) * predMj + predMi(i)
+        val outputVar = w2(i, ::) * predVarj + predVari(i)
+        (outputM, outputVar)
+      } else (predMi(i), predVari(i))
 
       UnivariateGaussian(outputM, outputVar)
 

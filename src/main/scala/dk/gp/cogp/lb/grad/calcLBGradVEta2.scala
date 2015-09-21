@@ -6,6 +6,7 @@ import dk.gp.math.invchol
 import dk.gp.cogp.lb.LowerBound
 import breeze.linalg.InjectNumericOps
 import dk.gp.cogp.model.CogpModel
+import breeze.linalg._
 
 object calcLBGradVEta2 {
 
