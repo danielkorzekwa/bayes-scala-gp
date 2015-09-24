@@ -15,6 +15,7 @@ import breeze.numerics.pow
 import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
 import breeze.linalg.Axis
+import dk.gp.math.logdetchol
 
 object calcLBLoglik {
 
@@ -41,9 +42,8 @@ object calcLBLoglik {
 
       val kZZ = lb.kZZj(j)
       val kZZinv = lb.kZZjInv(j)
-
       val u = lb.model.g(j).u
-      val qTerm_j = 0.5 * (logdet(kZZ)._2 + logdet(inv(u.v))._2) + 0.5 * trace(kZZinv * (u.m * u.m.t + u.v)) //is it better to compute log det using chol decomposition? look at cogp impl and alg 2.1 of Rasmussen book
+      val qTerm_j = 0.5 * (logdetchol(cholesky(kZZ)) - logdetchol(cholesky(u.v))) + 0.5 * trace(kZZinv * (u.m * u.m.t + u.v))
       qTerm_j
     }.sum
 
@@ -56,7 +56,7 @@ object calcLBLoglik {
 
     val v = lb.model.h(i).u
 
-    val pTerm_i = 0.5 * (logdet(kZZ2)._2 - logdet(v.v)._2) + 0.5 * trace(kZZ2inv * ((v.m * v.m.t + v.v)))
+    val pTerm_i = 0.5 * (logdetchol(cholesky(kZZ2))  - logdetchol(cholesky(v.v))) + 0.5 * trace(kZZ2inv * ((v.m * v.m.t + v.v)))
 
     pTerm_i
   }

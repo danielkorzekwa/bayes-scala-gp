@@ -24,7 +24,7 @@ case class CogpModel(g: Array[CogpGPVar], h: Array[CogpGPVar],
 
 object CogpModel {
 
-  def apply(x: DenseMatrix[Double], y: DenseMatrix[Double], z: DenseMatrix[Double], gVariables: Array[CogpGPVar], hVariables: Array[CogpGPVar],
+  def apply(gVariables: Array[CogpGPVar], hVariables: Array[CogpGPVar],
             beta: DenseVector[Double], w: DenseMatrix[Double]): CogpModel = {
 
     val betaDelta = DenseVector.zeros[Double](beta.size)

@@ -37,7 +37,7 @@ object createSingleHZeroGModel {
     //mixing weights
     val w = new DenseMatrix[Double](0,0)
 
-    val model = CogpModel(x, y, z, Array(), Array(hVariable0), beta, w)
+    val model = CogpModel( Array(), Array(hVariable0), beta, w)
     model
   }
 

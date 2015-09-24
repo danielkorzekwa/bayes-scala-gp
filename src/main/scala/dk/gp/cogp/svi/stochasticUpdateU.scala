@@ -27,8 +27,7 @@ object stochasticUpdateU {
 
     val u = lb.model.g.map(_.u)
     //natural parameters theta
-    //val vInv = invchol(cholesky(u(j).v).t) //@TODO use chol with jitter for matrix inverse
-    val vInv = inv(u(j).v)
+    val vInv = invchol(cholesky(u(j).v).t) //@TODO use chol with jitter for matrix inverse
     val theta1 = vInv * u(j).m
     val theta2 = -0.5 * vInv
 

@@ -37,7 +37,7 @@ object createOneHCovSEisoOneCovNoiseGModel {
     //mixing weights
     val w = new DenseMatrix(1, 1, Array(1.0)) // [P x Q]
 
-    val model = CogpModel(x, y, z, Array(gVariable), Array(hVariable0), beta, w)
+    val model = CogpModel(Array(gVariable), Array(hVariable0), beta, w)
     model
   }
 

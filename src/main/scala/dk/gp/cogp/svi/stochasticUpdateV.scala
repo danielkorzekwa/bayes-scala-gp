@@ -33,7 +33,7 @@ object stochasticUpdateV {
     val v = model.h.map(_.u)
 
     //natural parameters theta
-    val vInv = inv(v(i).v)//invchol(cholesky(v(i).v).t)
+    val vInv = invchol(cholesky(v(i).v).t)
     val theta1 = vInv * v(i).m
     val theta2 = -0.5 * vInv
 
