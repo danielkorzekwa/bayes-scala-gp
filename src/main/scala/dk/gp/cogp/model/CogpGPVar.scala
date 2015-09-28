@@ -13,6 +13,8 @@ import breeze.stats.variance.reduceDouble
 
 case class CogpGPVar(z: DenseMatrix[Double], u: MultivariateGaussian, covFunc: CovFunc, covFuncParams: DenseVector[Double], covFuncParamsDelta: DenseVector[Double]) {
 
+  require(u.v.findAll (_.isNaN).size==0,"Inducing points variance is NaN:" + u.v)
+  
   def calckZZ(): DenseMatrix[Double] = covFunc.cov(z, z, covFuncParams) + 1e-10 * DenseMatrix.eye[Double](z.size)
 
   def calckXZ(x: DenseMatrix[Double]): DenseMatrix[Double] = covFunc.cov(x, z, covFuncParams)
@@ -39,7 +41,7 @@ object CogpGPVar {
       y(idx)
     } else y
 
-    val vInv = 0.1 * (1.0 / variance(yZ)) * DenseMatrix.eye[Double](yZ.size)
+    val vInv = 0.1 * (1.0 / (variance(y))) * DenseMatrix.eye[Double](z.rows)
     val v = invchol(cholesky(vInv).t)
     MultivariateGaussian(m, v)
   }

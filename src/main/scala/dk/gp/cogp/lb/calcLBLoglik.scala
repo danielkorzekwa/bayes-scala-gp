@@ -26,67 +26,67 @@ object calcLBLoglik {
     val pTerm = (0 until lowerBound.model.h.size).map { i =>
 
       val pTerm = logNTerm(i, lowerBound) -
-        pTerm_i(i, lowerBound) - tracePTerm(i, lowerBound) -
-        kTildePTerm(i, lowerBound) -
-        0.5 * beta(i) * traceQTerm(i, lowerBound) -
-        0.5 * beta(i) * kTildeQTerm(i, lowerBound)
+        tildeP(i, lowerBound) -
+        traceQ(i, lowerBound) -
+        tildeQ(i, lowerBound) -
+        traceP(i, lowerBound) -
+        klP(i, lowerBound)
       pTerm
 
     }.sum
 
-    -qTerm(lowerBound) + pTerm
+    -klQ(lowerBound) + pTerm
   }
 
-  private def qTerm(lb: LowerBound): Double = {
-    val qTerm = (0 until lb.model.g.size).map { j =>
+  private def klQ(lb: LowerBound): Double = {
+    val klQ = (0 until lb.model.g.size).map { j =>
 
       val kZZ = lb.kZZj(j)
       val kZZinv = lb.kZZjInv(j)
       val u = lb.model.g(j).u
-      val qTerm_j = 0.5 * (logdetchol(cholesky(kZZ)) - logdetchol(cholesky(u.v))) + 0.5 * trace(kZZinv * (u.m * u.m.t + u.v))
-      qTerm_j
+      val klQ_j = 0.5 * (logdetchol(cholesky(kZZ)) - logdetchol(cholesky(u.v))) + 0.5 * trace(kZZinv * (u.m * u.m.t + u.v))
+
+      klQ_j
     }.sum
 
-    qTerm
+    klQ
   }
-  private def pTerm_i(i: Int, lb: LowerBound): Double = {
+  private def klP(i: Int, lb: LowerBound): Double = {
 
-    val kZZ2 = lb.kZZi(i)
-    val kZZ2inv = lb.kZZiInv(i)
-
+    val kZZ = lb.kZZi(i)
+    val kZZinv = lb.kZZiInv(i)
     val v = lb.model.h(i).u
 
-    val pTerm_i = 0.5 * (logdetchol(cholesky(kZZ2))  - logdetchol(cholesky(v.v))) + 0.5 * trace(kZZ2inv * ((v.m * v.m.t + v.v)))
+    val kl_i = 0.5 * (logdetchol(cholesky(kZZ)) - logdetchol(cholesky(v.v))) + 0.5 * trace(kZZinv * ((v.m * v.m.t + v.v)))
 
-    pTerm_i
+    kl_i
   }
 
   private def logNTerm(i: Int, lb: LowerBound): Double = {
 
     val Ai = lb.calcAi(i)
     val y = lb.yi(i)
-    
+
     val yTerm = y - wAm(i, lb) - Ai * lb.model.h(i).u.m
     val logNTerm = -0.5 * y.size * log(2 * Pi / lb.model.beta(i)) - 0.5 * lb.model.beta(i) * sum(pow(yTerm, 2))
 
     logNTerm
   }
 
-  private def kTildePTerm(i: Int, lb: LowerBound): Double = {
-    
+  private def tildeP(i: Int, lb: LowerBound): Double = {
+
     val kXZ = lb.kXZi(i)
     val kZX = kXZ.t
     val kZZinv = lb.kZZiInv(i)
+    val kXXDiag = lb.calcKxxDiagi(i)
 
-    val kXXDiag_i = lb.calcKxxDiagi(i)
+    val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
 
-    val kTildeDiagSum_i = sum(kXXDiag_i - diag(kXZ * kZZinv * kZX))
-
-    val kTildePTerm = 0.5 * lb.model.beta(i) * kTildeDiagSum_i
+    val kTildePTerm = 0.5 * lb.model.beta(i) * kTildeDiagSum
     kTildePTerm
   }
 
-  private def tracePTerm(i: Int, lb: LowerBound): Double = {
+  private def traceP(i: Int, lb: LowerBound): Double = {
 
     val Ai = lb.calcAi(i)
     val lambdaI = Ai.t * Ai
@@ -95,26 +95,24 @@ object calcLBLoglik {
     lb.model.beta(i) * 0.5 * trace(v.v * lambdaI)
   }
 
-  private def traceQTerm(i: Int, lb: LowerBound): Double = {
-    val traceQTerm = (0 until lb.model.g.size).map { j =>
+  private def traceQ(i: Int, lb: LowerBound): Double = {
+    val traceQ = (0 until lb.model.g.size).map { j =>
 
-      val Aj = lb.calcAj(i,j)
+      val Aj = lb.calcAj(i, j)
       val lambdaJ = Aj.t * Aj
       val u = lb.model.g(j).u
       pow(lb.model.w(i, j), 2) * trace(u.v * lambdaJ)
     }.sum
 
-    traceQTerm
+    0.5 * lb.model.beta(i) * traceQ
   }
 
-  private def kTildeQTerm(i: Int, lb: LowerBound): Double = {
-    val kTildeQTerm = (0 until lb.model.g.size).map { j =>
+  private def tildeQ(i: Int, lb: LowerBound): Double = {
+    val tildeQ = (0 until lb.model.g.size).map { j =>
 
-      val kXZ = lb.kXZj(i,j)
-      val kZZ = lb.kZZj(j)
+      val kXZ = lb.kXZj(i, j)
       val kZX = kXZ.t
       val kXXDiag = lb.calcKxxDiagj(i, j)
-
       val kZZinv = lb.kZZjInv(j)
 
       //@TODO performance improvement:
@@ -129,7 +127,7 @@ object calcLBLoglik {
       pow(lb.model.w(i, j), 2) * kTildeDiagSum
     }.sum
 
-    kTildeQTerm
+    0.5 * lb.model.beta(i) * tildeQ
   }
 
 }

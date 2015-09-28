@@ -67,14 +67,14 @@ class cogpTrainTest {
     val newModel = cogpTrain(x, y, model, iterNum = 500)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x, y))
-    assertEquals(76.4803, loglik, 0.0001)
+    assertEquals(76.4864, loglik, 0.0001)
 
     val predictedY = cogpPredict(x, newModel)
 
-    assertEquals(-0.4271, predictedY(10, 0).m, 0.0001)
+    assertEquals(-0.4268, predictedY(10, 0).m, 0.0001)
     assertEquals(0.00257, predictedY(10, 0).v, 0.0001)
 
-    assertEquals(0.4260, predictedY(10, 1).m, 0.0001)
+    assertEquals(0.4257, predictedY(10, 1).m, 0.0001)
     assertEquals(0.00257, predictedY(10, 1).v, 0.0001)
 
   }
@@ -95,14 +95,14 @@ class cogpTrainTest {
     val newModel = cogpTrain(x, y, model, iterNum = 500)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x, y))
-    assertEquals(60.1350, loglik, 0.0001)
+    assertEquals(60.0257, loglik, 0.0001)
 
     val predictedY = cogpPredict(x, newModel)
 
-    assertEquals(-0.4279, predictedY(10, 0).m, 0.0001)
+    assertEquals(-0.4253, predictedY(10, 0).m, 0.0001)
     assertEquals(0.00378, predictedY(10, 0).v, 0.0001)
 
-    assertEquals(0.4276, predictedY(10, 1).m, 0.0001)
+    assertEquals(0.4247, predictedY(10, 1).m, 0.0001)
     assertEquals(0.00294, predictedY(10, 1).v, 0.0001)
 
   }
@@ -119,7 +119,7 @@ class cogpTrainTest {
     val newModel = cogpTrain(x, y, model, iterNum = 200)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x, y))
-    assertEquals(207.6311, loglik, 0.0001)
+    assertEquals(207.6256, loglik, 0.0001)
 
     val predictedY = cogpPredict(x, newModel)
 
@@ -140,7 +140,7 @@ class cogpTrainTest {
     val newModel = cogpTrain(x, y, model, iterNum = 200)
 
     val loglik = calcLBLoglik(LowerBound(newModel, x, y))
-    assertEquals(191.8406, loglik, 0.0001)
+    assertEquals(191.8187, loglik, 0.0001)
 
     val predictedY = cogpPredict(x, newModel)
 
