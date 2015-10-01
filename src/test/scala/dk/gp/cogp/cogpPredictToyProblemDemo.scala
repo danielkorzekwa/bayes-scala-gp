@@ -15,6 +15,7 @@ import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.math.UnivariateGaussian
 import java.io.File
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import dk.gp.cogp.model.Task
 
 //Long convergence, solution: change learning rate for g_u from 1e-2 to 0.5
 //    val noise = Gaussian(0, 1)
@@ -25,17 +26,16 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 object cogpPredictToyProblemDemo extends App with LazyLogging {
 
-  val data: DenseMatrix[Double] = loadToyModelDataIncomplete()
-  val x = data(::, 0)
-  val y = data(::, 1 to 2)
-  val z = x(0 until x.size by 10) // inducing points for u and v inducing variables
+  val data: Array[Task] = loadToyModelDataIncomplete()
+  val z = DenseVector.rangeD(-10, 10, 1).toDenseMatrix.t // inducing points for u and v inducing variables
 
   val now = System.currentTimeMillis()
-  val initialToyModel = createCogpToyModel(x, y, z)
-  val trainedToyModel = cogpTrain(x, y, initialToyModel, iterNum = 500)
+  val initialToyModel = createCogpToyModel(data, z)
+  val trainedToyModel = cogpTrain(data, initialToyModel, iterNum = 500)
   logger.info("Total training time [ms]: " + (System.currentTimeMillis() - now))
 
-  val predictedY: DenseMatrix[UnivariateGaussian] = cogpPredict(x + 0.001, trainedToyModel)
+  val xTest = DenseVector.rangeD(-10, 10, 0.1)
+  val predictedY: DenseMatrix[UnivariateGaussian] = cogpPredict(xTest + 0.001, trainedToyModel)
 
   plotPredictions()
 
@@ -47,11 +47,11 @@ object cogpPredictToyProblemDemo extends App with LazyLogging {
     val figure = Figure()
     figure.subplot(0).legend = true
 
-    figure.subplot(0) += plot(x, y(::, 0), '.', name = "actual output 1")
-    figure.subplot(0) += plot(x, predictedOutput1, name = "predicted output 1")
+    figure.subplot(0) += plot(data(0).x.toDenseVector, data(0).y, '.', name = "actual output 1")
+    figure.subplot(0) += plot(xTest, predictedOutput1, name = "predicted output 1")
 
-    figure.subplot(0) += plot(x, y(::, 1), '.', name = "actual output 2")
-    figure.subplot(0) += plot(x, predictedOutput2, name = "predicted output 2")
+    figure.subplot(0) += plot(data(1).x.toDenseVector, data(1).y, '.', name = "actual output 2")
+    figure.subplot(0) += plot(xTest, predictedOutput2, name = "predicted output 2")
 
   }
 }

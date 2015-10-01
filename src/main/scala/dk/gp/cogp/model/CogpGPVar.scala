@@ -36,11 +36,6 @@ object CogpGPVar {
 
     val m = DenseVector.zeros[Double](z.rows)
 
-    val yZ = if (z.rows < y.size) {
-      val idx = Random.shuffle(List.range(0, y.size)).take(z.rows)
-      y(idx)
-    } else y
-
     val vInv = 0.1 * (1.0 / (variance(y))) * DenseMatrix.eye[Double](z.rows)
     val v = invchol(cholesky(vInv).t)
     MultivariateGaussian(m, v)

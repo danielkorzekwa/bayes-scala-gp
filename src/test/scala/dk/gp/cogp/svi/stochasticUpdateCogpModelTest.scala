@@ -7,28 +7,27 @@ import dk.gp.cogp.testutils.createCogpToyModel
 import java.io.File
 import dk.gp.cogp.lb.calcLBLoglik
 import dk.gp.cogp.lb.LowerBound
+import dk.gp.cogp.testutils.loadToyModelData
 
 class stochasticUpdateCogpModelTest {
 
   @Test def test = {
 
-    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 40, ::)
-    val x = data(::, 0).toDenseMatrix.t
-    val y = data(::, 1 to 2)
+    val data = loadToyModelData(n = 41)
 
-    val initialModel = createCogpToyModel(x, y)
+    val initialModel = createCogpToyModel(data)
 
     val finalModel = (1 to 50).foldLeft(initialModel) {
       case (currentModel, i) =>
-        val newModel = stochasticUpdateCogpModel(currentModel, x, y)
+        val newModel = stochasticUpdateCogpModel(currentModel, data)
 
-        val loglik = calcLBLoglik(LowerBound(newModel, x,y))
+        val loglik = calcLBLoglik(LowerBound(newModel, data))
         // println("LB loglik=" + loglik)
 
         newModel
     }
 
-    assertEquals(-1849.6491, calcLBLoglik(LowerBound(finalModel, x,y)), 0.0001)
+    assertEquals(-1849.6491, calcLBLoglik(LowerBound(finalModel, data)), 0.0001)
 
   }
 

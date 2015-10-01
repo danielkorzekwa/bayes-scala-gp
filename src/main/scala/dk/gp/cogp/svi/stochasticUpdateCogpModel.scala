@@ -7,28 +7,29 @@ import dk.gp.cov.utils.covDiag
 import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.model.CogpModel
+import dk.gp.cogp.model.Task
 
 object stochasticUpdateCogpModel {
 
-  def apply(model: CogpModel, x: DenseMatrix[Double], y: DenseMatrix[Double]): CogpModel = {
+  def apply(model: CogpModel, tasks: Array[Task]): CogpModel = {
 
     var currModel = model
 
     //@TODO when learning just the covParameters, at some iteration, loglik accuracy suddenly goes down, numerical stability issues? 
     //@TODO Given just gU and hypG are learned, learning first hypG then gU doesn't not converge (loglik is decreasing), why is that?
-    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, LowerBound(currModel, x, y)) }.toArray
+    val newU = (0 until model.g.size).map { j => stochasticUpdateU(j, LowerBound(currModel, tasks)) }.toArray
     currModel = withNewGu(newU, currModel)
 
-    val lowerBound = LowerBound(currModel, x, y)
+    val lowerBound = LowerBound(currModel,tasks)
     val (newW, newWDelta) = stochasticUpdateW(lowerBound)
     val (newBeta, newBetaDelta) = stochasticUpdateBeta(lowerBound)
     val newHypCovG: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.g.size).map { j => stochasticUpdateHypCovG(j, lowerBound) }.toArray
     currModel = withNewCovParamsG(newHypCovG, currModel).copy(w = newW, wDelta = newWDelta, beta = newBeta, betaDelta = newBetaDelta)
 
-    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, LowerBound(currModel, x, y)) }.toArray
+    val newV = (0 until model.h.size).map { i => stochasticUpdateV(i, LowerBound(currModel,tasks)) }.toArray
     currModel = withNewHu(newV, currModel)
 
-    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, LowerBound(currModel, x, y)) }.toArray
+    val newHypCovH: Array[(DenseVector[Double], DenseVector[Double])] = (0 until model.h.size).map { i => stochasticUpdateHypCovH(i, LowerBound(currModel,tasks)) }.toArray
     currModel = withNewCovParamsH(newHypCovH, currModel)
 
     currModel

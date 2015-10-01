@@ -16,6 +16,6 @@ object wAm {
     }.toSeq
 
     if (wAm.size > 0) sum(wAm)
-    else DenseVector.zeros(lb.yIdx(i).size)
+    else DenseVector.zeros(lb.tasks(i).y.size)
   }
 }

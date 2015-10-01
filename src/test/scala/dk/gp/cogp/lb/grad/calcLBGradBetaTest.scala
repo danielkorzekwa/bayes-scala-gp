@@ -7,18 +7,17 @@ import java.io.File
 import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.grad.calcLBGradBeta
+import dk.gp.cogp.testutils.loadToyModelData
 
 class calcLBGradBetaTest {
 
   @Test def test_5_data_points = {
 
-    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 4, ::)
-    val x = data(::, 0).toDenseMatrix.t
-    val y = data(::, 1 to 2)
+    val data = loadToyModelData(n = 5)
 
-    val model = createCogpToyModel(x, y)
+    val model = createCogpToyModel(data)
 
-    val betaGrad = calcLBGradBeta(LowerBound(model,x,y))
+    val betaGrad = calcLBGradBeta(LowerBound(model,data))
     assertEquals(-0.96381, betaGrad(0), 0.00001)
     assertEquals(-0.83919, betaGrad(1), 0.00001)
 
@@ -26,13 +25,11 @@ class calcLBGradBetaTest {
 
   @Test def test_40_data_points = {
 
-    val data = csvread(new File("src/test/resources/cogp/cogp_no_missing_points.csv"))(0 to 39, ::)
-    val x = data(::, 0).toDenseMatrix.t
-    val y = data(::, 1 to 2)
+    val data = loadToyModelData(n = 40)
 
-    val model = createCogpToyModel(x, y)
+    val model = createCogpToyModel(data)
 
-    val betaGrad = calcLBGradBeta(LowerBound(model,x,y))
+    val betaGrad = calcLBGradBeta(LowerBound(model,data))
     assertEquals(-52.24807, betaGrad(0), 0.00001)
     assertEquals(-51.90292, betaGrad(1), 0.00001)
 
