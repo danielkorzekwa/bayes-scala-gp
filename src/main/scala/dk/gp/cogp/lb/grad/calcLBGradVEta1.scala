@@ -20,7 +20,7 @@ object calcLBGradVEta1 {
     val beta = model.beta
 
     val u = model.g.map(_.u)
-    val v = model.h.map(_.u)
+    val v = model.h(i).u
 
     val y = lb.yi(i)
     val wam = if (w.size == 0) DenseVector.zeros[Double](y.size)
@@ -28,17 +28,18 @@ object calcLBGradVEta1 {
       (0 until w.cols).map { jIndex =>
 
         val Aj = lb.calcAj(i,jIndex)
-
+ 
         w(i, jIndex) * Aj * u(jIndex).m
       }
     }
 
     val yVal = y - wam
 
-    val vInv = invchol( cholesky(v(i).v).t)
+    val vInv = invchol( cholesky(v.v).t)
 
-    val grad = beta(i) * Ai.t * yVal - vInv * v(i).m
+    val grad = beta(i) * Ai.t * yVal - vInv * v.m
 
+   
     grad
   }
 

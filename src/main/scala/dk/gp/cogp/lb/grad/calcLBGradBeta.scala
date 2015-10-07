@@ -9,6 +9,7 @@ import breeze.numerics.pow
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cov.utils.covDiag
 import dk.gp.cogp.lb.wAm
+import dk.gp.math.diagProd
 
 object calcLBGradBeta {
 
@@ -47,11 +48,10 @@ object calcLBGradBeta {
   private def dTildeP(i: Int, lb: LowerBound): Double = {
     val kZZiInv = lb.kZZiInv(i)
     val kXZi = lb.kXZi(i)
-    val kZXi = kXZi.t
 
     val kXXiDiag = lb.calcKxxDiagi(i)
 
-    val kTildeDiagSum = sum(kXXiDiag - diag(kXZi * kZZiInv * kZXi))
+    val kTildeDiagSum = sum(kXXiDiag - diagProd(kXZi * kZZiInv,kXZi))
 
     0.5 * kTildeDiagSum
   }
@@ -80,7 +80,7 @@ object calcLBGradBeta {
       val kXXDiag = lb.calcKxxDiagj(i, j)
       val kZZinv = lb.kZZjInv(j)
 
-      val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
+      val kTildeDiagSum = sum(kXXDiag - diagProd(kXZ * kZZinv, kXZ))
 
       pow(lb.model.w(i, j), 2) * kTildeDiagSum
     }.sum

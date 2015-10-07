@@ -34,24 +34,25 @@ object cogpPredictToyProblemDemo extends App with LazyLogging {
   val trainedToyModel = cogpTrain(data, initialToyModel, iterNum = 500)
   logger.info("Total training time [ms]: " + (System.currentTimeMillis() - now))
 
-  val xTest = DenseVector.rangeD(-10, 10, 0.1)
-  val predictedY: DenseMatrix[UnivariateGaussian] = cogpPredict(xTest + 0.001, trainedToyModel)
+  val xTest =  DenseVector.rangeD(-10, 10, 0.1).toDenseMatrix.t  + 0.0001
+  val predictedY0: DenseVector[UnivariateGaussian] = cogpPredict(xTest , i = 0, trainedToyModel)
+  val predictedY1: DenseVector[UnivariateGaussian] = cogpPredict(xTest, i = 1, trainedToyModel)
 
   plotPredictions()
 
   private def plotPredictions() = {
 
-    val predictedOutput1 = predictedY(::, 0).map(_.m)
-    val predictedOutput2 = predictedY(::, 1).map(_.m)
+    val predictedOutput1 = predictedY0.map(_.m)
+    val predictedOutput2 = predictedY1.map(_.m)
 
     val figure = Figure()
     figure.subplot(0).legend = true
 
     figure.subplot(0) += plot(data(0).x.toDenseVector, data(0).y, '.', name = "actual output 1")
-    figure.subplot(0) += plot(xTest, predictedOutput1, name = "predicted output 1")
+    figure.subplot(0) += plot(xTest.toDenseVector, predictedOutput1, name = "predicted output 1")
 
     figure.subplot(0) += plot(data(1).x.toDenseVector, data(1).y, '.', name = "actual output 2")
-    figure.subplot(0) += plot(xTest, predictedOutput2, name = "predicted output 2")
+    figure.subplot(0) += plot(xTest.toDenseVector, predictedOutput2, name = "predicted output 2")
 
   }
 }

@@ -27,8 +27,8 @@ class calcLBGradHypCovGTest {
     val model = createCogpToyModel(data)
 
     val covParamsGrad = calcLBGradHypCovG(j = 0, LowerBound(model, data))
-    assertEquals(2647496.162073, covParamsGrad(0), 0.00001)
-    assertEquals(-3.19382182328e7, covParamsGrad(1), 0.00001)
+    assertEquals(2647496.163, covParamsGrad(0), 0.001)
+    assertEquals(-3.1938218233606294E7, covParamsGrad(1), 0.00001)
   }
 
 }

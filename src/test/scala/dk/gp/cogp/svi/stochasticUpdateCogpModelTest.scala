@@ -27,7 +27,7 @@ class stochasticUpdateCogpModelTest {
         newModel
     }
 
-    assertEquals(-1849.6491, calcLBLoglik(LowerBound(finalModel, data)), 0.0001)
+    assertEquals(-1849.640, calcLBLoglik(LowerBound(finalModel, data)), 0.001)
 
   }
 

@@ -90,13 +90,13 @@ class LowerBound(val model: CogpModel, val tasks: Array[Task]) {
 
   def calcdAj(i: Int, j: Int, k: Int): DenseMatrix[Double] = {
     val kZZinv = kZZjInv(j)
-    val AjD = dKxzj(i, j, k) * kZZinv - calcAj(i, j) * dKzzj(j, k) * kZZinv
+    val AjD = (dKxzj(i, j, k)  - calcAj(i, j) * dKzzj(j, k)) * kZZinv
     AjD
   }
 
   def calcdAi(i: Int, k: Int): DenseMatrix[Double] = {
     val kZZinv = kZZiInv(i)
-    val dAi = dKxzi(i, k) * kZZinv - calcAi(i) * dKzzi(i, k) * kZZinv
+    val dAi = (dKxzi(i, k) - calcAi(i) * dKzzi(i, k)) * kZZinv
     dAi
   }
 

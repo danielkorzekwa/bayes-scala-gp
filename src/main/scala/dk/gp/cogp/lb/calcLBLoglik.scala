@@ -16,6 +16,7 @@ import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
 import breeze.linalg.Axis
 import dk.gp.math.logdetchol
+import dk.gp.math.diagProd
 
 object calcLBLoglik {
 
@@ -76,11 +77,10 @@ object calcLBLoglik {
   private def tildeP(i: Int, lb: LowerBound): Double = {
 
     val kXZ = lb.kXZi(i)
-    val kZX = kXZ.t
     val kZZinv = lb.kZZiInv(i)
     val kXXDiag = lb.calcKxxDiagi(i)
 
-    val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
+    val kTildeDiagSum = sum(kXXDiag - diagProd(kXZ * kZZinv, kXZ))
 
     val kTildePTerm = 0.5 * lb.model.beta(i) * kTildeDiagSum
     kTildePTerm
@@ -111,19 +111,15 @@ object calcLBLoglik {
     val tildeQ = (0 until lb.model.g.size).map { j =>
 
       val kXZ = lb.kXZj(i, j)
-      val kZX = kXZ.t
       val kXXDiag = lb.calcKxxDiagj(i, j)
       val kZZinv = lb.kZZjInv(j)
 
-      //@TODO performance improvement:
       /**
        * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
        * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
        * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
        */
-      val kTildeDiagSum = sum(kXXDiag - diag(kXZ * kZZinv * kZX))
-      //   val kTildeDiagSum = sum(kXXDiag - sum((kXZ*kZZinv):*kZX,Axis._1)) 
-      //    val kTildeDiagSum = sum(kXXDiag - trace(kZX*kXZ*kZZinv))
+      val kTildeDiagSum = sum(kXXDiag - diagProd(kXZ * kZZinv, kXZ))
       pow(lb.model.w(i, j), 2) * kTildeDiagSum
     }.sum
 

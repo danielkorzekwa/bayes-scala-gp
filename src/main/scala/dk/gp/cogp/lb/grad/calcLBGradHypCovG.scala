@@ -8,21 +8,22 @@ import breeze.numerics._
 import breeze.linalg._
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.wAm
+import dk.gp.math.diagProd
 
 object calcLBGradHypCovG {
 
   def apply(j: Int, lb: LowerBound): DenseVector[Double] = {
-   
-    val covParamsD = lb.model.g(j).covFuncParams.mapPairs { (k, param) =>      
+
+    val covParamsD = lb.model.g(j).covFuncParams.mapPairs { (k, param) =>
       val kZZd = lb.dKzzj(j, k)
-      logTermPart(j, k,lb) - tildeQPart(j, k, lb) - traceQPart(j, k,lb) - lklPart(j, lb, kZZd)
+      logTermPart(j, k, lb) - tildeQPart(j, k, lb) - traceQPart(j, k, lb) - lklPart(j, lb, kZZd)
 
     }.toArray
 
     DenseVector(covParamsD)
   }
 
-  private def logTermPart(j: Int, k:Int,lb: LowerBound): Double = {
+  private def logTermPart(j: Int, k: Int, lb: LowerBound): Double = {
 
     val beta = lb.model.beta
     val w = lb.model.w
@@ -30,7 +31,7 @@ object calcLBGradHypCovG {
 
     val logTermPart = (0 until lb.model.h.size).map { i =>
 
-      val AjD = lb.calcdAj(i, j,k)
+      val AjD = lb.calcdAj(i, j, k)
       val Ai = lb.calcAi(i)
       val y = lb.yi(i)
 
@@ -56,16 +57,14 @@ object calcLBGradHypCovG {
 
     val tildeQPart = (0 until lb.model.h.size).map { i =>
 
+      val kXZ = lb.kXZj(i, j)
       val dKxz = lb.dKxzj(i, j, k)
-
-      val kZX = lb.kXZj(i, j).t
 
       val AjD = lb.calcdAj(i, j, k)
       val Aj = lb.calcAj(i, j)
 
       val dKxxDiag = lb.calcdKxxDiagj(i, j, k)
-
-      val tilde = 0.5 * beta(i) * pow(w(i, j), 2) * sum(dKxxDiag - diag(AjD * kZX) - diag(Aj * dKxz.t))
+      val tilde = 0.5 * beta(i) * pow(w(i, j), 2) * sum(dKxxDiag - diagProd(AjD, kXZ) - diagProd(Aj, dKxz))
       tilde
 
     }.sum
@@ -73,7 +72,7 @@ object calcLBGradHypCovG {
     tildeQPart
   }
 
-  private def traceQPart(j: Int, k:Int,lb: LowerBound): Double = {
+  private def traceQPart(j: Int, k: Int, lb: LowerBound): Double = {
 
     val w = lb.model.w
     val beta = lb.model.beta
@@ -85,9 +84,9 @@ object calcLBGradHypCovG {
 
       val kXZ = lb.kXZj(i, j)
 
-      val AjD = lb.calcdAj(i, j,k)
+      val AjD = lb.calcdAj(i, j, k)
       val Aj = lb.calcAj(i, j)
-      beta(i) * trace(pow(w(i, j), 2) * u.v * (AjD.t * Aj)) //@TODO performance improvement
+      beta(i) * pow(w(i, j), 2) * sum(diagProd(Aj * u.v, AjD))
     }.sum
 
     traceQPart

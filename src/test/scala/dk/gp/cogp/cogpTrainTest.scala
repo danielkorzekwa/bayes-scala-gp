@@ -20,6 +20,7 @@ import dk.gp.cogp.testutils.loadToyModelData
 import dk.gp.cogp.testutils.createSingleHZeroGModel
 import dk.gp.cogp.testutils.createOneHOneGModel
 import dk.gp.cogp.testutils.createOneHCovSEisoOneCovNoiseGModel
+import dk.gp.cogp.testutils.loadToyModelDataIncomplete
 
 class cogpTrainTest {
 
@@ -43,11 +44,11 @@ class cogpTrainTest {
     val newModel = cogpTrain(data, model, iterNum = 20)
 
     val loglik = calcLBLoglik(LowerBound(newModel, data))
-    assertEquals(-1959.8154, loglik, 0.0001)
+    assertEquals(-1959.8171, loglik, 0.0001)
 
-    val predictedY = cogpPredict(data(0).x, model)
+    val predictedY = cogpPredict(data(0).x, i = 0, model)
 
-    assertEquals(0, predictedY(10, 0).m, 0.0001)
+    assertEquals(0, predictedY(10).m, 0.0001)
 
   }
 
@@ -64,41 +65,37 @@ class cogpTrainTest {
     val loglik = calcLBLoglik(LowerBound(newModel, data))
     assertEquals(76.4864, loglik, 0.0001)
 
-    val predictedY = cogpPredict(x, newModel)
+    val predictedY0 = cogpPredict(data(0).x, i = 0, newModel)
+    val predictedY1 = cogpPredict(data(0).x, i = 1, newModel)
 
-    assertEquals(-0.4268, predictedY(10, 0).m, 0.0001)
-    assertEquals(0.00257, predictedY(10, 0).v, 0.0001)
+    assertEquals(-0.4268, predictedY0(10).m, 0.0001)
+    assertEquals(0.00257, predictedY0(10).v, 0.0001)
 
-    assertEquals(0.4257, predictedY(10, 1).m, 0.0001)
-    assertEquals(0.00257, predictedY(10, 1).v, 0.0001)
+    assertEquals(0.4257, predictedY1(10).m, 0.0001)
+    assertEquals(0.00257, predictedY1(10).v, 0.0001)
 
   }
 
-  @Ignore @Test def test_with_inducing_points_500_iter_missing_points = {
+  @Test def test_with_inducing_points_200_iter_missing_points = {
 
-    //    Random.setSeed(4676)
-    //
-    //    val data = loadToyModelData(n=Some(40))
-    //    val x = data(::, 0).toDenseMatrix.t
-    //    val y = data(::, 1 to 2)
-    //
-    //    y(5 to 10, 0) := Double.NaN
-    //    y(30 to 35, 1) := Double.NaN
-    //
-    //    val z = x(0 until x.rows by 10, ::) // inducing points for u and v inducing variables
-    //    val model = createCogpToyModel(x, y, z)
-    //    val newModel = cogpTrain(x, y, model, iterNum = 500)
-    //
-    //    val loglik = calcLBLoglik(LowerBound(newModel, x, y))
-    //    assertEquals(60.0257, loglik, 0.0001)
-    //
-    //    val predictedY = cogpPredict(x, newModel)
-    //
-    //    assertEquals(-0.4253, predictedY(10, 0).m, 0.0001)
-    //    assertEquals(0.00378, predictedY(10, 0).v, 0.0001)
-    //
-    //    assertEquals(0.4247, predictedY(10, 1).m, 0.0001)
-    //    assertEquals(0.00294, predictedY(10, 1).v, 0.0001)
+    val data = loadToyModelDataIncomplete()
+
+    val x = data(0).x.toDenseVector
+    val z = x(0 until x.size by 10) // inducing points for u and v inducing variables
+    val model = createCogpToyModel(data, z)
+    val newModel = cogpTrain(data, model, iterNum = 200)
+
+    val loglik = calcLBLoglik(LowerBound(newModel, data))
+    assertEquals(307.204, loglik, 0.001)
+
+    val predictedY0 = cogpPredict(data(0).x, i = 0, newModel)
+    val predictedY1 = cogpPredict(data(0).x, i = 1, newModel)
+
+    assertEquals(-0.4356, predictedY0(10).m, 0.0001)
+    assertEquals(0.0011, predictedY0(10).v, 0.0001)
+
+    assertEquals(0.4261, predictedY1(10).m, 0.0001)
+    assertEquals(0.00122, predictedY1(10).v, 0.0001)
 
   }
 
@@ -114,10 +111,10 @@ class cogpTrainTest {
     val loglik = calcLBLoglik(LowerBound(newModel, data))
     assertEquals(207.6256, loglik, 0.0001)
 
-    val predictedY = cogpPredict(x, newModel)
+    val predictedY = cogpPredict(data(0).x, i = 0, newModel)
 
-    assertEquals(-0.41389, predictedY(10, 0).m, 0.0001)
-    assertEquals(0.001100, predictedY(10, 0).v, 0.0001)
+    assertEquals(-0.41389, predictedY(10).m, 0.0001)
+    assertEquals(0.001100, predictedY(10).v, 0.0001)
 
   }
 
@@ -133,10 +130,10 @@ class cogpTrainTest {
     val loglik = calcLBLoglik(LowerBound(newModel, data))
     assertEquals(191.8190, loglik, 0.0001)
 
-    val predictedY = cogpPredict(x, newModel)
+    val predictedY0 = cogpPredict(data(0).x, i = 0, newModel)
 
-    assertEquals(-0.4127, predictedY(10, 0).m, 0.0001)
-    assertEquals(0.0016, predictedY(10, 0).v, 0.0001)
+    assertEquals(-0.4127, predictedY0(10).m, 0.0001)
+    assertEquals(0.0016, predictedY0(10).v, 0.0001)
 
   }
 
@@ -149,12 +146,12 @@ class cogpTrainTest {
     val newModel = cogpTrain(data, model, iterNum = 200)
 
     val loglik = calcLBLoglik(LowerBound(newModel, data))
-    assertEquals(-42.2647, loglik, 0.01)
+    assertEquals(-42.2504, loglik, 0.01)
 
-    val predictedY = cogpPredict(data(0).x, newModel)
+    val predictedY = cogpPredict(data(0).x, i = 0, newModel)
 
-    assertEquals(-0.39595, predictedY(10, 0).m, 0.0001)
-    assertEquals(0.00579, predictedY(10, 0).v, 0.0001)
+    assertEquals(-0.3961, predictedY(10).m, 0.0001)
+    assertEquals(0.00579, predictedY(10).v, 0.0001)
 
   }
 

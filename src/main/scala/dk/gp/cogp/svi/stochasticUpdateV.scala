@@ -27,14 +27,11 @@ object stochasticUpdateV {
   def apply(i: Int, lb: LowerBound): MultivariateGaussian = {
 
     val model = lb.model
-    val m = model
-
-    val u = model.g.map(_.u)
-    val v = model.h.map(_.u)
+    val v = model.h(i).u
 
     //natural parameters theta
-    val vInv = invchol(cholesky(v(i).v).t)
-    val theta1 = vInv * v(i).m
+    val vInv = invchol(cholesky(v.v).t)
+    val theta1 = vInv * v.m
     val theta2 = -0.5 * vInv
 
     val naturalGradEta1 = calcLBGradVEta1(i, lb)
@@ -46,14 +43,13 @@ object stochasticUpdateV {
     val newTheta2Eig = eig(newTheta2)
     val invNewTheta2 = newTheta2Eig.eigenvectors * diag(1.0 :/ newTheta2Eig.eigenvalues) * newTheta2Eig.eigenvectors.t
 
-    val newS = -0.5 * invNewTheta2 //@TODO use invchol with jitter
+    val newS = -0.5 * invNewTheta2
 
-    //@TODO following Nguyen, why is that: a bit of hack to allow h_i to be input-dependent noise
     val newM = lb.model.h(i).covFunc match {
-      case covFunc:CovNoise =>  v(i).m
-      case _ => newS * newTheta1
+      case covFunc: CovNoise => v.m
+      case _                 => newS * newTheta1
     }
-   
+
     MultivariateGaussian(newM, newS)
   }
 }

@@ -17,8 +17,8 @@ class calcLBGradWTest {
     val model = createCogpToyModel(data)
 
     val wGrad = calcLBGradW(LowerBound(model, data))
-    assertEquals(-0.436026, wGrad(0, 0), 0.00001)
-    assertEquals(-0.436026, wGrad(1, 0), 0.00001)
+    assertEquals(-0.436041, wGrad(0, 0), 0.00001)
+    assertEquals(-0.436041, wGrad(1, 0), 0.00001)
   }
 
   @Test def test_40_data_points = {
@@ -28,7 +28,7 @@ class calcLBGradWTest {
     val model = createCogpToyModel(data)
 
     val wGrad = calcLBGradW(LowerBound(model, data))
-    assertEquals(-1.014200, wGrad(0, 0), 0.00001)
-    assertEquals(-1.014200, wGrad(1, 0), 0.00001) //@TODO write a test, where  wGrad(0, 0)!=wGrad(1, 0)
+    assertEquals(-1.0137, wGrad(0, 0), 0.0001)
+    assertEquals(-1.0137, wGrad(1, 0), 0.0001) //@TODO write a test, where  wGrad(0, 0)!=wGrad(1, 0)
   }
 }

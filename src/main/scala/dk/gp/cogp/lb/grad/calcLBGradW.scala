@@ -8,6 +8,7 @@ import breeze.numerics.pow
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.wAm
 import dk.gp.cov.utils.covDiag
+import dk.gp.math.diagProd
 
 object calcLBGradW {
 
@@ -53,8 +54,7 @@ object calcLBGradW {
      * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
      */
     val kZX = kXZ.t
-
-    val kTildeDiagSum = sum(kXXDiag) - trace(kZX * kXZ * kZZinv)
+    val kTildeDiagSum = sum(kXXDiag) - sum(diagProd(kXZ*kZZinv,kXZ))
     val tildeTerm = beta(i) * w(i, j) * kTildeDiagSum
 
     tildeTerm
