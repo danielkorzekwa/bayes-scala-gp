@@ -76,11 +76,11 @@ object calcLBLoglik {
 
   private def tildeP(i: Int, lb: LowerBound): Double = {
 
+    val Ai = lb.calcAi(i)
     val kXZ = lb.kXZi(i)
-    val kZZinv = lb.kZZiInv(i)
     val kXXDiag = lb.calcKxxDiagi(i)
 
-    val kTildeDiagSum = sum(kXXDiag - diagProd(kXZ * kZZinv, kXZ))
+    val kTildeDiagSum = sum(kXXDiag - diagProd(Ai, kXZ))
 
     val kTildePTerm = 0.5 * lb.model.beta(i) * kTildeDiagSum
     kTildePTerm
@@ -98,8 +98,8 @@ object calcLBLoglik {
   private def traceQ(i: Int, lb: LowerBound): Double = {
     val traceQ = (0 until lb.model.g.size).map { j =>
 
-      val Aj = lb.calcAj(i, j)
-      val lambdaJ = Aj.t * Aj
+      val Aj = lb.Aj(i, j)
+      val lambdaJ = lb.lambdaJ(i, j)
       val u = lb.model.g(j).u
       pow(lb.model.w(i, j), 2) * trace(u.v * lambdaJ)
     }.sum
@@ -109,18 +109,7 @@ object calcLBLoglik {
 
   private def tildeQ(i: Int, lb: LowerBound): Double = {
     val tildeQ = (0 until lb.model.g.size).map { j =>
-
-      val kXZ = lb.kXZj(i, j)
-      val kXXDiag = lb.calcKxxDiagj(i, j)
-      val kZZinv = lb.kZZjInv(j)
-
-      /**
-       * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
-       * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
-       * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
-       */
-      val kTildeDiagSum = sum(kXXDiag - diagProd(kXZ * kZZinv, kXZ))
-      pow(lb.model.w(i, j), 2) * kTildeDiagSum
+      pow(lb.model.w(i, j), 2) * lb.tildeQ(i,j)
     }.sum
 
     0.5 * lb.model.beta(i) * tildeQ

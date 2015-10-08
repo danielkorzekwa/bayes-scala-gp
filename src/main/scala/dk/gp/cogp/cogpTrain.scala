@@ -12,13 +12,15 @@ import dk.gp.cogp.model.Task
 object cogpTrain extends LazyLogging{
   
   def apply(tasks:Array[Task], model: CogpModel, iterNum: Int): CogpModel = {
-    val finalModel = (0 until iterNum).foldLeft(model) { 
-      case (currModel, iter) => 
-        val newModel = stochasticUpdateCogpModel(currModel,tasks)
-          val lb = LowerBound(newModel, tasks)
-          logger.info("iter=%d/%d, llh=%.3f".format(iter,iterNum,calcLBLoglik(lb)))
-          newModel
+    
+    val lowerBound = LowerBound(model,tasks)
+    
+    val finalLB = (0 until iterNum).foldLeft(lowerBound) { 
+      case (currLB, iter) => 
+        val newLB = stochasticUpdateCogpModel(currLB,tasks)
+          logger.info("iter=%d/%d, llh=%.3f".format(iter,iterNum,calcLBLoglik(newLB)))
+          newLB
       }
-    finalModel
+    finalLB.model
   }
 }

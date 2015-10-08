@@ -46,12 +46,12 @@ object calcLBGradBeta {
   }
 
   private def dTildeP(i: Int, lb: LowerBound): Double = {
-    val kZZiInv = lb.kZZiInv(i)
     val kXZi = lb.kXZi(i)
+    val Ai = lb.calcAi(i)
 
     val kXXiDiag = lb.calcKxxDiagi(i)
 
-    val kTildeDiagSum = sum(kXXiDiag - diagProd(kXZi * kZZiInv,kXZi))
+    val kTildeDiagSum = sum(kXXiDiag - diagProd(Ai, kXZi))
 
     0.5 * kTildeDiagSum
   }
@@ -59,11 +59,9 @@ object calcLBGradBeta {
   private def dTraceQ(i: Int, lb: LowerBound) = {
     val dTraceQ = (0 until lb.model.g.size).map { j =>
 
-      val Aj = lb.calcAj(i, j)
-      val lambdaJ = Aj.t * Aj
+      val Aj = lb.Aj(i, j)
+      val lambdaJ = lb.lambdaJ(i, j)
       val gU = lb.model.g(j).u
-
-      val traceQ = trace(gU.v * lambdaJ)
 
       pow(lb.model.w(i, j), 2) * trace(gU.v * lambdaJ)
     }.sum
@@ -75,14 +73,7 @@ object calcLBGradBeta {
 
     val dTildeQ = (0 until lb.model.g.size).map { j =>
 
-      val kXZ = lb.kXZj(i, j)
-      val kZX = kXZ.t
-      val kXXDiag = lb.calcKxxDiagj(i, j)
-      val kZZinv = lb.kZZjInv(j)
-
-      val kTildeDiagSum = sum(kXXDiag - diagProd(kXZ * kZZinv, kXZ))
-
-      pow(lb.model.w(i, j), 2) * kTildeDiagSum
+      pow(lb.model.w(i, j), 2) * lb.tildeQ(i,j)
     }.sum
 
     0.5 * dTildeQ

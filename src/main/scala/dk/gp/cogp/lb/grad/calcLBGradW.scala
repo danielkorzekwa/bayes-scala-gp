@@ -28,8 +28,8 @@ object calcLBGradW {
     val w = lb.model.w
     val g = lb.model.g
 
-    val Aj = lb.calcAj(i,j)
-    val lambdaJ = Aj.t * Aj
+    val Aj = lb.Aj(i, j)
+    val lambdaJ = lb.lambdaJ(i, j)
 
     //trace term
     val traceTerm = beta(i) * w(i, j) * trace(g(j).u.v * lambdaJ)
@@ -38,32 +38,16 @@ object calcLBGradW {
 
   private def tildeTerm(i: Int, j: Int, lb: LowerBound): Double = {
 
-    val model = lb.model
     val beta = lb.model.beta
     val w = lb.model.w
-
-    val kXZ = lb.kXZj(i,j)
-
-    val kZZinv = lb.kZZjInv(j)
-
-    val kXXDiag = lb.calcKxxDiagj(i, j)
-
-    /**
-     * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
-     * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
-     * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
-     */
-    val kZX = kXZ.t
-    val kTildeDiagSum = sum(kXXDiag) - sum(diagProd(kXZ*kZZinv,kXZ))
-    val tildeTerm = beta(i) * w(i, j) * kTildeDiagSum
-
+    val tildeTerm = beta(i) * w(i, j) * lb.tildeQ(i, j)
     tildeTerm
   }
 
   private def logNormalTerm(i: Int, j: Int, lb: LowerBound): Double = {
 
     val Ai = lb.calcAi(i)
-    val Aj = lb.calcAj(i,j)
+    val Aj = lb.Aj(i, j)
     val beta = lb.model.beta
     val w = lb.model.w
     val g = lb.model.g
@@ -71,7 +55,7 @@ object calcLBGradW {
     val y = lb.yi(i)
 
     //log normal term
-  
+
     val logNormalTerm1 = beta(i) * ((y - wAm(i, lb) - Ai * h(i).u.m + w(i, j) * (Aj * g(j).u.m)).t * (Aj * g(j).u.m)) //wAm (j'!= j) = wAm - wAjmj 
     val logNormalTerm2 = beta(i) * w(i, j) * sum(pow(Aj * g(j).u.m, 2))
     val logNormalTerm = logNormalTerm1 - logNormalTerm2

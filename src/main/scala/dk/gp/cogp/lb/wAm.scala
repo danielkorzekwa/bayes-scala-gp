@@ -11,7 +11,7 @@ object wAm {
     val wAm = lb.model.g.zipWithIndex.map {
       case (g, j) =>
 
-        val Aj = lb.calcAj(i, j)
+        val Aj = lb.Aj(i, j)
         lb.model.w(i, j) * Aj * g.u.m
     }.toSeq
 

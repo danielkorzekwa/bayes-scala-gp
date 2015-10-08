@@ -10,12 +10,13 @@ import dk.gp.cov.utils.covDiagD
 import dk.gp.cov.utils.covDiag
 import breeze.linalg._
 import dk.gp.cogp.model.Task
+import dk.gp.math.diagProd
 
-class LowerBound(val model: CogpModel, val tasks: Array[Task]) {
+class LowerBound(var model: CogpModel, val tasks: Array[Task]) {
 
   private val kZZjMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()
   private val kZZjInvMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()
-  private val kXZjMap: mutable.Map[Int, mutable.Map[Int, DenseMatrix[Double]]] = mutable.Map()
+  val kXZjMap: mutable.Map[Int, mutable.Map[Int, DenseMatrix[Double]]] = mutable.Map()
 
   private val kZZiMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()
   private val kZZiInvMap: mutable.Map[Int, DenseMatrix[Double]] = mutable.Map()
@@ -26,6 +27,37 @@ class LowerBound(val model: CogpModel, val tasks: Array[Task]) {
 
   private val dkZZiMap: mutable.Map[Int, Array[DenseMatrix[Double]]] = mutable.Map()
   private val dkXZiMap: mutable.Map[Int, Array[DenseMatrix[Double]]] = mutable.Map()
+
+  private val AjMap: mutable.Map[Int, mutable.Map[Int, DenseMatrix[Double]]] = mutable.Map()
+  private val lambdaJMap: mutable.Map[Int, mutable.Map[Int, DenseMatrix[Double]]] = mutable.Map()
+
+  private var _tildeQ: DenseMatrix[Double] = null
+
+  def tildeQ: DenseMatrix[Double] = {
+    if (_tildeQ == null) _tildeQ = calcTildeQ()
+    _tildeQ
+  }
+
+  def clearCache() = {
+    kZZjMap.clear()
+    kZZjInvMap.clear()
+    kXZjMap.clear()
+
+    kZZiMap.clear()
+    kZZiInvMap.clear()
+    kXZiMap.clear()
+
+    dkZZjMap.clear()
+    dkXZjMap.clear()
+
+    dkZZiMap.clear()
+    dkXZiMap.clear()
+
+    AjMap.clear()
+    lambdaJMap.clear()
+
+    _tildeQ = null
+  }
 
   def kZZj(j: Int): DenseMatrix[Double] = kZZjMap.getOrElseUpdate(j, model.g(j).calckZZ())
   def kZZjInv(j: Int): DenseMatrix[Double] = kZZjInvMap.getOrElseUpdate(j, calckZZjInv(j))
@@ -57,6 +89,31 @@ class LowerBound(val model: CogpModel, val tasks: Array[Task]) {
     dKxz
   }
 
+  def Aj(i: Int, j: Int): DenseMatrix[Double] = AjMap.getOrElseUpdate(j, mutable.Map()).getOrElseUpdate(i, kXZj(i, j) * kZZjInv(j))
+
+  def lambdaJ(i: Int, j: Int) = {
+    lambdaJMap.getOrElseUpdate(j, mutable.Map()).getOrElseUpdate(i, Aj(i, j).t * Aj(i, j))
+  }
+
+  private def calcTildeQ(): DenseMatrix[Double] = {
+
+    val m = DenseMatrix.zeros[Double](model.h.size, model.g.size)
+
+    for (i <- 0 until model.h.size; j <- 0 until model.g.size) {
+      val kXXDiag = calcKxxDiagj(i, j)
+
+      /**
+       * trace(ABC) = trace(CAB) or trace(ABC) = sum(sum(ab.*c',2))
+       * https://www.ics.uci.edu/~welling/teaching/KernelsICS273B/MatrixCookBook.pdf,
+       * https://github.com/trungngv/cogp/blob/master/libs/util/diagProd.m
+       */
+      val kTildeDiagSum = sum(kXXDiag - diagProd(Aj(i, j), kXZj(i, j)))
+      m(i, j) = kTildeDiagSum
+
+    }
+    m
+  }
+
   def calcKxxDiagi(i: Int): DenseVector[Double] = {
 
     val x = tasks(i).x
@@ -71,7 +128,6 @@ class LowerBound(val model: CogpModel, val tasks: Array[Task]) {
   }
 
   def calcAi(i: Int): DenseMatrix[Double] = kXZi(i) * kZZiInv(i)
-  def calcAj(i: Int, j: Int): DenseMatrix[Double] = kXZj(i, j) * kZZjInv(j)
 
   /**
    * @param k k-derivative
@@ -90,7 +146,7 @@ class LowerBound(val model: CogpModel, val tasks: Array[Task]) {
 
   def calcdAj(i: Int, j: Int, k: Int): DenseMatrix[Double] = {
     val kZZinv = kZZjInv(j)
-    val AjD = (dKxzj(i, j, k)  - calcAj(i, j) * dKzzj(j, k)) * kZZinv
+    val AjD = (dKxzj(i, j, k) - Aj(i, j) * dKzzj(j, k)) * kZZinv
     AjD
   }
 

@@ -19,7 +19,7 @@ class stochasticUpdateCogpModelTest {
 
     val finalModel = (1 to 50).foldLeft(initialModel) {
       case (currentModel, i) =>
-        val newModel = stochasticUpdateCogpModel(currentModel, data)
+        val newModel = stochasticUpdateCogpModel(LowerBound(currentModel, data),data).model
 
         val loglik = calcLBLoglik(LowerBound(newModel, data))
         // println("LB loglik=" + loglik)
@@ -27,7 +27,7 @@ class stochasticUpdateCogpModelTest {
         newModel
     }
 
-    assertEquals(-1849.640, calcLBLoglik(LowerBound(finalModel, data)), 0.001)
+    assertEquals(-1849.654, calcLBLoglik(LowerBound(finalModel, data)), 0.001)
 
   }
 

@@ -27,7 +27,7 @@ object calcLBGradVEta1 {
     else sum{
       (0 until w.cols).map { jIndex =>
 
-        val Aj = lb.calcAj(i,jIndex)
+        val Aj = lb.Aj(i,jIndex)
  
         w(i, jIndex) * Aj * u(jIndex).m
       }

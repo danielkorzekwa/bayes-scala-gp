@@ -61,7 +61,7 @@ object calcLBGradHypCovG {
       val dKxz = lb.dKxzj(i, j, k)
 
       val AjD = lb.calcdAj(i, j, k)
-      val Aj = lb.calcAj(i, j)
+      val Aj = lb.Aj(i, j)
 
       val dKxxDiag = lb.calcdKxxDiagj(i, j, k)
       val tilde = 0.5 * beta(i) * pow(w(i, j), 2) * sum(dKxxDiag - diagProd(AjD, kXZ) - diagProd(Aj, dKxz))
@@ -78,14 +78,10 @@ object calcLBGradHypCovG {
     val beta = lb.model.beta
     val u = lb.model.g(j).u
 
-    val kZZinv = lb.kZZjInv(j)
-
     val traceQPart = (0 until lb.model.h.size).map { i =>
 
-      val kXZ = lb.kXZj(i, j)
-
       val AjD = lb.calcdAj(i, j, k)
-      val Aj = lb.calcAj(i, j)
+      val Aj = lb.Aj(i, j)
       beta(i) * pow(w(i, j), 2) * sum(diagProd(Aj * u.v, AjD))
     }.sum
 

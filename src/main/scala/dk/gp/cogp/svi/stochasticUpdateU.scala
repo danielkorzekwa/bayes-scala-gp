@@ -37,6 +37,7 @@ object stochasticUpdateU {
      *  Hensman et al. Gaussian Processes for Big Data, 2013
      */
     val naturalGradEta1 = calcLBGradUEta1(j, lb)
+    
     val naturalGradEta2 = calcLBGradUEta2(j, lb)
 
     val newTheta1 = theta1 + learningRate * naturalGradEta1
