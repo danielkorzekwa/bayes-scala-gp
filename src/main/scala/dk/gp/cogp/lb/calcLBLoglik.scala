@@ -6,15 +6,10 @@ import breeze.linalg.DenseVector
 import breeze.linalg.InjectNumericOps
 import breeze.linalg.cholesky
 import breeze.linalg.diag
-import breeze.linalg.inv
-import breeze.linalg.logdet
 import breeze.linalg.sum
 import breeze.linalg.trace
 import breeze.numerics.log
 import breeze.numerics.pow
-import dk.gp.cov.utils.covDiag
-import dk.gp.math.invchol
-import breeze.linalg.Axis
 import dk.gp.math.logdetchol
 import dk.gp.math.diagProd
 
@@ -76,13 +71,7 @@ object calcLBLoglik {
 
   private def tildeP(i: Int, lb: LowerBound): Double = {
 
-    val Ai = lb.calcAi(i)
-    val kXZ = lb.kXZi(i)
-    val kXXDiag = lb.calcKxxDiagi(i)
-
-    val kTildeDiagSum = sum(kXXDiag - diagProd(Ai, kXZ))
-
-    val kTildePTerm = 0.5 * lb.model.beta(i) * kTildeDiagSum
+    val kTildePTerm = 0.5 * lb.model.beta(i) * lb.tildeP(i)
     kTildePTerm
   }
 
@@ -92,7 +81,7 @@ object calcLBLoglik {
     val lambdaI = Ai.t * Ai
 
     val v = lb.model.h(i).u
-    lb.model.beta(i) * 0.5 * trace(v.v * lambdaI)
+    lb.model.beta(i) * 0.5 * sum(diagProd(v.v,lambdaI))
   }
 
   private def traceQ(i: Int, lb: LowerBound): Double = {
@@ -101,7 +90,7 @@ object calcLBLoglik {
       val Aj = lb.Aj(i, j)
       val lambdaJ = lb.lambdaJ(i, j)
       val u = lb.model.g(j).u
-      pow(lb.model.w(i, j), 2) * trace(u.v * lambdaJ)
+      pow(lb.model.w(i, j), 2) * sum(diagProd(u.v ,lambdaJ))
     }.sum
 
     0.5 * lb.model.beta(i) * traceQ

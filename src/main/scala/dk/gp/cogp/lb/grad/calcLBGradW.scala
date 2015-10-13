@@ -32,7 +32,7 @@ object calcLBGradW {
     val lambdaJ = lb.lambdaJ(i, j)
 
     //trace term
-    val traceTerm = beta(i) * w(i, j) * trace(g(j).u.v * lambdaJ)
+    val traceTerm = beta(i) * w(i, j) * sum(diagProd(g(j).u.v,lambdaJ))
     traceTerm
   }
 

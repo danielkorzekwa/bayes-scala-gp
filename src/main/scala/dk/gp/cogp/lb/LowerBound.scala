@@ -32,10 +32,16 @@ class LowerBound(var model: CogpModel, val tasks: Array[Task]) {
   private val lambdaJMap: mutable.Map[Int, mutable.Map[Int, DenseMatrix[Double]]] = mutable.Map()
 
   private var _tildeQ: DenseMatrix[Double] = null
+  private var _tildeP: DenseVector[Double] = null
 
   def tildeQ: DenseMatrix[Double] = {
     if (_tildeQ == null) _tildeQ = calcTildeQ()
     _tildeQ
+  }
+
+  def tildeP: DenseVector[Double] = {
+    if (_tildeP == null) _tildeP = calcTildeP()
+    _tildeP
   }
 
   def clearCache() = {
@@ -57,6 +63,7 @@ class LowerBound(var model: CogpModel, val tasks: Array[Task]) {
     lambdaJMap.clear()
 
     _tildeQ = null
+     _tildeP = null
   }
 
   def kZZj(j: Int): DenseMatrix[Double] = kZZjMap.getOrElseUpdate(j, model.g(j).calckZZ())
@@ -93,6 +100,20 @@ class LowerBound(var model: CogpModel, val tasks: Array[Task]) {
 
   def lambdaJ(i: Int, j: Int) = {
     lambdaJMap.getOrElseUpdate(j, mutable.Map()).getOrElseUpdate(i, Aj(i, j).t * Aj(i, j))
+  }
+
+  private def calcTildeP(): DenseVector[Double] = {
+    val m = DenseVector.zeros[Double](model.h.size)
+
+    for (i <- 0 until model.h.size) {
+
+      val kXXDiag = calcKxxDiagi(i)
+      val kTildeDiagSum = sum(kXXDiag - diagProd(calcAi(i), kXZi(i)))
+
+      m(i) = kTildeDiagSum
+    }
+
+    m
   }
 
   private def calcTildeQ(): DenseMatrix[Double] = {
