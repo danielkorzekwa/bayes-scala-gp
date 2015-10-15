@@ -80,10 +80,10 @@ object cogpPredict {
 
     val h = model.h(i)
 
-    val kSS = h.covFunc.cov(s.toDenseMatrix.t, s.toDenseMatrix.t, h.covFuncParams)(0, 0)
+    val kSS = h.covFunc.cov(s.toDenseMatrix, s.toDenseMatrix, h.covFuncParams)(0, 0)
 
-    val kSZ = h.covFunc.cov(s.toDenseMatrix.t, h.z, h.covFuncParams)(0, ::)
-    val kZZ = h.covFunc.cov(h.z, h.z, h.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](h.z.size)
+    val kSZ = h.covFunc.cov(s.toDenseMatrix, h.z, h.covFuncParams)(0, ::)
+    val kZZ = h.covFunc.cov(h.z, h.z, h.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](h.z.rows)
     val kZZinv = invchol(cholesky(kZZ).t)
 
     val var_i = kSS - kSZ * (kZZinv - kZZinv * h.u.v * kZZinv) * kSZ.t
@@ -94,8 +94,8 @@ object cogpPredict {
   private def predMean_i(s: DenseVector[Double], i: Int, model: CogpModel): Double = {
 
     val h = model.h(i)
-    val kSZ = h.covFunc.cov(s.toDenseMatrix.t, h.z, h.covFuncParams)(0, ::)
-    val kZZ = h.covFunc.cov(h.z, h.z, h.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](h.z.size)
+    val kSZ = h.covFunc.cov(s.toDenseMatrix, h.z, h.covFuncParams)(0, ::)
+    val kZZ = h.covFunc.cov(h.z, h.z, h.covFuncParams) + 1e-10 * DenseMatrix.eye[Double](h.z.rows)
     val kZZinv = invchol(cholesky(kZZ).t)
     val mean_i = kSZ * kZZinv * h.u.m
     mean_i
@@ -106,7 +106,7 @@ object cogpPredict {
 
     val predMeanArray = model.g.zipWithIndex.map { case (g,j) =>
 
-      val kSZ = g.covFunc.cov(s.toDenseMatrix.t, g.z, g.covFuncParams)(0, ::)
+      val kSZ = g.covFunc.cov(s.toDenseMatrix, g.z, g.covFuncParams)(0, ::)
       val kZZ = kZZj(j)
       val kZZinv = invchol(cholesky(kZZ).t)
 
@@ -121,9 +121,9 @@ object cogpPredict {
     val predVarArray = model.g.zipWithIndex.map {
       case (g, j) =>
 
-        val kSS = g.covFunc.cov(s.toDenseMatrix.t, s.toDenseMatrix.t, g.covFuncParams)(0, 0)
+        val kSS = g.covFunc.cov(s.toDenseMatrix, s.toDenseMatrix, g.covFuncParams)(0, 0)
 
-        val kSZ = g.covFunc.cov(s.toDenseMatrix.t, g.z, g.covFuncParams)(0, ::)
+        val kSZ = g.covFunc.cov(s.toDenseMatrix, g.z, g.covFuncParams)(0, ::)
         val kZZ = kZZj(j)
         val kZZinv = invchol(cholesky(kZZ).t)
 

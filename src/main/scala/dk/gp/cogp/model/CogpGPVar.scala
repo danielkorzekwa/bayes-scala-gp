@@ -15,7 +15,7 @@ case class CogpGPVar(z: DenseMatrix[Double], u: MultivariateGaussian, covFunc: C
 
   require(u.v.findAll (_.isNaN).size==0,"Inducing points variance is NaN:" + u.v)
   
-  def calckZZ(): DenseMatrix[Double] = covFunc.cov(z, z, covFuncParams) + 1e-10 * DenseMatrix.eye[Double](z.size)
+  def calckZZ(): DenseMatrix[Double] = covFunc.cov(z, z, covFuncParams) + 1e-10 * DenseMatrix.eye[Double](z.rows)
 
   def calckXZ(x: DenseMatrix[Double]): DenseMatrix[Double] = covFunc.cov(x, z, covFuncParams)
 
