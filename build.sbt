@@ -25,7 +25,7 @@ lazy val root = (project in file(".")).
       // test scoped
       "org.slf4j" % "slf4j-log4j12" % "1.7.2" % Test,
       "com.novocode" % "junit-interface" % "0.11" % Test,
-       "org.scalanlp" %% "breeze-viz" % "0.10" % Test
+      "org.scalanlp" %% "breeze-viz" % "0.10" % Test
       
     ),
     

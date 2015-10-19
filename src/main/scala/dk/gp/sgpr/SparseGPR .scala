@@ -1,6 +1,8 @@
 package dk.gp.sgpr
 
 import breeze.linalg.DenseMatrix
+import breeze.linalg.DenseVector
+import dk.gp.math.UnivariateGaussian
 
 /**
  * Sparse Gaussian Process Regression
@@ -13,8 +15,7 @@ trait SparseGPR {
    * Joint model: p(f|u)*p(z|u)*p(u)*p(y|f)
    *
    *
-   * Returns [mean,variance] for p(z|y)
    */
-  def predict(z: DenseMatrix[Double]): DenseMatrix[Double]
+  def predict(z: DenseMatrix[Double]): DenseVector[UnivariateGaussian]
 
 }

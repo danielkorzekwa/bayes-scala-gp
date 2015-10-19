@@ -5,6 +5,8 @@ import breeze.numerics._
 import breeze.linalg._
 import dk.gp.cov.utils.covDiag
 import dk.gp.math.invchol
+import dk.gp.math.UnivariateGaussian
+import dk.gp.math.UnivariateGaussian
 
 /**
  * Gaussian Process Regression. It uses Gaussian likelihood and zero mean functions.
@@ -28,20 +30,33 @@ case class GenericSparseGPR(x: DenseMatrix[Double], y: DenseVector[Double], u: D
   private val kNNdiag = covDiag(x, covFunc, covFuncParams) + 1e-7
   private val sigma = invchol(cholesky(kMM + pow(likNoiseStdDev, -2) * kMN * kNM).t)
   private val kMMinv = invchol(cholesky(kMM).t)
-
   private val yValue: DenseVector[Double] = y
+   private val sigmaKmnyVal = sigma * kMN * yValue
 
-  def predict(z: DenseMatrix[Double]): DenseMatrix[Double] = {
+  def predict(z: DenseMatrix[Double]): DenseVector[UnivariateGaussian] = {
 
-    val kZZ: DenseMatrix[Double] = covFunc.cov(z, z, covFuncParams)
-    val kZU: DenseMatrix[Double] = covFunc.cov(z, u, covFuncParams)
-    val kUZ = kZU.t
+    val predicted = z(*, ::).map { z =>
 
-    //@TODO use Cholesky Factorization instead of a direct inverse
-    val predMean = pow(likNoiseStdDev, -2) * kZU * sigma * kMN * yValue
-    val predVariance = kZZ - kZU * kMMinv * kUZ + kZU * sigma * kUZ
+      val kZZ: DenseMatrix[Double] = covFunc.cov(z.toDenseMatrix, z.toDenseMatrix, covFuncParams)
+      val kZU: DenseMatrix[Double] = covFunc.cov(z.toDenseMatrix, u, covFuncParams)
+      val kUZ = kZU.t
 
-    DenseVector.horzcat(predMean, diag(predVariance))
+      val predMean = pow(likNoiseStdDev, -2) * kZU * sigmaKmnyVal
+      val predVariance = kZZ - kZU * kMMinv * kUZ + kZU * sigma * kUZ
+      UnivariateGaussian(predMean(0), predVariance(0, 0))
+    }
+
+    //    val kZZ: DenseMatrix[Double] = covFunc.cov(z, z, covFuncParams)
+    //    val kZU: DenseMatrix[Double] = covFunc.cov(z, u, covFuncParams)
+    //    val kUZ = kZU.t
+    //
+    //    //@TODO use Cholesky Factorization instead of a direct inverse
+    //    val predMean = pow(likNoiseStdDev, -2) * kZU * sigma * kMN * yValue
+    //    val predVariance = kZZ - kZU * kMMinv * kUZ + kZU * sigma * kUZ
+    //
+    //    DenseVector.horzcat(predMean, diag(predVariance))
+
+    predicted
   }
 
   /**
