@@ -137,8 +137,8 @@ class cogpTrainTest {
 
   }
 
-  @Test def test_40_data_points_500_iter_single_h_covseiso_single_g_cov_noise = {
-
+  @Ignore @Test def test_40_data_points_500_iter_single_h_covseiso_single_g_cov_noise = {
+    
     val data = loadToyModelData(n = 40)
 
     val z = data(0).x
