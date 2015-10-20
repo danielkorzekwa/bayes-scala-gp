@@ -1,12 +1,12 @@
 package dk.gp.sgpr
 
-import dk.gp.cov.CovSEiso
 import org.junit._
 import Assert._
+import dk.gp.cov.CovSEiso
 import breeze.linalg._
 import java.io.File
 
-class GenericSparseGPRTest {
+class sgprPredictTest {
 
   @Test def test_all_trainingset_as_inducing_points_not_large_scale = {
     val data = csvread(new File("src/test/resources/gpml/regression_data.csv"), skipLines = 1)
@@ -17,11 +17,11 @@ class GenericSparseGPRTest {
     val covFunc = CovSEiso()
     val noiseLogStdDev = -1.9025
 
-    val z = DenseVector(-1d, 1).toDenseMatrix.t
+    val s = DenseVector(-1d, 1).toDenseMatrix.t
 
-    val model = GenericSparseGPR(x, y, x, covFunc, covFuncParams, noiseLogStdDev)
+    val model = SgprModel(x, y, x, covFunc, covFuncParams, noiseLogStdDev)
 
-    val predictions = model.predict(z)
+    val predictions = sgprPredict(s, model)
 
     assertEquals(0.037, predictions(0).m, 0.0001) //z(0) mean
     assertEquals(0.01825, predictions(0).v, 0.0001) //z(0) variance
@@ -40,11 +40,11 @@ class GenericSparseGPRTest {
     val covFunc = CovSEiso()
     val noiseLogStdDev = -1.9025
 
-    val z = DenseVector(-1d, 1).toDenseMatrix.t
+    val s = DenseVector(-1d, 1).toDenseMatrix.t
 
-    val model = GenericSparseGPR(x, y, u, covFunc, covFuncParams, noiseLogStdDev)
+    val model = SgprModel(x, y, u, covFunc, covFuncParams, noiseLogStdDev)
 
-    val predictions = model.predict(z)
+    val predictions = sgprPredict(s, model)
 
     assertEquals(0.0371, predictions(0).m, 0.0001) //z(0) mean
     assertEquals(0.01825, predictions(0).v, 0.0001) //z(0) variance
@@ -64,11 +64,11 @@ class GenericSparseGPRTest {
     val covFunc = CovSEiso()
     val noiseLogStdDev = -1.9025
 
-    val z = DenseVector(-1d, 1).toDenseMatrix.t
+    val s = DenseVector(-1d, 1).toDenseMatrix.t
 
-    val model = GenericSparseGPR(x, y, u, covFunc, covFuncParams, noiseLogStdDev)
+    val model = SgprModel(x, y, u, covFunc, covFuncParams, noiseLogStdDev)
 
-    val predictions = model.predict(z)
+    val predictions = sgprPredict(s, model)
 
     assertEquals(0.5468, predictions(0).m, 0.0001) //z(0) mean
     assertEquals(8.3925e-4, predictions(0).v, 0.0001) //z(0) variance
@@ -76,4 +76,5 @@ class GenericSparseGPRTest {
     assertEquals(2.6868, predictions(1).m, 0.0001) //z(1) mean
     assertEquals(8.3923e-4, predictions(1).v, 0.0001) //z(1) variance
   }
+
 }

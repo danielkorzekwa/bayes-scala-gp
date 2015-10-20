@@ -46,7 +46,6 @@ object calcLowerBound {
   private def f2(kMM: DenseMatrix[Double], kMN: DenseMatrix[Double], kNM: DenseMatrix[Double], likNoiseVar: Double, a: DenseMatrix[Double]): Double =
     -0.5 * logdet(a)._2
 
-  //@Replace inv with invchol
   private def f3(kMM: DenseMatrix[Double], kMN: DenseMatrix[Double], kNM: DenseMatrix[Double], y: DenseVector[Double], likNoiseVar: Double, a: DenseMatrix[Double]): Double =
     (1d / (2 * likNoiseVar)) * (y.t * kNM * invchol(cholesky(a).t) * kMN * y)
 
