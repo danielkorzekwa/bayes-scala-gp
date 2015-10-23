@@ -13,8 +13,10 @@ import breeze.linalg.inv
 
 case class SgprModel private (kMMinv: DenseMatrix[Double], u: DenseMatrix[Double],
                               covFunc: CovFunc, covFuncParams: DenseVector[Double], logNoiseStdDev: Double,
-                              yKnmInvLmInvLa: DenseVector[Double], invLm: DenseMatrix[Double], invLa: DenseMatrix[Double]) {
-
+                              yKnmInvLmInvLa: DenseVector[Double], //[u x 1]
+                              invLm: DenseMatrix[Double], //[u x u] 
+                              invLa: DenseMatrix[Double] // [u x u]
+                              ) {
 }
 
 object SgprModel {
