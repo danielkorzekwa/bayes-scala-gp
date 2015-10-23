@@ -8,21 +8,31 @@ import breeze.numerics._
 
 object sgprPredict {
 
-  def apply(s: DenseMatrix[Double], model: SgprModel): DenseVector[UnivariateGaussian] = {
+  def apply(s: DenseMatrix[Double], model: SgprModel, computeVariance: Boolean = true): DenseVector[UnivariateGaussian] = {
 
     val likNoiseStdDev = exp(model.logNoiseStdDev)
-    
-    val predicted = s(*, ::).map { s =>
 
-      val kZZ: DenseMatrix[Double] = model.covFunc.cov(s.toDenseMatrix, s.toDenseMatrix, model.covFuncParams)
-      val kZU: DenseMatrix[Double] = model.covFunc.cov(s.toDenseMatrix, model.u, model.covFuncParams)
-      val kUZ = kZU.t
+    val predictedArray = (0 until s.rows).par.map { i =>
 
-      val predMean = pow(likNoiseStdDev, -2) * kZU * model.sigmaKmnyVal
-      val predVariance = kZZ - kZU * model.kMMinv * kUZ + kZU * model.sigma * kUZ
-      UnivariateGaussian(predMean(0), predVariance(0, 0))
-    }
+      val sRow = s(i, ::).t
 
-    predicted
+      val kZU = model.covFunc.cov(sRow.toDenseMatrix, model.u, model.covFuncParams)
+      val kZUinvLm = kZU * model.invLm
+      val kZUinvLmInvLa = kZUinvLm * model.invLa
+
+      val predMean = kZUinvLmInvLa * model.yKnmInvLmInvLa
+
+      val predVariance = if (computeVariance) {
+
+        val kZZ: DenseMatrix[Double] = model.covFunc.cov(sRow.toDenseMatrix, sRow.toDenseMatrix, model.covFuncParams)
+        
+        val v = diag(kZZ - kZUinvLm * kZUinvLm.t + pow(likNoiseStdDev, 2) * (kZUinvLmInvLa * kZUinvLmInvLa.t))
+        v(0)
+      } else Double.NaN
+      UnivariateGaussian(predMean(0), predVariance)
+    }.toArray
+
+    DenseVector(predictedArray)
+
   }
 }

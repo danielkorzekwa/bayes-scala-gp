@@ -6,8 +6,14 @@ import dk.gp.cov.CovFunc
 import dk.gp.math.invchol
 import breeze.linalg.cholesky
 import breeze.numerics._
+import dk.gp.math.inveig
+import breeze.linalg.diag
+import breeze.stats._
+import breeze.linalg.inv
 
-case class SgprModel private (kMMinv: DenseMatrix[Double], sigma: DenseMatrix[Double], sigmaKmnyVal: DenseVector[Double], u: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], logNoiseStdDev: Double) {
+case class SgprModel private (kMMinv: DenseMatrix[Double], u: DenseMatrix[Double],
+                              covFunc: CovFunc, covFuncParams: DenseVector[Double], logNoiseStdDev: Double,
+                              yKnmInvLmInvLa: DenseVector[Double], invLm: DenseMatrix[Double], invLa: DenseMatrix[Double]) {
 
 }
 
@@ -27,16 +33,22 @@ object SgprModel {
   def apply(x: DenseMatrix[Double], y: DenseVector[Double], u: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], logNoiseStdDev: Double): SgprModel = {
 
     val likNoiseStdDev = exp(logNoiseStdDev)
+    val likNoiseVar = likNoiseStdDev * likNoiseStdDev
 
-    val kMM: DenseMatrix[Double] = covFunc.cov(u, u, covFuncParams) + DenseMatrix.eye[Double](u.rows) * 1e-7 //add some jitter
-    val kMN: DenseMatrix[Double] = covFunc.cov(u, x, covFuncParams)
-    val kNM = kMN.t
+    val kMM: DenseMatrix[Double] = covFunc.cov(u, u, covFuncParams)
+    val kNM: DenseMatrix[Double] = covFunc.cov(x, u, covFuncParams)
 
-    val sigma = invchol(cholesky(kMM + pow(likNoiseStdDev, -2) * kMN * kNM).t)
-    val sigmaKmnyVal = sigma * kMN * y
+    val lm: DenseMatrix[Double] = cholesky(kMM + 1e-7 * DenseMatrix.eye[Double](kMM.rows)).t
+    val kMMinv = invchol(lm)
+    val invLm = inv(lm)
+    val KnmInvLm = kNM * invLm
+    val C = KnmInvLm.t * KnmInvLm
 
-    val kMMinv = invchol(cholesky(kMM).t)
+    val a = likNoiseVar * DenseMatrix.eye[Double](u.rows) + C
+    val la = cholesky(a).t
+    val invLa: DenseMatrix[Double] = inv(la)
+    val yKnmInvLmInvLa: DenseVector[Double] = ((y.t * kNM * invLm) * invLa).t
 
-    new SgprModel(kMMinv, sigma, sigmaKmnyVal, u, covFunc, covFuncParams, logNoiseStdDev)
+    new SgprModel(kMMinv, u, covFunc, covFuncParams, logNoiseStdDev, yKnmInvLmInvLa, invLm, invLa)
   }
 }

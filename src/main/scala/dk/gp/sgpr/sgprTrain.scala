@@ -12,7 +12,7 @@ object sgprTrain {
     val initialParams = DenseVector(covFuncParams.toArray :+ logNoiseStdDev)
     val diffFunction = SparseGpDiffFunction(x, y, u, covFunc)
 
-    val optimizer = new LBFGS[DenseVector[Double]](maxIter = 100, m = 3, tolerance = 1.0E-6)
+    val optimizer = new LBFGS[DenseVector[Double]](maxIter = 100, m = 6, tolerance = 1.0E-6)
     val optIterations = optimizer.iterations(diffFunction, initialParams).toList
 
     val newParams = optIterations.last.x

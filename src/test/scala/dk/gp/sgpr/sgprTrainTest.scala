@@ -23,9 +23,9 @@ class sgprTrainTest {
 
     val sgprModel = sgprTrain(x, y, u, covFunc, initialCovParams, logNoiseStdDev)
 
-    assertEquals(0.7130, sgprModel.covFuncParams(0), 0.0001)
-    assertEquals(-0.99066, sgprModel.covFuncParams(1), 0.0001)
-    assertEquals(-1.8961, sgprModel.logNoiseStdDev, 0.0001)
+    assertEquals(0.68652, sgprModel.covFuncParams(0), 0.0001)
+    assertEquals(-0.9925, sgprModel.covFuncParams(1), 0.0001)
+    assertEquals(-1.9012, sgprModel.logNoiseStdDev, 0.0001)
   }
 
   @Test def learn_pseudo_inducing_points_large_scale = {
@@ -44,6 +44,6 @@ class sgprTrainTest {
 
     assertEquals(1.7715, sgprModel.covFuncParams(0), 0.0001)
     assertEquals(0.3772, sgprModel.covFuncParams(1), 0.0001)
-    assertEquals(-0.0754, sgprModel.logNoiseStdDev, 0.0001)
+    assertEquals(-0.0755, sgprModel.logNoiseStdDev, 0.0001)
   }
 }
