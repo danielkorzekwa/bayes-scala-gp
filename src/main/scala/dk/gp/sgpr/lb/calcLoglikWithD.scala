@@ -3,11 +3,6 @@ package dk.gp.sgpr.lb
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import dk.gp.cov.CovFunc
-import breeze.numerics._
-import dk.gp.sgpr.lb.SgprLowerBound
-import dk.gp.sgpr.lb.calcLowerBoundKLikNoise
-import dk.gp.sgpr.lb.calcLowerBoundDKernel
-import dk.gp.sgpr.lb.calcLowerBound
 
 object calcLoglikWithD {
 

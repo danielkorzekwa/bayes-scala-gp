@@ -1,12 +1,10 @@
 package dk.gp.cogp.lb.grad
 
-import org.junit._
-import org.junit.Assert._
-import breeze.linalg._
-import java.io.File
-import dk.gp.cogp.testutils.createCogpToyModel
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
 import dk.gp.cogp.lb.LowerBound
-import dk.gp.cogp.lb.grad.calcLBGradBeta
+import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.testutils.loadToyModelData
 
 class calcLBGradBetaTest {

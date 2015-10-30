@@ -4,10 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 import breeze.linalg.DenseVector
-import breeze.linalg.csvread
 import breeze.numerics.log
-import dk.gp.cogp.lb.LowerBound
-import dk.gp.cogp.lb.calcLBLoglik
 import dk.gp.cogp.testutils.createCogpToyModel
 import dk.gp.cogp.testutils.loadToyModelData
 import dk.gp.cov.CovFunc
