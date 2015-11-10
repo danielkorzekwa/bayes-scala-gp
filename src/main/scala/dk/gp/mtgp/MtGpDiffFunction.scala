@@ -33,11 +33,10 @@ case class MtGpDiffFunction(x: DenseMatrix[Double], y: DenseVector[Double], covF
       val taskX = x(idx, ::).toDenseMatrix
       val taskY = y(idx).toDenseVector
 
-      val model = GprModel(x, y, covFunc, initialCovFuncParams, initialLikNoiseLogStdDev)
+      val model = GprModel(taskX, taskY, covFunc, initialCovFuncParams, initialLikNoiseLogStdDev)
       val gpDiffFunction = GprDiffFunction(model)
       gpDiffFunction
     }
-
     gpDiffFunctions
   }
 }

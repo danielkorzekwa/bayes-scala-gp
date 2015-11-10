@@ -15,7 +15,7 @@ class learnMtGgHyperParamsTest {
   val y = data(::, 1)
 
   val x1 = DenseMatrix.horzcat(DenseMatrix.zeros[Double](y.size, 1) + 1.0, x)
-  val x2 = DenseMatrix.horzcat(DenseMatrix.zeros[Double](y.size, 1) + 1.0, x)
+  val x2 = DenseMatrix.horzcat(DenseMatrix.zeros[Double](y.size, 1) + 2.0, x)
 
   val allX = DenseMatrix.vertcat(x1, x2)
   val allY = DenseVector.vertcat(y, y)
@@ -28,8 +28,8 @@ class learnMtGgHyperParamsTest {
 
     val (learnedCovFuncParams, learnedLikNoiseLogStdDev) = learnMtGgHyperParams(allX, allY, covFunc, covFuncParams, likNoiseLogStdDev)
 
-    assertEquals(0.66160, learnedCovFuncParams(0), 0.0001)
-    assertEquals(-1.0825, learnedCovFuncParams(1), 0.0001)
-    assertEquals(-2.1626, learnedLikNoiseLogStdDev, 0.0001)
+    assertEquals(0.68594, learnedCovFuncParams(0), 0.0001)
+    assertEquals(-0.99340,learnedCovFuncParams(1), 0.0001)
+    assertEquals(-1.9025, learnedLikNoiseLogStdDev, 0.0001)
   }
 }
