@@ -6,6 +6,7 @@ List of algorithms:
 * [Collaborative multi-output Gaussian Process](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/cogp/cogp.md)
 * [Sparse Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/sgpr/sgpr.md)
 * [Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/gpr/gpr.md)
+* [Hierachical Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/hgpr/hgpr.md)
 * [Multi Task Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/mtgp/mtgp.md)
 
 
