@@ -5,14 +5,13 @@ import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import breeze.numerics._
 import dk.bayes.dsl.variable.Gaussian
-import dk.bayes.infer.gp.hgp.util.HgpFactorGraph
-import dk.bayes.infer.gp.hgp.util.inferXPrior
-import dk.bayes.infer.gp.hgp.util.inferXPrior
 import dk.gp.math.MultivariateGaussian
 import dk.gp.math.MultivariateGaussian
 import dk.gp.math.UnivariateGaussian
 import dk.gp.math.UnivariateGaussian
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
+import dk.gp.hgpr.util.inferXPrior
+import dk.gp.hgpr.util.HgprFactorGraph
 
 /**
  * Hierarchical Gaussian Process regression. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -40,7 +39,7 @@ object hgprPredict {
 
   private def createTaskPosteriorByTaskId(xTest: DenseMatrix[Double], model: HgprModel): Map[Int, TaskPosterior] = {
 
-    val hgpFactorGraph = HgpFactorGraph(model.x, model.y, model.u, model.covFunc, model.covFuncParams, model.likNoiseLogStdDev)
+    val hgpFactorGraph = HgprFactorGraph(model.x, model.y, model.u, model.covFunc, model.covFuncParams, model.likNoiseLogStdDev)
     val uPosterior = hgpFactorGraph.calcUPosterior()
 
     val taskIds = xTest(::, 0).toArray.distinct

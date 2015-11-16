@@ -8,6 +8,7 @@ List of algorithms:
 * [Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/gpr/gpr.md)
 * [Hierachical Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/hgpr/hgpr.md)
 * [Multi Task Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/mtgp/mtgp.md)
+* [GPR: Learning cov hyper parameters with variational lower bound on marginal likelihood](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/gprvblearn/gprvblearn.md)
 
 
 This project uses [Bayes-scala](https://github.com/danielkorzekwa/bayes-scala) library for Bayesian inference.

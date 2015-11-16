@@ -14,7 +14,6 @@ object predict {
 
     val meanZ = DenseVector.zeros[Double](z.rows) + model.mean
 
-    //@TODO use Cholesky Factorization instead of a direct inverse
     val predMean = meanZ + kXZ.t * (model.kXXInv * (model.y - model.meanX))
     val predVar = kZZ - kXZ.t * model.kXXInv * kXZ
 
