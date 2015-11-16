@@ -10,7 +10,7 @@ List of algorithms:
 * [Multi Task Gaussian Process Regression](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/doc/mtgp/mtgp.md)
 
 
-This project is related to a [Bayes-scala](https://github.com/danielkorzekwa/bayes-scala) library.
+This project uses [Bayes-scala](https://github.com/danielkorzekwa/bayes-scala) library for Bayesian inference.
 
 ## How to use it from sbt and maven?
 
