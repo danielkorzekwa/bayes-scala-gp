@@ -1,17 +1,14 @@
 package dk.gp.hgpr
 
-import breeze.linalg._
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import breeze.numerics._
+import breeze.numerics.exp
 import dk.bayes.dsl.variable.Gaussian
-import dk.gp.math.MultivariateGaussian
-import dk.gp.math.MultivariateGaussian
-import dk.gp.math.UnivariateGaussian
-import dk.gp.math.UnivariateGaussian
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
-import dk.gp.hgpr.util.inferXPrior
+import dk.gp.gp.gpPredictSingle
 import dk.gp.hgpr.util.HgprFactorGraph
+import dk.gp.math.MultivariateGaussian
+import dk.gp.math.UnivariateGaussian
 
 /**
  * Hierarchical Gaussian Process regression. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -30,8 +27,8 @@ object hgprPredict {
       val taskId = xRow(0).toInt
       val taskPosterior = taskPosteriorByTaskId(taskId)
 
-      val xTestPrior = inferXPrior(xRow.toDenseMatrix, taskPosterior.x, taskPosterior.xPosterior, model.covFunc, model.covFuncParams, model.likNoiseLogStdDev)
-      UnivariateGaussian(xTestPrior._1(0), xTestPrior._2(0, 0))
+      val xTestPrior = gpPredictSingle(xRow.toDenseMatrix, MultivariateGaussian(taskPosterior.xPosterior.mean,taskPosterior.xPosterior.variance),taskPosterior.x, model.covFunc, model.covFuncParams)
+      UnivariateGaussian(xTestPrior.m(0), xTestPrior.v(0, 0))
     }.toArray
     DenseVector(predictedArray)
 
@@ -56,9 +53,9 @@ object hgprPredict {
         val taskXTest = xTest(taskXTestIdx, ::).toDenseMatrix
 
         val taskXX = DenseMatrix.vertcat(taskX, taskXTest)
-        val (xPriorMean, cPriorVar) = inferXPrior(taskXX, model.u, uPosterior, model.covFunc, model.covFuncParams, model.likNoiseLogStdDev)
+        val xPrior = gpPredictSingle(taskXX,MultivariateGaussian(uPosterior.mean,uPosterior.variance),  model.u,model.covFunc, model.covFuncParams)
 
-        val xPriorVariable = dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian(xPriorMean, cPriorVar)
+        val xPriorVariable = dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian(xPrior.m, xPrior.v)
 
         val A = DenseMatrix.horzcat(DenseMatrix.eye[Double](taskX.rows), DenseMatrix.zeros[Double](taskX.rows, taskXTest.rows))
         val yVar = DenseMatrix.eye[Double](taskY.size) * exp(2d * model.likNoiseLogStdDev)
