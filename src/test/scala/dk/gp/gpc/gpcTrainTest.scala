@@ -21,8 +21,7 @@ class gpcTrainTest {
   val covFuncParams = DenseVector(log(1), log(1), log(1)) //log sf, logEllx1, logEllx2
   val mean = 0
 
-  //@TODO failing on CI
-  @Ignore @Test def test = {
+  @Test def test = {
 
     val model = GpcModel(x, y, covFunc, covFuncParams, mean)
     val trainedModel = gpcTrain(model, maxIter = 10)
