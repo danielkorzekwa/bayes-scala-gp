@@ -8,6 +8,10 @@ import dk.gp.math.MultivariateGaussian
 import dk.gp.gp.gpPredictSingle
 import dk.bayes.math.gaussian.Gaussian
 import breeze.numerics._
+import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
+import dk.gp.hgpc.util.TaskVariable
+import dk.bayes.dsl.factor._
+import dk.bayes.math.gaussian.canonical.CanonicalGaussian
 
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -37,6 +41,27 @@ object hgpcPredict {
   }
 
   private def createTaskPosteriorByTaskId(xTest: DenseMatrix[Double], model: HgpcModel): Map[Int, TaskPosterior] = {
+    
+     val covU = model.covFunc.cov(model.u, model.u, model.covFuncParams) + DenseMatrix.eye[Double](model.u.rows) * 1e-7
+    val meanU = DenseVector.zeros[Double](model.u.rows) + model.mean
+
+    val uVariable = dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian(meanU, covU)
+
+      val taskIds = model.x(::, 0).toArray.distinct
+      val taskVariables = taskIds.map{ taskId => 
+    
+          val idx = model.x(::, 0).findAll { x => x == taskId }
+      val taskX = model.x(idx, ::).toDenseMatrix
+      val taskY = model.y(idx).toDenseVector
+        
+        TaskVariable(taskX,taskY,model,uVariable).asInstanceOf[DoubleFactor[CanonicalGaussian, _]] //@TODO this is a hack to allow for using a proper implicit for multOp()
+     }
+      
+      
+    val factorGraph = EPNaiveBayesFactorGraph(uVariable, taskVariables, true)
+    
+    factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+    
     throw new UnsupportedOperationException("Not implemented yet")
   }
 }

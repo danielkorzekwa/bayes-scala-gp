@@ -15,7 +15,7 @@ This project uses [Bayes-scala](https://github.com/danielkorzekwa/bayes-scala) l
 
 ## How to use it from sbt and maven?
 
-Release and snaphot versions are available for Scala versions 2.10 and 2.11
+Only snapshot version for Scala 2.11.
 
 ### Snapshot version
 

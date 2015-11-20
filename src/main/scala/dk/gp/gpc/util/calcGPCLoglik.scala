@@ -16,13 +16,7 @@ object calcGPCLoglik {
     val meanX = DenseVector.zeros[Double](model.x.rows) + model.mean
 
     val fVariable = MultivariateGaussian(meanX, covX)
-
-    val yVariables = model.y.toArray.zipWithIndex.map {
-      case (y, i) =>
-        val isTrue = (y == 1)
-        MvnGaussianThreshold(fVariable, i, v = 1d, exceeds = Some(isTrue)) //step function loglik with noise var = 1 is equivalent to probit likelihood
-    }
-
+    val yVariables = createLikelihoodVariables(fVariable,model.y)
     val factorGraph = EPNaiveBayesFactorGraph(fVariable, yVariables, true)
     factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
 
