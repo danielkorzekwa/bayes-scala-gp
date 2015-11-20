@@ -17,7 +17,8 @@ class hgpcPredictTest {
   @Ignore @Test def test = {
 
     val model = HgpcModel(x, y, u, covFunc, covFuncParams, mean)
-    val xTest = DenseMatrix((1.0, 4.0, -4.0), (1.0, -2.5, -1.3), (2.0, 4.0, -4.0), (2.0, -2.5, -1.3), (3.0, 4.0, -4.0), (3.0, -2.5, -1.3), (99.0, 4.0, -4.0), (99.0, -2.5, -1.3))
+    // val xTest = DenseMatrix((1.0, 4.0, -4.0), (1.0, -2.5, -1.3), (2.0, 4.0, -4.0), (2.0, -2.5, -1.3), (3.0, 4.0, -4.0), (3.0, -2.5, -1.3), (99.0, 4.0, -4.0), (99.0, -2.5, -1.3))
+    val xTest = DenseMatrix((99.0, 4.0, -4.0), (99.0, -2.5, -1.3))
     val predicted = hgpcPredict(xTest, model)
 
     println(predicted)

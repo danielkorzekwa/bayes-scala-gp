@@ -13,7 +13,6 @@ import dk.gp.gp._
 import dk.bayes.math.gaussian.Gaussian
 import dk.bayes.infer.epnaivebayes._
 import dk.bayes.math.gaussian.canonical._
-import dk.gp.gpc.util.inferFPosterior
 import dk.gp.gpc.util.createLikelihoodVariables
 
 /**

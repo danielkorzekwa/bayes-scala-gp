@@ -9,6 +9,7 @@ import dk.gp.gp.gpPredictSingle
 import dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian
 import dk.gp.gpc.util.createLikelihoodVariables
 import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
+import dk.gp.gp.ConditionalGPFactory
 
 trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 
@@ -21,23 +22,27 @@ trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
   }
 
   def calcYFactorMsgUp(uPosterior: DenseCanonicalGaussian, oldFactorMsgUp: DenseCanonicalGaussian): Option[DenseCanonicalGaussian] = {
-   
+
     val uVarMsgDown = uPosterior / oldFactorMsgUp
-    
-    val taskXPrior = gpPredictSingle(this.taskX,dk.gp.math.MultivariateGaussian(uVarMsgDown.mean,uVarMsgDown.variance),this.model.u,this.model.covFunc,this.model.covFuncParams,this.model.mean)
-    
-      val taskXPriorVariable = MultivariateGaussian(taskXPrior.m,taskXPrior.v)
-      
+
+    val taskXPrior = gpPredictSingle(this.taskX, dk.gp.math.MultivariateGaussian(uVarMsgDown.mean, uVarMsgDown.variance), this.model.u, this.model.covFunc, this.model.covFuncParams, this.model.mean)
+
+    val taskXPriorVariable = MultivariateGaussian(taskXPrior.m, taskXPrior.v)
+
     val yVariables = createLikelihoodVariables(taskXPriorVariable, this.taskY)
 
     val factorGraph = EPNaiveBayesFactorGraph(taskXPriorVariable, yVariables, true)
     factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
     val taskXPosteriorVariable = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
-    
-    val taskXVarMsgUp = taskXPosteriorVariable/DenseCanonicalGaussian(taskXPriorVariable.m,taskXPriorVariable.v)
-    
-  //  val xFactorCanon = DenseCanonicalGaussian
-    
-    throw new UnsupportedOperationException("Not implemented")
+
+    val taskXVarMsgUp = taskXPosteriorVariable / DenseCanonicalGaussian(taskXPriorVariable.m, taskXPriorVariable.v)
+
+    val (a, b, v) = ConditionalGPFactory(this.model.u, this.model.covFunc, this.model.covFuncParams, this.model.mean).create(this.taskX)
+    val xFactorCanon = DenseCanonicalGaussian(a, b, v)
+
+    val factorTimesMsg = xFactorCanon * taskXVarMsgUp.extend(a.cols + a.rows, a.cols)
+    val newXFactorMsgUp = factorTimesMsg.marginal((0 until a.cols): _*)
+
+    Some(newXFactorMsgUp)
   }
 }
