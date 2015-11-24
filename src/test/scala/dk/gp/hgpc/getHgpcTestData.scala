@@ -14,8 +14,8 @@ object getHgpcTestData {
     val x = csvread(new File("src/test/resources/gpml/classification_x.csv"))
     val y = csvread(new File("src/test/resources/gpml/classification_y.csv")).toDenseVector
 
-    val x1Idx = (0 until x.rows-1).filter(idx => idx % 2 == 0)
-    val x2Idx = (0 until x.rows-1).filter(idx => idx % 2 == 1)
+    val x1Idx = (0 until x.rows - 1).filter(idx => idx % 2 == 0)
+    val x2Idx = (0 until x.rows - 1).filter(idx => idx % 2 == 1)
     val x1 = DenseMatrix.horzcat(DenseMatrix.zeros[Double](x1Idx.size, 1) + 1.0, x(x1Idx, ::))
     val x2 = DenseMatrix.horzcat(DenseMatrix.zeros[Double](x2Idx.size, 1) + 2.0, x(x2Idx, ::))
     val x3 = DenseMatrix.horzcat(DenseMatrix.zeros[Double](1, 1) + 3.0, x(x.rows - 1 to x.rows - 1, ::))
@@ -27,4 +27,5 @@ object getHgpcTestData {
     (allX, allY, u)
 
   }
+
 }

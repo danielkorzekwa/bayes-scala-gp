@@ -1,17 +1,16 @@
 package dk.gp.hgpc
 
+import breeze.linalg._
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import dk.gp.math.UnivariateGaussian
-import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
-import dk.gp.math.MultivariateGaussian
-import dk.gp.gp.gpPredictSingle
-import dk.bayes.math.gaussian.Gaussian
-import breeze.numerics._
-import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
-import dk.gp.hgpc.util.TaskVariable
 import dk.bayes.dsl.factor._
+import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.bayes.math.gaussian.canonical.CanonicalGaussian
+import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
+import dk.gp.gp.gpPredictSingle
+import dk.gp.gpc.util.calcLoglikGivenLatentVar
+import dk.gp.hgpc.util.TaskVariable
+import dk.gp.math.MultivariateGaussian
 
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -33,7 +32,7 @@ object hgpcPredict {
       val taskPosterior = taskPosteriorByTaskId(taskId)
 
       val tTestPrior = gpPredictSingle(tRow.toDenseMatrix, MultivariateGaussian(taskPosterior.xPosterior.mean, taskPosterior.xPosterior.variance), taskPosterior.x, model.covFunc, model.covFuncParams, model.mean)
-      val predictedProb = Gaussian.stdCdf(tTestPrior.m(0) / sqrt(1d + tTestPrior.v(0, 0)))
+      val predictedProb = calcLoglikGivenLatentVar(tTestPrior.m(0), tTestPrior.v(0, 0), 1d)
 
       predictedProb
     }.toArray
@@ -57,7 +56,7 @@ object hgpcPredict {
       TaskVariable(taskX, taskY, model, uVariable).asInstanceOf[DoubleFactor[CanonicalGaussian, _]] //@TODO this is a hack to allow for using a proper implicit for multOp()
     }
 
-    val factorGraph = EPNaiveBayesFactorGraph(uVariable, taskVariables, false)
+    val factorGraph = EPNaiveBayesFactorGraph(uVariable, taskVariables, true)
 
     factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
     val uPosterior = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]

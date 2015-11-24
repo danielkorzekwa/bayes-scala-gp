@@ -14,6 +14,7 @@ import dk.bayes.math.gaussian.Gaussian
 import dk.bayes.infer.epnaivebayes._
 import dk.bayes.math.gaussian.canonical._
 import dk.gp.gpc.util.createLikelihoodVariables
+import dk.gp.gpc.util.calcLoglikGivenLatentVar
 
 /**
  * Gaussian Process classification.
@@ -37,10 +38,10 @@ object gpcPredict {
     val factorGraph = EPNaiveBayesFactorGraph(fVariable, yVariables, true)
     factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
     val fPosterior = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
-
+    
     val predictedT = gpPredict(t, dk.gp.math.MultivariateGaussian(fPosterior.mean, fPosterior.variance), model.x, model.covFunc, model.covFuncParams, model.mean)
 
-    val predictedProb = predictedT.map(predictedT => Gaussian.stdCdf(predictedT.m(0) / sqrt(1d + predictedT.v(0, 0))))
+    val predictedProb = predictedT.map(predictedT => calcLoglikGivenLatentVar(predictedT.m(0), predictedT.v(0, 0),1d))
 
     predictedProb
   }

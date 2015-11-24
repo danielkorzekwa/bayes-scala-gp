@@ -10,6 +10,7 @@ import dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian
 import dk.gp.gpc.util.createLikelihoodVariables
 import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.gp.gp.ConditionalGPFactory
+import dk.gp.gpc.util.calcLoglikGivenLatentVar
 
 trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 
@@ -42,7 +43,6 @@ trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 
     val factorTimesMsg = xFactorCanon * taskXVarMsgUp.extend(a.cols + a.rows, a.cols)
     val newXFactorMsgUp = factorTimesMsg.marginal((0 until a.cols): _*)
-
     Some(newXFactorMsgUp)
   }
 }
