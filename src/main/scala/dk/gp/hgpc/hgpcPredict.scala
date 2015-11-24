@@ -11,6 +11,8 @@ import dk.gp.gp.gpPredictSingle
 import dk.gp.gpc.util.calcLoglikGivenLatentVar
 import dk.gp.hgpc.util.TaskVariable
 import dk.gp.math.MultivariateGaussian
+import dk.gp.hgpc.util.inferUPosterior
+import dk.gp.gpc.util.createLikelihoodVariables
 
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -41,25 +43,7 @@ object hgpcPredict {
 
   private def createTaskPosteriorByTaskId(xTest: DenseMatrix[Double], model: HgpcModel): Map[Int, TaskPosterior] = {
 
-    val covU = model.covFunc.cov(model.u, model.u, model.covFuncParams) + DenseMatrix.eye[Double](model.u.rows) * 1e-7
-    val meanU = DenseVector.zeros[Double](model.u.rows) + model.mean
-
-    val uVariable = dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian(meanU, covU)
-
-    val taskIds = model.x(::, 0).toArray.distinct
-    val taskVariables = taskIds.map { taskId =>
-
-      val idx = model.x(::, 0).findAll { x => x == taskId }
-      val taskX = model.x(idx, ::).toDenseMatrix
-      val taskY = model.y(idx).toDenseVector
-
-      TaskVariable(taskX, taskY, model, uVariable).asInstanceOf[DoubleFactor[CanonicalGaussian, _]] //@TODO this is a hack to allow for using a proper implicit for multOp()
-    }
-
-    val factorGraph = EPNaiveBayesFactorGraph(uVariable, taskVariables, true)
-
-    factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
-    val uPosterior = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
+    val uPosterior = inferUPosterior(model)
 
     val testTaskIds = xTest(::, 0).toArray.distinct
     val taskPosteriorByTaskId: Map[Int, TaskPosterior] = testTaskIds.map { taskId =>
@@ -68,11 +52,27 @@ object hgpcPredict {
       val taskY = model.y(idx).toDenseVector
 
       val taskPosterior = if (taskY.size == 0) TaskPosterior(model.u, uPosterior)
-      else throw new UnsupportedOperationException("Not implemented yet")
+      else {
+
+        val taskXTestIdx = xTest(::, 0).findAll(x => x == taskId)
+        val taskXTest = xTest(taskXTestIdx, ::).toDenseMatrix
+
+        val taskXX = DenseMatrix.vertcat(taskX, taskXTest)
+        val xPrior = gpPredictSingle(taskXX, MultivariateGaussian(uPosterior.mean, uPosterior.variance), model.u, model.covFunc, model.covFuncParams)
+        val xPriorVariable = dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian(xPrior.m, xPrior.v)
+        val yVariables = createLikelihoodVariables(xPriorVariable, taskY)
+
+        val factorGraph = EPNaiveBayesFactorGraph(xPriorVariable, yVariables, true)
+        factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+        val xPosteriorVariable = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
+
+        TaskPosterior(taskXX, DenseCanonicalGaussian(xPosteriorVariable.mean, xPosteriorVariable.variance))
+      }
 
       taskId.toInt -> taskPosterior
     }.toList.toMap
 
     taskPosteriorByTaskId
   }
+
 }

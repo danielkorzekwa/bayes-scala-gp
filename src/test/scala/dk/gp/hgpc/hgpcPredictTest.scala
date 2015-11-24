@@ -17,10 +17,20 @@ class hgpcPredictTest {
   @Test def test = {
 
     val model = HgpcModel(x, y, u, covFunc, covFuncParams, mean)
-    // val xTest = DenseMatrix((1.0, 4.0, -4.0), (1.0, -2.5, -1.3), (2.0, 4.0, -4.0), (2.0, -2.5, -1.3), (3.0, 4.0, -4.0), (3.0, -2.5, -1.3), (99.0, 4.0, -4.0), (99.0, -2.5, -1.3))
-    val xTest = DenseMatrix((99.0, 4.0, -4.0), (99.0, -2.5, -1.3))
+    val xTest = DenseMatrix((1.0, 4.0, -4.0), (1.0, -2.5, -1.3), (2.0, 4.0, -4.0), (2.0, -2.5, -1.3), (3.0, 4.0, -4.0), (3.0, -2.5, -1.3), (99.0, 4.0, -4.0), (99.0, -2.5, -1.3))
     val predicted = hgpcPredict(xTest, model)
 
-    println(predicted)
+    assertEquals(0.460447, predicted(0), 0.0001)
+    assertEquals(0.8693, predicted(1), 0.0001)
+
+    assertEquals(0.4588, predicted(2), 0.0001)
+    assertEquals(0.9311, predicted(3), 0.0001)
+
+    assertEquals(0.460447, predicted(4), 0.0001)
+    assertEquals(0.8620, predicted(5), 0.0001)
+
+    assertEquals(0.2062, predicted(6), 0.0001)
+    assertEquals(0.8645, predicted(7), 0.0001)
+
   }
 }

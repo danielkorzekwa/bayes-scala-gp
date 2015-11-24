@@ -23,24 +23,24 @@ class hgprPredictTest {
     val initialHgpModel = HgprModel(allX, allY, u, covFunc, covFuncParams, likNoiseLogStdDev)
     val trainedHgpModel = hgprTrain(initialHgpModel)
 
-    assertEquals(0.8575, trainedHgpModel.covFuncParams(0), 0.0001)
-    assertEquals(-0.9461, trainedHgpModel.covFuncParams(1), 0.0001)
-    assertEquals(-1.8034, trainedHgpModel.likNoiseLogStdDev, 0.0001)
+    assertEquals(0.8564, trainedHgpModel.covFuncParams(0), 0.0001)
+    assertEquals(-0.9463, trainedHgpModel.covFuncParams(1), 0.0001)
+    assertEquals(-1.8032, trainedHgpModel.likNoiseLogStdDev, 0.0001)
 
     val xTest = DenseMatrix((1.0, -1.0), (1.0, 1.0), (2.0, -1.0), (2.0, 1.0), (3.0, -1.0), (3.0, 1.0), (99.0, -1.0), (99.0, 1.0))
     val predicted = hgprPredict(xTest, trainedHgpModel)
 
-    assertEquals(0.0072, predicted(0).m, 0.0001)
-    assertEquals(1.4895, predicted(1).m, 0.0001)
+    assertEquals(0.0073, predicted(0).m, 0.0001)
+    assertEquals(1.4882, predicted(1).m, 0.0001)
 
-    assertEquals(0.0512, predicted(2).m, 0.0001)
-    assertEquals(0.9524, predicted(3).m, 0.0001)
+    assertEquals(0.0513, predicted(2).m, 0.0001)
+    assertEquals(0.9513, predicted(3).m, 0.0001)
 
     assertEquals(0.04871, predicted(4).m, 0.0001)
-    assertEquals(1.0525, predicted(5).m, 0.0001)
+    assertEquals(1.0513, predicted(5).m, 0.0001)
 
-    assertEquals(0.0408, predicted(6).m, 0.0001)
-    assertEquals(1.0577, predicted(7).m, 0.0001)
+    assertEquals(0.0409, predicted(6).m, 0.0001)
+    assertEquals(1.0565, predicted(7).m, 0.0001)
   }
 
   /**
