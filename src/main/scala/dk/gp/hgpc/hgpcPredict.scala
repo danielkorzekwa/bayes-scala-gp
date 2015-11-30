@@ -11,13 +11,14 @@ import dk.gp.gp.gpPredictSingle
 import dk.gp.gpc.util.calcLoglikGivenLatentVar
 import dk.gp.hgpc.util.TaskVariable
 import dk.gp.math.MultivariateGaussian
-import dk.gp.hgpc.util.inferUPosterior
 import dk.gp.gpc.util.createLikelihoodVariables
+import dk.gp.hgpc.util.createHgpcFactorGraph
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.
  */
-object hgpcPredict {
+object hgpcPredict extends LazyLogging {
 
   case class TaskPosterior(x: DenseMatrix[Double], xPosterior: DenseCanonicalGaussian)
 
@@ -43,7 +44,10 @@ object hgpcPredict {
 
   private def createTaskPosteriorByTaskId(xTest: DenseMatrix[Double], model: HgpcModel): Map[Int, TaskPosterior] = {
 
-    val uPosterior = inferUPosterior(model)
+    val hgpcFactorGraph = createHgpcFactorGraph(model)
+    val iterations = hgpcFactorGraph.calibrate(maxIter = 10, threshold = 1e-3)
+    if (iterations >= 10) logger.warn(s"Factor graph did not converge in less than 10 iterations")
+    val uPosterior = hgpcFactorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
 
     val testTaskIds = xTest(::, 0).toArray.distinct
     val taskPosteriorByTaskId: Map[Int, TaskPosterior] = testTaskIds.map { taskId =>
@@ -63,7 +67,8 @@ object hgpcPredict {
         val yVariables = createLikelihoodVariables(xPriorVariable, taskY)
 
         val factorGraph = EPNaiveBayesFactorGraph(xPriorVariable, yVariables, true)
-        factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+        val iterations = factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+        if (iterations >= 10) logger.warn(s"Factor graph did not converge in less than 10 iterations")
         val xPosteriorVariable = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
 
         TaskPosterior(taskXX, DenseCanonicalGaussian(xPosteriorVariable.mean, xPosteriorVariable.variance))

@@ -30,7 +30,6 @@ case class ConditionalGPFactory(x: DenseMatrix[Double], covFunc: CovFunc, covFun
     val b = if(mean==0d) DenseVector.zeros[Double](t.rows) else {meanT - A * meanX}
     val kTXInvLXX = kTX * lXXinv
     val v = kTT - kTXInvLXX * kTXInvLXX.t
-
     (A, b, v)
 
   }

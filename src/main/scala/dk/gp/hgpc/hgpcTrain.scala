@@ -5,11 +5,12 @@ import breeze.linalg.DenseVector
 import breeze.optimize.ApproximateGradientFunction
 import breeze.optimize.LBFGS
 import dk.gp.hgpc.util.calcHGPCLoglik
-
+import breeze.linalg._
+import com.typesafe.scalalogging.slf4j._
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.
  */
-object hgpcTrain {
+object hgpcTrain extends LazyLogging {
 
   def apply(hgpcModel: HgpcModel, maxIter: Int = 100): HgpcModel = {
 
@@ -38,7 +39,14 @@ object hgpcTrain {
     val currMean = params.toArray.last
 
     val currModel = gpcModel.copy(covFuncParams = currCovFuncParams, mean = currMean)
-    val loglik = calcHGPCLoglik(currModel)
+    val loglik = try { calcHGPCLoglik(currModel) }
+    catch {
+      case e: NotConvergedException => Double.NaN
+      case e:MatrixNotSymmetricException => {
+        logger.warn(e.getLocalizedMessage)
+        Double.NaN
+      }
+    }
     -loglik
   }
 }

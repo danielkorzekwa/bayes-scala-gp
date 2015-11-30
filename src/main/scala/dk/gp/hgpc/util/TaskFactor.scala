@@ -11,6 +11,8 @@ import dk.gp.gpc.util.createLikelihoodVariables
 import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.gp.gp.ConditionalGPFactory
 import dk.gp.gpc.util.calcLoglikGivenLatentVar
+import dk.bayes.math.gaussian.canonical.SparseCanonicalGaussian
+import breeze.linalg.MatrixNotSymmetricException
 
 trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 
@@ -20,6 +22,24 @@ trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
     val m = DenseVector.zeros[Double](this.uVariable.m.size)
     val v = DenseMatrix.eye[Double](this.uVariable.m.size) * 1000d
     DenseCanonicalGaussian(m, v)
+  }
+
+  def calcLoglik(uPosterior: DenseCanonicalGaussian, oldFactorMsgUp: DenseCanonicalGaussian): Double = {
+    val uVarMsgDown = uPosterior / oldFactorMsgUp
+    val taskXPrior = gpPredictSingle(this.taskX, dk.gp.math.MultivariateGaussian(uVarMsgDown.mean, uVarMsgDown.variance), this.model.u, this.model.covFunc, this.model.covFuncParams, this.model.mean)
+
+    val taskXPriorVariable = MultivariateGaussian(taskXPrior.m, taskXPrior.v)
+
+    val yVariables = createLikelihoodVariables(taskXPriorVariable, this.taskY)
+
+    val factorGraph = EPNaiveBayesFactorGraph(taskXPriorVariable, yVariables, true)
+    factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+
+    val taskXPosteriorVariable = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
+
+    val logliks = factorGraph.getMsgsUp().zip(yVariables).map { case (msgUp, yVariable) => yVariable.loglik(taskXPosteriorVariable, msgUp.asInstanceOf[SparseCanonicalGaussian]) }
+
+    logliks.sum
   }
 
   def calcYFactorMsgUp(uPosterior: DenseCanonicalGaussian, oldFactorMsgUp: DenseCanonicalGaussian): Option[DenseCanonicalGaussian] = {
@@ -33,7 +53,8 @@ trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
     val yVariables = createLikelihoodVariables(taskXPriorVariable, this.taskY)
 
     val factorGraph = EPNaiveBayesFactorGraph(taskXPriorVariable, yVariables, true)
-    factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+   factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+    
     val taskXPosteriorVariable = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
 
     val taskXVarMsgUp = taskXPosteriorVariable / DenseCanonicalGaussian(taskXPriorVariable.m, taskXPriorVariable.v)
