@@ -8,4 +8,4 @@ Notes for learning phase:
 
 Examples
   * [training](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/src/test/scala/dk/gp/hgpc/hgpcTrainTest.scala)
-  * [training](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/src/test/scala/dk/gp/hgpc/hgpcPredictTest.scala)
+  * [prediction](https://github.com/danielkorzekwa/bayes-scala-gp/blob/master/src/test/scala/dk/gp/hgpc/hgpcPredictTest.scala)
