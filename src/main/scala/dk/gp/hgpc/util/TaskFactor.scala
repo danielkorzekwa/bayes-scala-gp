@@ -18,6 +18,8 @@ trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 
   this: TaskVariable =>
 
+  val (a, b, v) = ConditionalGPFactory(this.model.u, this.model.covFunc, this.model.covFuncParams, this.model.mean).create(this.taskX)
+
   val initFactorMsgUp: DenseCanonicalGaussian = {
     val m = DenseVector.zeros[Double](this.uVariable.m.size)
     val v = DenseMatrix.eye[Double](this.uVariable.m.size) * 1000d
@@ -53,13 +55,12 @@ trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
     val yVariables = createLikelihoodVariables(taskXPriorVariable, this.taskY)
 
     val factorGraph = EPNaiveBayesFactorGraph(taskXPriorVariable, yVariables, true)
-   factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
-    
+    factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
+
     val taskXPosteriorVariable = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
 
     val taskXVarMsgUp = taskXPosteriorVariable / DenseCanonicalGaussian(taskXPriorVariable.m, taskXPriorVariable.v)
 
-    val (a, b, v) = ConditionalGPFactory(this.model.u, this.model.covFunc, this.model.covFuncParams, this.model.mean).create(this.taskX)
     val xFactorCanon = DenseCanonicalGaussian(a, b, v)
 
     val factorTimesMsg = xFactorCanon * taskXVarMsgUp.extend(a.cols + a.rows, a.cols)
