@@ -1,13 +1,13 @@
 package dk.gp.gpc.util
 
 import dk.gp.gpc.GpcModel
-import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian
 import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 import dk.bayes.dsl.variable.categorical.MvnGaussianThreshold
 import dk.bayes.math.gaussian.canonical._
 import dk.bayes.math.gaussian.canonical.CanonicalGaussian._
+import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
 object calcGPCLoglik {
 
   def apply(model: GpcModel): Double = {

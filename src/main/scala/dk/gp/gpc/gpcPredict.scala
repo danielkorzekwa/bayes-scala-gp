@@ -11,10 +11,10 @@ import dk.gp.math._
 import breeze.numerics._
 import dk.gp.gp._
 import dk.bayes.math.gaussian.Gaussian
-import dk.bayes.infer.epnaivebayes._
 import dk.bayes.math.gaussian.canonical._
 import dk.gp.gpc.util.createLikelihoodVariables
 import dk.gp.gpc.util.calcLoglikGivenLatentVar
+import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
 
 /**
  * Gaussian Process classification.

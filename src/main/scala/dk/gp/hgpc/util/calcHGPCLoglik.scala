@@ -3,7 +3,6 @@ package dk.gp.hgpc.util
 import dk.gp.hgpc.HgpcModel
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.bayes.dsl.factor.DoubleFactor
 import dk.bayes.math.gaussian.canonical.CanonicalGaussian
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian

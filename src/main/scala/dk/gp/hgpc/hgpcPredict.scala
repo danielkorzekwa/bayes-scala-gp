@@ -4,7 +4,6 @@ import breeze.linalg._
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import dk.bayes.dsl.factor._
-import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.bayes.math.gaussian.canonical.CanonicalGaussian
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
 import dk.gp.gp.gpPredictSingle
@@ -14,6 +13,7 @@ import dk.gp.math.MultivariateGaussian
 import dk.gp.gpc.util.createLikelihoodVariables
 import dk.gp.hgpc.util.createHgpcFactorGraph
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
 
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.

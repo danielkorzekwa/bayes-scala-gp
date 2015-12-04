@@ -1,10 +1,10 @@
 package dk.gp.hgpc.util
 
 import dk.gp.hgpc.HgpcModel
-import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
+import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
 
 object createHgpcFactorGraph {
   

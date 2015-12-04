@@ -8,11 +8,11 @@ import dk.gp.gp.gpPredict
 import dk.gp.gp.gpPredictSingle
 import dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian
 import dk.gp.gpc.util.createLikelihoodVariables
-import dk.bayes.infer.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.gp.gp.ConditionalGPFactory
 import dk.gp.gpc.util.calcLoglikGivenLatentVar
 import dk.bayes.math.gaussian.canonical.SparseCanonicalGaussian
 import breeze.linalg.MatrixNotSymmetricException
+import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
 
 trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 

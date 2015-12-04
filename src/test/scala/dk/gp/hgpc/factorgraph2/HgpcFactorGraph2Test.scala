@@ -1,18 +1,21 @@
 package dk.gp.hgpc.factorgraph2
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
+import dk.bayes.factorgraph2.api.calibrate
+import dk.bayes.factorgraph2.factor.CanonicalGaussianFactor
+import dk.bayes.factorgraph2.factor.CanonicalLinearGaussianFactor
+import dk.bayes.factorgraph2.factor.StepFunctionFactor
+import dk.bayes.factorgraph2.variable.BernVariable
+import dk.bayes.factorgraph2.variable.CanonicalGaussianVariable
+import dk.bayes.math.gaussian.canonical.CanonicalGaussian
 import dk.gp.gp.ConditionalGPFactory
-import dk.gp.gpc.factorgraph2.BernVariable
-import dk.gp.gpc.factorgraph2.GaussianVariable
-import dk.gp.gpc.factorgraph2.LinearGaussianFactor
-import dk.gp.gpc.factorgraph2.MultivariateGaussianFactor
-import dk.gp.gpc.factorgraph2.MvnGaussianThresholdFactor
 import dk.gp.hgpc.TestCovFunc
 import dk.gp.hgpc.getHgpcTestData
+import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
 
 class HgpcFactorGraph2Test {
 
@@ -33,9 +36,9 @@ class HgpcFactorGraph2Test {
      * Create variables
      */
 
-    val uVariable = GaussianVariable()
+    val uVariable = CanonicalGaussianVariable()
 
-    val taskVariables = taskIds.map(taskId => GaussianVariable())
+    val taskVariables = taskIds.map(taskId => CanonicalGaussianVariable())
 
     val taskYVariables: Array[Array[BernVariable]] = taskIds.map { taskId =>
 
@@ -50,14 +53,14 @@ class HgpcFactorGraph2Test {
     /**
      * Create factors
      */
-    val uFactor = MultivariateGaussianFactor(uVariable, meanU, covU)
+    val uFactor = CanonicalGaussianFactor(uVariable, meanU, covU)
 
     val taskFactors = taskIds.zipWithIndex.map {
       case (taskId, taskIndex) =>
         val idx = x(::, 0).findAll { x => x == taskId }
         val taskX = x(idx, ::).toDenseMatrix
         val (a, b, v) = ConditionalGPFactory(u, covFunc, covFuncParams, mean).create(taskX)
-        LinearGaussianFactor(uVariable, taskVariables(taskIndex), a, b, v)
+        CanonicalLinearGaussianFactor(uVariable, taskVariables(taskIndex), a, b, v)
     }
 
     val taskYFactors = taskIds.zipWithIndex.map {
@@ -67,7 +70,7 @@ class HgpcFactorGraph2Test {
 
         val yFactors = taskY.toArray.zipWithIndex.map {
           case (y, i) =>
-            MvnGaussianThresholdFactor(taskVariables(taskIndex), taskYVariables(taskIndex)(i), taskY.size, i, v = 1)
+            StepFunctionFactor(taskVariables(taskIndex), taskYVariables(taskIndex)(i), taskY.size, i, v = 1)
         }
 
         yFactors
@@ -84,7 +87,10 @@ class HgpcFactorGraph2Test {
      * Calibration
      */
 
+    var calibrated = false
     def calibrateStep() = {
+
+      val beforeUMarginal = uVariable.get()
 
       taskFactors.zipWithIndex.foreach {
         case (taskFactor, taskIndex) =>
@@ -103,14 +109,18 @@ class HgpcFactorGraph2Test {
 
       }
 
-      // yFactors.foreach(yFactor => yFactor.updateMsgV1())
-      uVariable.update()
+      calibrated = CanonicalGaussian.isIdentical(beforeUMarginal, uVariable.get, 1e-3)
     }
 
-    for (i <- 0 until 10) {
-      calibrateStep()
-    }
+    val (calib, iter) = calibrate(calibrateStep, 100, calibrated)
 
-    println(uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean)
+    assertTrue(calib)
+    assertEquals(9, iter)
+
+    //println(uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean)
+
+    assertEquals(-1.7049183, uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(0), 0.00001)
+    assertEquals(-1.26784, uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(1), 0.00001)
+    assertEquals(-6.40419, uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(2), 0.00001)
   }
 }

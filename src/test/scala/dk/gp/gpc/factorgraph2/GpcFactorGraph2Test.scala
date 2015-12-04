@@ -1,14 +1,21 @@
 package dk.gp.gpc.factorgraph2
 
 import java.io.File
-
 import org.junit.Test
-
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import breeze.linalg.csvread
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
 import dk.gp.gpc.TestCovFunc
+import dk.bayes.factorgraph2.variable.CanonicalGaussianVariable
+import dk.bayes.factorgraph2.variable._
+import dk.bayes.factorgraph2.factor.CanonicalGaussianFactor
+import dk.bayes.factorgraph2.factor.StepFunctionFactor
+import dk.bayes.factorgraph2.api.calibrate
+import dk.bayes.math.numericops.isIdentical
+import dk.bayes.math.gaussian.canonical.CanonicalGaussian
+import org.junit._
+import Assert._
 
 class GpcFactorGraph2Test {
 
@@ -29,7 +36,7 @@ class GpcFactorGraph2Test {
      * create variables
      */
 
-    val fVariable = GaussianVariable()
+    val fVariable = CanonicalGaussianVariable()
 
     val yVariables = y.toArray.map(y => BernVariable(y))
 
@@ -37,11 +44,11 @@ class GpcFactorGraph2Test {
      * Create factors
      */
 
-    val fFactor = MultivariateGaussianFactor(fVariable, meanX, covX)
+    val fFactor = CanonicalGaussianFactor(fVariable, meanX, covX)
 
     val yFactors = y.toArray.zipWithIndex.map {
       case (y, i) =>
-        MvnGaussianThresholdFactor(fVariable, yVariables(i), x.rows, i, v = 1)
+        StepFunctionFactor(fVariable, yVariables(i), x.rows, i, v = 1)
     }
 
     /**
@@ -53,17 +60,26 @@ class GpcFactorGraph2Test {
     /**
      * Calibration
      */
-
+    var calibrated = false
     def calibrateStep() = {
       yFactors.foreach(yFactor => yFactor.updateMsgV1())
+
+      val oldFMarginal = fVariable.get()
+
       fVariable.update()
+
+      calibrated = CanonicalGaussian.isIdentical(oldFMarginal, fVariable.get, 1e-4)
     }
 
-    for (i <- 0 until 10) {
-      calibrateStep()
-    }
+    val (calib, iter) = calibrate(calibrateStep, 100, calibrated)
 
-    println(fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean)
+    assertTrue(calib)
+    assertEquals(64, iter)
+    // println(fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean)
 
+    assertEquals(-1.411551, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(0), 0.00001)
+    assertEquals(-1.28968, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(1), 0.00001)
+    assertEquals(-6.397447, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(2), 0.00001)
   }
+
 }
