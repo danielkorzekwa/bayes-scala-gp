@@ -38,7 +38,10 @@ class GpcFactorGraph2Test {
 
     val fVariable = CanonicalGaussianVariable()
 
-    val yVariables = y.toArray.map(y => BernVariable(y))
+    val yVariables = y.toArray.map { y =>
+      val k = if (y == 1) 1 else 0
+      BernVariable(k)
+    }
 
     /**
      * Create factors
@@ -55,7 +58,6 @@ class GpcFactorGraph2Test {
      * Update variables
      */
     fVariable.update()
-    yVariables.foreach(_.update())
 
     /**
      * Calibration

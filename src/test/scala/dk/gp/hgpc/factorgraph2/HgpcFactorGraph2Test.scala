@@ -45,7 +45,10 @@ class HgpcFactorGraph2Test {
       val idx = x(::, 0).findAll { x => x == taskId }
       val taskY = y(idx).toDenseVector
 
-      val yVariables = y.toArray.map(y => BernVariable(y))
+      val yVariables = y.toArray.map { yPoint =>
+        val k = if (yPoint == 1) 1 else 0
+        BernVariable(k)
+      }
 
       yVariables
     }
@@ -81,7 +84,6 @@ class HgpcFactorGraph2Test {
      */
     uVariable.update()
     taskVariables.foreach(_.update())
-    taskYVariables.foreach(_.foreach(_.update()))
 
     /**
      * Calibration
