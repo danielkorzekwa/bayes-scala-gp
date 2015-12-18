@@ -76,12 +76,12 @@ class GpcFactorGraph2Test {
     val (calib, iter) = calibrate(calibrateStep, 100, calibrated)
 
     assertTrue(calib)
-    assertEquals(64, iter)
+    assertEquals(44, iter)
     // println(fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean)
 
-    assertEquals(-1.411551, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(0), 0.00001)
-    assertEquals(-1.28968, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(1), 0.00001)
-    assertEquals(-6.397447, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(2), 0.00001)
+    assertEquals(-1.411514, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(0), 0.00001)
+    assertEquals(-1.28964, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(1), 0.00001)
+    assertEquals(-6.3971, fVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(2), 0.0001)
   }
 
 }

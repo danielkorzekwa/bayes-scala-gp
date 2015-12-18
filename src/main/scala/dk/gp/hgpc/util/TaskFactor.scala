@@ -13,6 +13,10 @@ import dk.gp.gpc.util.calcLoglikGivenLatentVar
 import dk.bayes.math.gaussian.canonical.SparseCanonicalGaussian
 import breeze.linalg.MatrixNotSymmetricException
 import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
+import breeze.linalg.cholesky
+import dk.gp.math.invchol
+import breeze.linalg.inv
+import dk.bayes.math.gaussian.canonical.canonicalLinearGaussianMsgUp
 
 trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 
@@ -61,10 +65,9 @@ trait TaskFactor extends DoubleFactor[DenseCanonicalGaussian, Any] {
 
     val taskXVarMsgUp = taskXPosteriorVariable / DenseCanonicalGaussian(taskXPriorVariable.m, taskXPriorVariable.v)
 
-    val xFactorCanon = DenseCanonicalGaussian(a, b, v)
+    val newXFactorMsgUp = canonicalLinearGaussianMsgUp(a, b, v, taskXVarMsgUp)
 
-    val factorTimesMsg = xFactorCanon * taskXVarMsgUp.extend(a.cols + a.rows, a.cols)
-    val newXFactorMsgUp = factorTimesMsg.marginal((0 until a.cols): _*)
     Some(newXFactorMsgUp)
   }
+
 }

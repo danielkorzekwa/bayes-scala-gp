@@ -27,10 +27,10 @@ class HgpcFactorGraph2Test {
     val (calib, iter) = calibrateHgpcFactorGraph2(hgpcFactorGraph,maxIter=100)
 
     assertTrue(calib)
-    assertEquals(9, iter)
+    assertEquals(6, iter)
 
-    assertEquals(-1.7049183, hgpcFactorGraph.uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(0), 0.00001)
-    assertEquals(-1.26784, hgpcFactorGraph.uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(1), 0.00001)
-    assertEquals(-6.40419, hgpcFactorGraph.uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(2), 0.00001)
+    assertEquals(-1.70451, hgpcFactorGraph.uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(0), 0.00001)
+    assertEquals(-1.26741, hgpcFactorGraph.uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(1), 0.00001)
+    assertEquals(-6.40155, hgpcFactorGraph.uVariable.get.asInstanceOf[DenseCanonicalGaussian].mean(2), 0.00001)
   }
 }
