@@ -44,9 +44,13 @@ object hgpcPredict extends LazyLogging {
 
   private def createTaskPosteriorByTaskId(xTest: DenseMatrix[Double], model: HgpcModel): Map[Int, TaskPosterior] = {
 
+    val now = System.currentTimeMillis()
+    logger.info("Calibrating factor graph...")
     val hgpcFactorGraph = createHgpcFactorGraph(model)
     val iterations = hgpcFactorGraph.calibrate(maxIter = 10, threshold = 1e-3)
     if (iterations >= 10) logger.warn(s"Factor graph did not converge in less than 10 iterations")
+    logger.info("Calibrating factor graph...done: " + (System.currentTimeMillis() - now))
+
     val uPosterior = hgpcFactorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
 
     val testTaskIds = xTest(::, 0).toArray.distinct
