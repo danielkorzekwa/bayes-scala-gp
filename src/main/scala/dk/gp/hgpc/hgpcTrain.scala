@@ -4,9 +4,10 @@ import breeze.linalg.NotConvergedException
 import breeze.linalg.DenseVector
 import breeze.optimize.ApproximateGradientFunction
 import breeze.optimize.LBFGS
-import dk.gp.hgpc.util.calcHGPCLoglik
 import breeze.linalg._
 import com.typesafe.scalalogging.slf4j._
+import util._
+
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.
  */
@@ -47,6 +48,9 @@ object hgpcTrain extends LazyLogging {
         Double.NaN
       }
     }
+    
+    logger.info("Neg loglik = %.4f, params=%s".format(-loglik,params))
+    
     -loglik
   }
 }

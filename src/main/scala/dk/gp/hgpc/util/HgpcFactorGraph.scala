@@ -12,7 +12,7 @@ import dk.bayes.factorgraph2.factor.StepFunctionFactor
 import dk.bayes.factorgraph2.variable.BernVariable
 import dk.bayes.factorgraph2.factor.StepFunctionFactor
 
-case class HgpcFactorGraph2(model: HgpcModel) {
+case class HgpcFactorGraph(model: HgpcModel) {
 
   private val x = model.x
   private val y = model.y

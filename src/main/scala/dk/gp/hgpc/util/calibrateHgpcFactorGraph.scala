@@ -5,9 +5,9 @@ import dk.bayes.math.gaussian.canonical.CanonicalGaussian
 import scala.util.Random
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
 
-object calibrateHgpcFactorGraph2 {
+object calibrateHgpcFactorGraph {
 
-  def apply(factorGraph: HgpcFactorGraph2, maxIter: Int): (Boolean, Int) = {
+  def apply(factorGraph: HgpcFactorGraph, maxIter: Int): (Boolean, Int) = {
 
     /**
      * Update variables

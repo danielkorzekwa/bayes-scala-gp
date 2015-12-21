@@ -1,4 +1,4 @@
-package dk.gp.hgpc.factorgraph2
+package dk.gp.hgpc.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -7,8 +7,6 @@ import breeze.linalg.DenseVector
 import dk.gp.hgpc.HgpcModel
 import dk.gp.hgpc.TestCovFunc
 import dk.gp.hgpc.getHgpcTestData
-import dk.gp.hgpc.util.HgpcFactorGraph2
-import dk.gp.hgpc.util.calibrateHgpcFactorGraph2
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
 
 class HgpcFactorGraph2Test {
@@ -23,8 +21,8 @@ class HgpcFactorGraph2Test {
 
   @Test def test: Unit = {
 
-    val hgpcFactorGraph = HgpcFactorGraph2(hgpcModel)
-    val (calib, iter) = calibrateHgpcFactorGraph2(hgpcFactorGraph,maxIter=100)
+    val hgpcFactorGraph = HgpcFactorGraph(hgpcModel)
+    val (calib, iter) = calibrateHgpcFactorGraph(hgpcFactorGraph,maxIter=100)
 
     assertTrue(calib)
     assertEquals(6, iter)
