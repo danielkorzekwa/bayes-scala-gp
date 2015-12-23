@@ -5,10 +5,10 @@ import breeze.linalg.DenseVector
 import breeze.numerics.exp
 import dk.bayes.dsl.variable.Gaussian
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
-import dk.gp.gp.gpPredictSingle
 import dk.gp.hgpr.util.HgprFactorGraph
 import dk.gp.math.MultivariateGaussian
 import dk.gp.math.UnivariateGaussian
+import dk.gp.gp.GPPredictSingle
 
 /**
  * Hierarchical Gaussian Process regression. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -27,7 +27,7 @@ object hgprPredict {
       val taskId = xRow(0).toInt
       val taskPosterior = taskPosteriorByTaskId(taskId)
 
-      val xTestPrior = gpPredictSingle(xRow.toDenseMatrix, MultivariateGaussian(taskPosterior.xPosterior.mean,taskPosterior.xPosterior.variance),taskPosterior.x, model.covFunc, model.covFuncParams)
+      val xTestPrior = GPPredictSingle(MultivariateGaussian(taskPosterior.xPosterior.mean, taskPosterior.xPosterior.variance), taskPosterior.x, model.covFunc, model.covFuncParams).predictSingle(xRow.toDenseMatrix)
       UnivariateGaussian(xTestPrior.m(0), xTestPrior.v(0, 0))
     }.toArray
     DenseVector(predictedArray)
@@ -53,7 +53,7 @@ object hgprPredict {
         val taskXTest = xTest(taskXTestIdx, ::).toDenseMatrix
 
         val taskXX = DenseMatrix.vertcat(taskX, taskXTest)
-        val xPrior = gpPredictSingle(taskXX,MultivariateGaussian(uPosterior.mean,uPosterior.variance),  model.u,model.covFunc, model.covFuncParams)
+        val xPrior = GPPredictSingle(MultivariateGaussian(uPosterior.mean, uPosterior.variance), model.u, model.covFunc, model.covFuncParams).predictSingle(taskXX)
 
         val xPriorVariable = dk.bayes.dsl.variable.gaussian.multivariate.MultivariateGaussian(xPrior.m, xPrior.v)
 

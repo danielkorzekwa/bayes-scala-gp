@@ -8,8 +8,8 @@ import breeze.numerics._
 import dk.gp.math.MultivariateGaussian
 import dk.gp.math.MultivariateGaussian
 import dk.gp.hgpr.HgprModel
-import dk.gp.gp.gpPredictSingle
 import dk.gp.math.MultivariateGaussian
+import dk.gp.gp.GPPredictSingle
 
 object calcHgprLoglik {
 
@@ -29,7 +29,7 @@ object calcHgprLoglik {
       val xFactorMsgUp = hgpFactorGraph.getXFactorMsgUp(taskId.toInt)
 
       val uVarMsgDown = uPosterior / xFactorMsgUp
-      val xPrior = gpPredictSingle(taskX, MultivariateGaussian(uVarMsgDown.mean,uVarMsgDown.variance), model.u,model.covFunc, model.covFuncParams)
+      val xPrior = GPPredictSingle(MultivariateGaussian(uVarMsgDown.mean,uVarMsgDown.variance), model.u,model.covFunc, model.covFuncParams).predictSingle(taskX)
       val cPriorVarWithNoise = xPrior.v + DenseMatrix.eye[Double](taskX.rows) * exp(2 * model.likNoiseLogStdDev)
       val loglik = gprLoglik(xPrior.m, cPriorVarWithNoise, invchol(cholesky(cPriorVarWithNoise).t), taskY)
 

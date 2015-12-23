@@ -1,20 +1,16 @@
 package dk.gp.hgpc
 
-import breeze.linalg._
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import dk.bayes.dsl.factor._
-import dk.bayes.math.gaussian.canonical.CanonicalGaussian
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
-import dk.gp.gp.gpPredictSingle
-import dk.gp.gpc.util.calcLoglikGivenLatentVar
-import dk.gp.math.MultivariateGaussian
-import dk.gp.gpc.util.createLikelihoodVariables
-import com.typesafe.scalalogging.slf4j.LazyLogging
-import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
 import dk.gp.gp.ConditionalGPFactory
-import dk.gp.hgpc.util.calibrateHgpcFactorGraph
+import dk.gp.gp.GPPredictSingle
+import dk.gp.gpc.util.calcLoglikGivenLatentVar
 import dk.gp.hgpc.util.HgpcFactorGraph
+import dk.gp.hgpc.util.calibrateHgpcFactorGraph
+import dk.gp.math.MultivariateGaussian
 
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -27,15 +23,15 @@ object hgpcPredict extends LazyLogging {
    * Returns vector of probabilities for a class 1
    */
   def apply(t: DenseMatrix[Double], model: HgpcModel): DenseVector[Double] = {
-    val taskPosteriorByTaskId: Map[Int, TaskPosterior] = createTaskPosteriorByTaskId(t, model)
+    val gpModelsByTaskId: Map[Int, GPPredictSingle] = createTaskPosteriorByTaskId(t, model)
 
     val predictedArray = (0 until t.rows).par.map { rowIndex =>
 
       val tRow = t(rowIndex, ::).t
       val taskId = tRow(0).toInt
-      val taskPosterior = taskPosteriorByTaskId(taskId)
+      val gpModel = gpModelsByTaskId(taskId)
 
-      val tTestPrior = gpPredictSingle(tRow.toDenseMatrix, MultivariateGaussian(taskPosterior.xPosterior.mean, taskPosterior.xPosterior.variance), taskPosterior.x, model.covFunc, model.covFuncParams, model.mean)
+      val tTestPrior = gpModel.predictSingle(tRow.toDenseMatrix)
       val predictedProb = calcLoglikGivenLatentVar(tTestPrior.m(0), tTestPrior.v(0, 0), 1d)
 
       predictedProb
@@ -43,7 +39,7 @@ object hgpcPredict extends LazyLogging {
     DenseVector(predictedArray)
   }
 
-  private def createTaskPosteriorByTaskId(xTest: DenseMatrix[Double], model: HgpcModel): Map[Int, TaskPosterior] = {
+  private def createTaskPosteriorByTaskId(xTest: DenseMatrix[Double], model: HgpcModel): Map[Int, GPPredictSingle] = {
 
     val now = System.currentTimeMillis()
     logger.info("Calibrating factor graph...")
@@ -54,13 +50,15 @@ object hgpcPredict extends LazyLogging {
 
     val uPosterior = hgpcFactorGraph.uVariable.get.asInstanceOf[DenseCanonicalGaussian]
 
+    logger.info("Computing taskPosteriorByTaskId...")
+
     val testTaskIds = xTest(::, 0).toArray.map(_.toInt).distinct
-    val taskPosteriorByTaskId: Map[Int, TaskPosterior] = testTaskIds.map { taskId =>
+    val gpModelsByTaskId: Map[Int, GPPredictSingle] = testTaskIds.map { taskId =>
       val idx = model.x(::, 0).findAll { x => x == taskId }
       val taskX = model.x(idx, ::).toDenseMatrix
       val taskY = model.y(idx).toDenseVector
 
-      val taskPosterior = if (taskY.size == 0) TaskPosterior(model.u, uPosterior)
+      val gpModel = if (taskY.size == 0) GPPredictSingle(MultivariateGaussian(uPosterior.mean, uPosterior.variance), model.u, model.covFunc, model.covFuncParams, model.mean)
       else {
 
         val taskXTestIdx = xTest(::, 0).findAll(x => x == taskId)
@@ -77,14 +75,16 @@ object hgpcPredict extends LazyLogging {
         val taskFactorDownMsg = hgpcFactorGraph.taskFactorsMap(taskId).getMsgV2().get.asInstanceOf[DenseCanonicalGaussian]
         val taskPosteriorXX = taskFactorDownMsgFull * ((taskVarPosterior / taskFactorDownMsg).extend(taskXX.rows, 0))
 
-        TaskPosterior(taskXX, taskPosteriorXX)
+        GPPredictSingle(MultivariateGaussian(taskPosteriorXX.mean, taskPosteriorXX.variance), taskXX, model.covFunc, model.covFuncParams, model.mean)
 
       }
 
-      taskId.toInt -> taskPosterior
+      taskId.toInt -> gpModel
     }.toList.toMap
 
-    taskPosteriorByTaskId
+    logger.info("Computing taskPosteriorByTaskId...done")
+
+    gpModelsByTaskId
   }
 
 }

@@ -23,7 +23,7 @@ object calibrateHgpcFactorGraph {
 
       val beforeUMarginal = factorGraph.uVariable.get()
 
-      factorGraph.taskIds.foreach { taskId =>
+      factorGraph.taskIds.par.foreach { taskId =>
         factorGraph.taskFactorsMap(taskId).updateMsgV2()
 
         factorGraph.taskVariablesMap(taskId).update()
