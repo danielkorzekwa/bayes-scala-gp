@@ -5,7 +5,6 @@ import Assert._
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import dk.gp.gpc.GpcModel
-import dk.gp.hgpc.util.HgpcFactorGraph2
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
 import dk.bayes.math.gaussian.canonical.SparseCanonicalGaussian
 import breeze.linalg.CSCMatrix
