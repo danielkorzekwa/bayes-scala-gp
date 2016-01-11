@@ -6,6 +6,7 @@ import breeze.linalg._
 import java.io.File
 import dk.gp.cov.CovSEiso
 import breeze.numerics._
+import dk.gp.mtgpc.TestMtGprCovFunc
 
 class learnMtGgHyperParamsTest {
 
@@ -20,7 +21,7 @@ class learnMtGgHyperParamsTest {
   val allX = DenseMatrix.vertcat(x1, x2)
   val allY = DenseVector.vertcat(y, y)
 
-  val covFunc = CovSEiso()
+  val covFunc = TestMtGprCovFunc()
   val covFuncParams = DenseVector(log(1d), log(1))
   val likNoiseLogStdDev = log(0.1)
 

@@ -10,8 +10,7 @@ object gpcTrain {
 
   def apply(gpcModel: GpcModel, maxIter: Int = 100): GpcModel = {
 
-    val g = calcLoglik(gpcModel)(_)
-    val diffFunc = new ApproximateGradientFunction(g)
+    val diffFunc = new GpcDiffFunction(gpcModel)
 
     val initialParams = DenseVector(gpcModel.covFuncParams.toArray :+ gpcModel.mean)
 
@@ -27,17 +26,4 @@ object gpcTrain {
     trainedModel
   }
 
-  private def calcLoglik(gpcModel: GpcModel)(params: DenseVector[Double]): Double = {
-
-    val currCovFuncParams = DenseVector(params.toArray.dropRight(1))
-
-    val currMean = params.toArray.last
-
-    val currModel = gpcModel.copy(covFuncParams = currCovFuncParams, mean = currMean)
-    val loglik = try { calcGPCLoglik(currModel)}
-    catch {
-      case e :NotConvergedException => Double.NaN
-    }
-    -loglik
-  }
 }
