@@ -8,12 +8,12 @@ import dk.gp.gpc.GpcDiffFunction
 import dk.gp.gpc.GpcModel
 import breeze.linalg._
 
-case class MtGpcDiffFunction(x: DenseMatrix[Double], y: DenseVector[Double], covFunc: CovFunc, initialCovFuncParams: DenseVector[Double], initialGpMean: Double) extends DiffFunction[DenseVector[Double]] {
+case class MtGpcDiffFunction(initialModel: MtgpcModel) extends DiffFunction[DenseVector[Double]] {
 
   private val gpDiffFunctions = createGpDiffFunctions()
 
   def calculate(params: DenseVector[Double]): (Double, DenseVector[Double]) = {
-      val loglikWithD = gpDiffFunctions.map(gpDiffFunc => gpDiffFunc.calculate(params))
+    val loglikWithD = gpDiffFunctions.map(gpDiffFunc => gpDiffFunc.calculate(params))
 
     val totalLoglik = loglikWithD.map(_._1).sum
     val totalGrad = sum(loglikWithD.map(_._2))
@@ -23,14 +23,14 @@ case class MtGpcDiffFunction(x: DenseMatrix[Double], y: DenseVector[Double], cov
 
   private def createGpDiffFunctions(): Seq[GpcDiffFunction] = {
 
-    val taskIds = x(::, 0).toArray.distinct
+    val taskIds = initialModel.x(::, 0).toArray.distinct
 
     val gpDiffFunctions = taskIds.map { cId =>
-      val idx = x(::, 0).findAll { x => x == cId }
-      val taskX = x(idx, ::).toDenseMatrix
-      val taskY = y(idx).toDenseVector
+      val idx = initialModel.x(::, 0).findAll { x => x == cId }
+      val taskX = initialModel.x(idx, ::).toDenseMatrix
+      val taskY = initialModel.y(idx).toDenseVector
 
-      val model = GpcModel(taskX, taskY, covFunc, initialCovFuncParams, initialGpMean)
+      val model = GpcModel(taskX, taskY, initialModel.covFunc, initialModel.covFuncParams, initialModel.gpMean)
       val gpDiffFunction = GpcDiffFunction(model)
       gpDiffFunction
     }

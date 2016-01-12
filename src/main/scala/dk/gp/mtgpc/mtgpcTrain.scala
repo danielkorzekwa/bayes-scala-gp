@@ -8,7 +8,7 @@ import breeze.optimize.LBFGS
 /**
  * Multi Task Gaussian Process Classification parameters learning: It is almost like standard Gaussian Process Classification, but with hyper parameters shared between task Gaussian Processes.
  */
-object learnMtGgcHyperParams {
+object mtgpcTrain {
 
   /**
    * @param x [taskId, feature1, feature2,...]
@@ -19,10 +19,11 @@ object learnMtGgcHyperParams {
    *
    * @return Learned (covFuncParams,gpMean)
    */
-  def apply(x: DenseMatrix[Double], y: DenseVector[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], gpMean: Double): (DenseVector[Double], Double) = {
-    val initialParams = DenseVector(covFuncParams.toArray :+ gpMean)
+  def apply(model: MtgpcModel): MtgpcModel = {
 
-    val diffFunction = MtGpcDiffFunction(x, y, covFunc, covFuncParams, gpMean)
+    val initialParams = DenseVector(model.covFuncParams.toArray :+ model.gpMean)
+
+    val diffFunction = MtGpcDiffFunction(model)
 
     val optimizer = new LBFGS[DenseVector[Double]](maxIter = 10, m = 6, tolerance = 1.0E-6)
     val optIterations = optimizer.iterations(diffFunction, initialParams).map { state => println("iter=%d, loglik=%.4f, params=%s".format(state.iter, state.value, state.x)); state }.toList
@@ -31,7 +32,9 @@ object learnMtGgcHyperParams {
     val newCovFuncParams = DenseVector(newParams.toArray.dropRight(1))
     val newGpMean = newParams.toArray.last
 
-    (newCovFuncParams, newGpMean)
+    val trainedModel = model.copy(covFuncParams = newCovFuncParams, gpMean = newGpMean)
+
+    trainedModel
   }
 
 }

@@ -28,7 +28,7 @@ object gpcPredict {
    * @returns Predicted probabilities for class +1
    */
   def apply(t: DenseMatrix[Double], model: GpcModel): DenseVector[Double] = {
-
+  
     val covX = model.covFunc.cov(model.x, model.x, model.covFuncParams) + DenseMatrix.eye[Double](model.x.rows) * 1e-7
     val meanX = DenseVector.zeros[Double](model.x.rows) + model.mean
 
