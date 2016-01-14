@@ -16,11 +16,11 @@ class mtgpcTrainTest {
   @Test def test = {
 
     val initialModel = MtgpcModel(x, y, covFunc, covFuncParams, gpMean)
-    val trainedModel = mtgpcTrain(initialModel)
-    assertEquals(-6.5124, trainedModel.gpMean, 0.0001)
+    val trainedModel = mtgpcTrain(initialModel,maxIter=10)
+    assertEquals(-6.3811, trainedModel.gpMean, 0.0001)
 
-    assertEquals(3.9167, trainedModel.covFuncParams(0), 0.0001) //logSf
-    assertEquals(1.3032, trainedModel.covFuncParams(1), 0.0001) //logEllx1
-    assertEquals(1.1069, trainedModel.covFuncParams(2), 0.0001) //logEllx2
+    assertEquals(4.1296, trainedModel.covFuncParams(0), 0.0001) //logSf
+    assertEquals(1.3718, trainedModel.covFuncParams(1), 0.0001) //logEllx1
+    assertEquals(1.32032, trainedModel.covFuncParams(2), 0.0001) //logEllx2
   }
 }

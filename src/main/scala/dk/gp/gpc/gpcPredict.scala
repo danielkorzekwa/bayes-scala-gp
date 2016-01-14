@@ -12,14 +12,16 @@ import breeze.numerics._
 import dk.gp.gp._
 import dk.bayes.math.gaussian.Gaussian
 import dk.bayes.math.gaussian.canonical._
-import dk.gp.gpc.util.createLikelihoodVariables
 import dk.gp.gpc.util.calcLoglikGivenLatentVar
 import dk.bayes.dsl.epnaivebayes.EPNaiveBayesFactorGraph
+import com.typesafe.scalalogging.slf4j.LazyLogging
+import dk.gp.gpc.util.calibrateGpcFactorGraph
+import dk.gp.gpc.util.GpcFactorGraph
 
 /**
  * Gaussian Process classification.
  */
-object gpcPredict {
+object gpcPredict extends LazyLogging {
 
   /**
    * @param t Matrix of N test points [NxD], D - dimensionality of predictor vector
@@ -28,20 +30,19 @@ object gpcPredict {
    * @returns Predicted probabilities for class +1
    */
   def apply(t: DenseMatrix[Double], model: GpcModel): DenseVector[Double] = {
-  
-    val covX = model.covFunc.cov(model.x, model.x, model.covFuncParams) + DenseMatrix.eye[Double](model.x.rows) * 1e-7
-    val meanX = DenseVector.zeros[Double](model.x.rows) + model.mean
 
-    val fVariable = MultivariateGaussian(meanX, covX)
-    val yVariables = createLikelihoodVariables(fVariable, model.y)
+    val now = System.currentTimeMillis()
+    // logger.info("Calibrating factor graph...")
+    val gpcFactorGraph = GpcFactorGraph(model)
+    val (calib, iters) = calibrateGpcFactorGraph(gpcFactorGraph, maxIter = 10)
+    //if (iters >= 10) logger.warn(s"Factor graph did not converge in less than 10 iterations")
+    // logger.info("Calibrating factor graph...done: " + (System.currentTimeMillis() - now))
 
-    val factorGraph = EPNaiveBayesFactorGraph(fVariable, yVariables, true)
-    factorGraph.calibrate(maxIter = 10, threshold = 1e-4)
-    val fPosterior = factorGraph.getPosterior().asInstanceOf[DenseCanonicalGaussian]
-    
-    val predictedT = gpPredict(t, dk.gp.math.MultivariateGaussian(fPosterior.mean, fPosterior.variance), model.x, model.covFunc, model.covFuncParams, model.mean)
+    val fPosterior = gpcFactorGraph.fVariable.get.asInstanceOf[DenseCanonicalGaussian]
 
-    val predictedProb = predictedT.map(predictedT => calcLoglikGivenLatentVar(predictedT.m(0), predictedT.v(0, 0),1d))
+    val predictedT = gpPredict(t, dk.gp.math.MultivariateGaussian(fPosterior.mean, fPosterior.variance), model.x, model.covFunc, model.covFuncParams, model.gpMean)
+
+    val predictedProb = predictedT.map(predictedT => calcLoglikGivenLatentVar(predictedT.m(0), predictedT.v(0, 0), 1d))
 
     predictedProb
   }

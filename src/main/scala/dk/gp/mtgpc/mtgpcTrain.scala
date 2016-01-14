@@ -11,21 +11,18 @@ import breeze.optimize.LBFGS
 object mtgpcTrain {
 
   /**
-   * @param x [taskId, feature1, feature2,...]
-   * @param y Vector of {0,1}
-   * @param covFunc
-   * @param initialCovFuncParams
-   * @param gpMean The mean value of the Gaussian Process
+   * @param model
+   * @param maxIter
    *
    * @return Learned (covFuncParams,gpMean)
    */
-  def apply(model: MtgpcModel): MtgpcModel = {
+  def apply(model: MtgpcModel, maxIter: Int = 100): MtgpcModel = {
 
     val initialParams = DenseVector(model.covFuncParams.toArray :+ model.gpMean)
 
     val diffFunction = MtGpcDiffFunction(model)
 
-    val optimizer = new LBFGS[DenseVector[Double]](maxIter = 10, m = 6, tolerance = 1.0E-6)
+    val optimizer = new LBFGS[DenseVector[Double]](maxIter, m = 6, tolerance = 1.0E-6)
     val optIterations = optimizer.iterations(diffFunction, initialParams).map { state => println("iter=%d, loglik=%.4f, params=%s".format(state.iter, state.value, state.x)); state }.toList
     val newParams = optIterations.last.x
 

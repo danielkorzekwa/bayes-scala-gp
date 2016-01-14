@@ -12,16 +12,16 @@ object gpcTrain {
 
     val diffFunc = new GpcDiffFunction(gpcModel)
 
-    val initialParams = DenseVector(gpcModel.covFuncParams.toArray :+ gpcModel.mean)
+    val initialParams = DenseVector(gpcModel.covFuncParams.toArray :+ gpcModel.gpMean)
 
     val optimizer = new LBFGS[DenseVector[Double]](maxIter, m = 6, tolerance = 1.0E-6)
     val optIterations = optimizer.iterations(diffFunc, initialParams).toList
     val newParams = optIterations.last.x
 
     val newCovFuncParams = DenseVector(newParams.toArray.dropRight(1))
-    val newMean = newParams.toArray.last
+    val newGPMean = newParams.toArray.last
 
-    val trainedModel = gpcModel.copy(covFuncParams = newCovFuncParams, mean = newMean)
+    val trainedModel = gpcModel.copy(covFuncParams = newCovFuncParams, gpMean = newGPMean)
 
     trainedModel
   }

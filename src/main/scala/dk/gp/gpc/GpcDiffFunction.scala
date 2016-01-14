@@ -8,11 +8,32 @@ import breeze.linalg._
 
 case class GpcDiffFunction(initialGpcModel: GpcModel) extends DiffFunction[DenseVector[Double]] {
 
-  val g = calcLoglik(initialGpcModel)(_)
-  val approxDiffFunc = new ApproximateGradientFunction(g)
+  val epsilon = 1E-5
 
-  def calculate(params: DenseVector[Double]): (Double, DenseVector[Double]) = {
-    approxDiffFunc.calculate(params)
+  val g = calcLoglik(initialGpcModel)(_)
+
+  def calculate(x: DenseVector[Double]): (Double, DenseVector[Double]) = {
+
+    val currCovFuncParams = DenseVector(x.toArray.dropRight(1))
+    val currMean = x.toArray.last
+    val currModel = initialGpcModel.copy(covFuncParams = currCovFuncParams, gpMean = currMean)
+
+    val loglik = try { -calcGPCLoglik(currModel) }
+    catch {
+      case e: NotConvergedException => Double.NaN
+    }
+
+    val grad: DenseVector[Double] = DenseVector.zeros[Double](x.size)
+    val xx = x.copy
+    for ((k, v) <- x.iterator) {
+      xx(k) += epsilon
+      val gradModel = initialGpcModel.copy(covFuncParams = DenseVector(xx.toArray.dropRight(1)), gpMean = xx.toArray.last)
+      val graLoglik = -calcGPCLoglik(gradModel)
+      grad(k) = (graLoglik - loglik) / epsilon
+      xx(k) -= epsilon
+    }
+    (loglik, grad)
+
   }
 
   private def calcLoglik(gpcModel: GpcModel)(params: DenseVector[Double]): Double = {
@@ -21,7 +42,7 @@ case class GpcDiffFunction(initialGpcModel: GpcModel) extends DiffFunction[Dense
 
     val currMean = params.toArray.last
 
-    val currModel = gpcModel.copy(covFuncParams = currCovFuncParams, mean = currMean)
+    val currModel = gpcModel.copy(covFuncParams = currCovFuncParams, gpMean = currMean)
     val loglik = try { calcGPCLoglik(currModel) }
     catch {
       case e: NotConvergedException => Double.NaN

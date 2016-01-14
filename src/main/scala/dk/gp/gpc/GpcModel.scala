@@ -11,4 +11,4 @@ import breeze.linalg.DenseVector
  * @param covFuncParams
  * @param mean
  */
-case class GpcModel(x: DenseMatrix[Double], y: DenseVector[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double = 0)
+case class GpcModel(x: DenseMatrix[Double], y: DenseVector[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], gpMean: Double = 0)
