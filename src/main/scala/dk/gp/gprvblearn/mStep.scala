@@ -9,6 +9,7 @@ import breeze.optimize.LBFGS
 import dk.bayes.math.gaussian.MultivariateGaussian
 import dk.bayes.math.linear.invchol
 import dk.bayes.math.linear.logdetchol
+import breeze.linalg._
 
 /**
  * Returns new values of f's covariance parameters, that maximise the value of variational lower bound
@@ -30,7 +31,7 @@ object mStep {
 
     val diffFunction = GenericDiffFunction(fPosterior, calcFPriorVar, calcFPriorVarD)
 
-    val optimizer = new LBFGS[DenseVector[Double]](maxIter = 100, m = 3, tolerance = 1.0E-6)
+    val optimizer = new LBFGS[DenseVector[Double]](maxIter = 10, m = 6, tolerance = 1.0E-6)
     val optIterations = optimizer.iterations(diffFunction, initialParamsVec).toList
 
     val newParams = optIterations.last.x
@@ -61,8 +62,12 @@ object mStep {
      * (http://mlg.eng.cam.ac.uk/zoubin/papers/ecml03.pdf, http://mlg.eng.cam.ac.uk/zoubin/papers/KimGha06-PAMI.pdf)
      */
     private def loglik(fPriorVar: DenseMatrix[Double], fPriorVarInv:  DenseMatrix[Double]): Double = {
-      val logDet = logdetchol(cholesky(fPriorVar))
-      -0.5 * logDet - 0.5 * (fPosterior.m.t * invchol(cholesky(fPriorVar).t) * fPosterior.m) - 0.5 * trace(fPriorVarInv * fPosterior.v)
+   
+     val linv =  inv(cholesky(fPriorVar).t)
+     val mlinv =fPosterior.m.t*linv
+    
+     val logDet = logdetchol(cholesky(fPriorVar))
+     -0.5 * logDet - 0.5 * (mlinv*mlinv.t) - 0.5 * trace(fPriorVarInv * fPosterior.v) //fPosterior.m.t * fPriorVarInv* fPosterior.m = mlinv*mlinv
     }
 
     /**

@@ -20,8 +20,8 @@ lazy val root = (project in file(".")).
     unmanagedSourceDirectories in Test := (scalaSource in Test).value :: Nil,
     
     libraryDependencies ++= Seq(
-      "org.scalanlp" %% "breeze" % "0.12-SNAPSHOT",
-      "com.github.danielkorzekwa" %% "bayes-scala" % "0.6-SNAPSHOT",
+      "org.scalanlp" %% "breeze" % "0.12",
+      "com.github.danielkorzekwa" %% "bayes-scala" % "0.7-SNAPSHOT",
       "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
       // test scoped
       "org.slf4j" % "slf4j-log4j12" % "1.7.2" % Test,

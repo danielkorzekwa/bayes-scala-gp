@@ -35,4 +35,10 @@ case class GpcFactorGraph(model: GpcModel) {
       StepFunctionFactor(fVariable, yVariables(i), model.x.rows, i, v = 1)
   }
 
+  def updateFfactor(covFuncParams: DenseVector[Double], gpMean: Double) = {
+    val newCovX = model.covFunc.cov(model.x, model.x, covFuncParams) + DenseMatrix.eye[Double](model.x.rows) * 1e-7
+    val newMeanX = DenseVector.zeros[Double](model.x.rows) + gpMean
+    fFactor.updateMeanAndVariance(newMeanX, newCovX)
+  }
+
 }

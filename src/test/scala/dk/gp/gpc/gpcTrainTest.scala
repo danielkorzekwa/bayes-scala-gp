@@ -25,6 +25,7 @@ class gpcTrainTest {
 
     val model = GpcModel(x, y, covFunc, covFuncParams, mean)
     val trainedModel = gpcTrain(model, maxIter = 10)
+
     assertEquals(-1.38042, trainedModel.gpMean, 0.0001)
 
     assertEquals(3.6096945, trainedModel.covFuncParams(0), 0.0001) //logSf
@@ -32,7 +33,6 @@ class gpcTrainTest {
     assertEquals(1.4379288, trainedModel.covFuncParams(2), 0.0001) //logEllx2
 
     val predicted = gpcPredict(t, trainedModel)
-    println(predicted)
     assertEquals(0.2527, predicted(6480), 0.0001) // t = [4 -4]
     assertEquals(0.3006, predicted(1255), 0.0001) //t = [-2.5 0]
     assertEquals(0.90304, predicted(1242), 0.0001) //t = [-2.5 -1.3]

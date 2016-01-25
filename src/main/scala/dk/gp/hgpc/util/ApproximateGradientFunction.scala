@@ -32,8 +32,8 @@ case class ApproximateGradientFunction(initialModel: HgpcModel) extends DiffFunc
     for ((k, v) <- x.iterator) {
       xx(k) += epsilon
       val gradModel = initialModel.copy(covFuncParams = DenseVector(xx.toArray.dropRight(1)), mean = xx.toArray.last)
-      val graLoglik = -calcHGPCLoglik(gradModel)
-      grad(k) = (graLoglik - loglik) / epsilon
+      val gradLoglik = -calcHGPCLoglik(gradModel)
+      grad(k) = (gradLoglik - loglik) / epsilon
       xx(k) -= epsilon
     }
     (loglik, grad)

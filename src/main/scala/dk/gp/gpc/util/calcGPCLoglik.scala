@@ -18,11 +18,31 @@ object calcGPCLoglik {
     val gpcFactorGraph = GpcFactorGraph(model)
     val (calib, iters) = calibrateGpcFactorGraph(gpcFactorGraph, maxIter = 10)
 
-    val totalLoglik = gpcFactorGraph.yFactors.map { yFactor =>
+    apply(gpcFactorGraph)
+  }
+
+  def apply(calibratedFactorGraph: GpcFactorGraph): Double = {
+ 
+    val totalLoglik = calibratedFactorGraph.yFactors.map { yFactor =>
       val outcome1Prob = yFactor.calcNewMsgV2()
+    
       if (yFactor.v2.k == 1) log(outcome1Prob) else log1p(-outcome1Prob)
     }.sum
 
     totalLoglik
   }
+  
+   
+  /**
+   * This function will update calibratedHgpcFactorGraph for the purpose of computing approximated loglikelihood of evidence given provided covFuncParams and gpMean parameters
+   * It is used for computing approximated derivatives of approximated loglikelihood(lowerBound) for covFuncParams and gpMean parameters
+   */
+   def apply(calibratedHgpcFactorGraph: GpcFactorGraph,covFuncParams: DenseVector[Double], gpMean: Double): Double = {
+     
+     calibratedHgpcFactorGraph.updateFfactor(covFuncParams, gpMean)
+     calibratedHgpcFactorGraph.fFactor.updateMsgV1()
+     calibratedHgpcFactorGraph.fVariable.update()
+     
+     apply(calibratedHgpcFactorGraph)
+   }
 }
