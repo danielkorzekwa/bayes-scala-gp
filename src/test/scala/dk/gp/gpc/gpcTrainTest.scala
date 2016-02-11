@@ -13,8 +13,8 @@ import org.junit.Ignore
  */
 class gpcTrainTest {
 
-  val x = csvread(new File("src/test/resources/gpml/classification_x.csv"))
-  val y = csvread(new File("src/test/resources/gpml/classification_y.csv")).toDenseVector
+  val x = csvread(new File("src/test/resources/gpml/classification_x.csv"))//(0 to 1, ::)
+  val y = csvread(new File("src/test/resources/gpml/classification_y.csv")).toDenseVector//(0 to 1)
   val t = csvread(new File("src/test/resources/gpml/classification_test.csv"))
 
   val covFunc = TestCovFunc()
@@ -26,15 +26,16 @@ class gpcTrainTest {
     val model = GpcModel(x, y, covFunc, covFuncParams, mean)
     val trainedModel = gpcTrain(model, maxIter = 10)
 
-    assertEquals(-1.38042, trainedModel.gpMean, 0.0001)
+    assertEquals(-1.73052, trainedModel.gpMean, 0.0001)
 
-    assertEquals(3.6096945, trainedModel.covFuncParams(0), 0.0001) //logSf
-    assertEquals(0.560092, trainedModel.covFuncParams(1), 0.0001) //logEllx1
-    assertEquals(1.4379288, trainedModel.covFuncParams(2), 0.0001) //logEllx2
+    assertEquals(4.28354, trainedModel.covFuncParams(0), 0.0001) //logSf
+    assertEquals(0.55933, trainedModel.covFuncParams(1), 0.0001) //logEllx1
+    assertEquals(1.74289, trainedModel.covFuncParams(2), 0.0001) //logEllx2
 
     val predicted = gpcPredict(t, trainedModel)
-    assertEquals(0.2527, predicted(6480), 0.0001) // t = [4 -4]
-    assertEquals(0.3006, predicted(1255), 0.0001) //t = [-2.5 0]
-    assertEquals(0.90304, predicted(1242), 0.0001) //t = [-2.5 -1.3]
+    
+    assertEquals(0.18973, predicted(6480), 0.0001) // t = [4 -4]
+    assertEquals(0.3966, predicted(1255), 0.0001) //t = [-2.5 0]
+    assertEquals(0.91849, predicted(1242), 0.0001) //t = [-2.5 -1.3]
   }
 }

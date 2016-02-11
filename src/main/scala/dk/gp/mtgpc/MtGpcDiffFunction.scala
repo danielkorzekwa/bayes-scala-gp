@@ -4,9 +4,9 @@ import breeze.optimize.DiffFunction
 import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
 import dk.gp.cov.CovFunc
-import dk.gp.gpc.GpcDiffFunction
 import dk.gp.gpc.GpcModel
 import breeze.linalg._
+import dk.gp.gpc.util.GpcApproxDiffFunction
 
 case class MtGpcDiffFunction(initialModel: MtgpcModel) extends DiffFunction[DenseVector[Double]] {
 
@@ -21,7 +21,7 @@ case class MtGpcDiffFunction(initialModel: MtgpcModel) extends DiffFunction[Dens
     (totalLoglik, totalGrad)
   }
 
-  private def createGpDiffFunctions(): Seq[GpcDiffFunction] = {
+  private def createGpDiffFunctions(): Seq[GpcApproxDiffFunction] = {
 
     val taskIds = initialModel.x(::, 0).toArray.distinct
 
@@ -31,7 +31,7 @@ case class MtGpcDiffFunction(initialModel: MtgpcModel) extends DiffFunction[Dens
       val taskY = initialModel.y(idx).toDenseVector
 
       val model = GpcModel(taskX, taskY, initialModel.covFunc, initialModel.covFuncParams, initialModel.gpMean)
-      val gpDiffFunction = GpcDiffFunction(model)
+      val gpDiffFunction = GpcApproxDiffFunction(model)
       gpDiffFunction
     }
     gpDiffFunctions

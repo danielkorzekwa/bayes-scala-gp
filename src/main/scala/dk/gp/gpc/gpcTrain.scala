@@ -5,12 +5,14 @@ import breeze.linalg.DenseVector
 import breeze.optimize.LBFGS
 import dk.gp.gpc.util.calcGPCLoglik
 import breeze.linalg._
+import util._
+import breeze.optimize._
 
 object gpcTrain {
 
   def apply(gpcModel: GpcModel, maxIter: Int = 100): GpcModel = {
 
-    val diffFunc = new GpcDiffFunction(gpcModel)
+    val diffFunc = GpcLowerboundDiffFunction(gpcModel)
 
     val initialParams = DenseVector(gpcModel.covFuncParams.toArray :+ gpcModel.gpMean)
 
