@@ -9,9 +9,9 @@ import breeze.numerics._
 
 object calcLoglikGivenLatentVar {
 
-  def apply(xMean: DenseVector[Double], xVar: DenseMatrix[Double], stepFunctionNoiseVar: Double): DenseVector[Double] = {
+  def apply(xMean: DenseVector[Double], xVar: DenseVector[Double], stepFunctionNoiseVar: Double): DenseVector[Double] = {
 
-    val meanVar = horzcat(xMean, diag(xVar))
+    val meanVar = horzcat(xMean, xVar)
     val yProbs = meanVar(*, ::).map(x => apply(x(0),x(1),stepFunctionNoiseVar))
     yProbs
   }

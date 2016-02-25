@@ -25,15 +25,15 @@ class hgpcPredictTest {
 
     val model = HgpcModel(x, y, u, covFunc, covFuncParams, mean)
     val predicted = hgpcPredict(xTest, model)
+    
+    assertEquals(0.20623, predicted(0), 0.0001)
+    assertEquals(0.8645, predicted(1), 0.0001)
 
-    assertEquals(0.460447, predicted(0), 0.0001)
-    assertEquals(0.8657, predicted(1), 0.0001)
+    assertEquals(0.20623428, predicted(2), 0.0001)
+    assertEquals( 0.864512843, predicted(3), 0.0001)
 
-    assertEquals(0.4604, predicted(2), 0.0001)
-    assertEquals(0.8657, predicted(3), 0.0001)
-
-    assertEquals(0.460447, predicted(4), 0.0001)
-    assertEquals(0.8657, predicted(5), 0.0001)
+    assertEquals(0.2062340, predicted(4), 0.0001)
+    assertEquals(0.86451368, predicted(5), 0.0001)
 
     assertEquals(0.2062, predicted(6), 0.0001)
     assertEquals(0.8645, predicted(7), 0.0001)

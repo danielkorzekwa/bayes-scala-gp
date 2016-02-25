@@ -23,12 +23,14 @@ class hgpcTrainTest extends LazyLogging {
     val model = HgpcModel(x, y, u, covFunc, covFuncParams, mean)
     val trainedModel = hgpcTrain(model, maxIter = 3)
     logger.info(s"trained cov params=${trainedModel.covFuncParams}, trained mean=${trainedModel.mean}")
-    
+
     assertTrue("actual:" + trainedModel.covFuncParams, isIdentical(DenseVector(1.1589097518504272, 0.05547575752863218, 0.35914404525312227), trainedModel.covFuncParams, 0.0001))
     assertEquals(-0.5261, trainedModel.mean, 0.0001)
 
     val predicted = hgpcPredict(xTest, trainedModel)
-    assertTrue(isIdentical(DenseVector(0.4782692229268218, 0.8841698021473274, 0.4782723135802849, 0.8841703921012793, 0.47827103581304, 0.8841700491249389, 0.42628523013193, 0.8839896446532274), predicted, 0.0001))
+    assertTrue(
+      isIdentical(DenseVector(0.4262832412031917, 0.8839892446263581, 0.42628628427193305, 0.883989841119802, 0.42628502561601134, 0.8839894716952773, 0.42628523013193, 0.8839896446532274),
+        predicted, 0.0001))
 
   }
 
