@@ -1,7 +1,6 @@
 package dk.gp.cogp
 
 import breeze.linalg.DenseMatrix
-import dk.gp.math.UnivariateGaussian
 import breeze.linalg.DenseVector
 import breeze.linalg.inv
 import breeze.numerics._
@@ -10,6 +9,7 @@ import dk.gp.math.invchol
 import dk.gp.cogp.model.CogpModel
 import breeze.linalg._
 import dk.gp.cogp.util.calcKzzj
+import dk.bayes.math.gaussian.Gaussian
 
 //@TODO performance improvement, do not compute covariance  and inv(cov) for every single test point
 object cogpPredict {
@@ -18,21 +18,21 @@ object cogpPredict {
    * @param x [task index, prediction record]
    * @param model
    */
-  def apply(x: DenseVector[Double], model: CogpModel): UnivariateGaussian = apply(x.toDenseMatrix, model)(0)
+  def apply(x: DenseVector[Double], model: CogpModel): Gaussian = apply(x.toDenseMatrix, model)(0)
 
   /**
    * @param x [prediction record]
    * @param i task index
    * @param model
    */
-  def apply(x: DenseVector[Double], i: Int, model: CogpModel): UnivariateGaussian = cogpPredict(x.toDenseMatrix, i, model)(0)
+  def apply(x: DenseVector[Double], i: Int, model: CogpModel): Gaussian = cogpPredict(x.toDenseMatrix, i, model)(0)
 
   /**
    * @param x Matrix of row vectors [prediction record]
    * @param i task index
    * @param model
    */
-  def apply(x: DenseMatrix[Double], i: Int, model: CogpModel): DenseVector[UnivariateGaussian] = {
+  def apply(x: DenseMatrix[Double], i: Int, model: CogpModel): DenseVector[Gaussian] = {
     val taskIndexVec = DenseMatrix.fill[Double](x.rows, 1)(i)
     val xTest = DenseMatrix.horzcat(taskIndexVec, x)
 
@@ -43,7 +43,7 @@ object cogpPredict {
    * @param x Matrix of row vectors [task index, prediction record]
    * @param model
    */
-  def apply(x: DenseMatrix[Double], model: CogpModel): DenseVector[UnivariateGaussian] = {
+  def apply(x: DenseMatrix[Double], model: CogpModel): DenseVector[Gaussian] = {
 
     val kZZj = calcKzzj(model)
     val w2 = pow(model.w, 2)
@@ -56,7 +56,7 @@ object cogpPredict {
 
   }
 
-  def pointPredict(x: DenseVector[Double], i: Int, model: CogpModel, kZZj: Array[DenseMatrix[Double]], w2: DenseMatrix[Double]): UnivariateGaussian = {
+  def pointPredict(x: DenseVector[Double], i: Int, model: CogpModel, kZZj: Array[DenseMatrix[Double]], w2: DenseMatrix[Double]): Gaussian = {
 
     val w = model.w
 
@@ -72,7 +72,7 @@ object cogpPredict {
       (outputM, outputVar)
     } else (predMi, predVari)
 
-    UnivariateGaussian(outputM, outputVar)
+    Gaussian(outputM, outputVar)
 
   }
 

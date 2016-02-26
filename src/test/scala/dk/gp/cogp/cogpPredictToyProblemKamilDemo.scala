@@ -6,17 +6,16 @@ import breeze.linalg.DenseVector
 import breeze.numerics._
 import breeze.plot.Figure
 import breeze.plot.plot
-import breeze.stats.distributions.Gaussian
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.lb.calcLBLoglik
 import dk.gp.cogp.svi.stochasticUpdateCogpModel
 import dk.gp.cogp.testutils._
 import dk.gp.cogp.testutils.createCogpToyModel
-import dk.gp.math.UnivariateGaussian
 import java.io.File
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import scala.math.Pi
 import dk.gp.cogp.model.Task
+import dk.bayes.math.gaussian.Gaussian
 
 object cogpPredictToyProblemKamilDemo extends App with LazyLogging {
 
@@ -30,8 +29,8 @@ object cogpPredictToyProblemKamilDemo extends App with LazyLogging {
 
   val xTest = DenseVector.rangeD(0, 2 * Pi, 0.1).toDenseMatrix.t + 0.001
 
-  val predictedY0: DenseVector[UnivariateGaussian] = cogpPredict(xTest, i = 0, trainedToyModel)
-  val predictedY1: DenseVector[UnivariateGaussian] = cogpPredict(xTest, i = 1, trainedToyModel)
+  val predictedY0: DenseVector[Gaussian] = cogpPredict(xTest, i = 0, trainedToyModel)
+  val predictedY1: DenseVector[Gaussian] = cogpPredict(xTest, i = 1, trainedToyModel)
 
   plotPredictions()
 

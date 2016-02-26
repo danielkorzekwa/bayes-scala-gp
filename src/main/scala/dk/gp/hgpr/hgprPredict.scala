@@ -3,12 +3,11 @@ package dk.gp.hgpr
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import breeze.numerics.exp
-import dk.bayes.dsl.variable.Gaussian
 import dk.bayes.math.gaussian.canonical.DenseCanonicalGaussian
 import dk.gp.hgpr.util.HgprFactorGraph
-import dk.gp.math.MultivariateGaussian
-import dk.gp.math.UnivariateGaussian
 import dk.gp.gp.GPPredictSingle
+import dk.bayes.math.gaussian.Gaussian
+import dk.bayes.math.gaussian.MultivariateGaussian
 
 /**
  * Hierarchical Gaussian Process regression. Multiple Gaussian Processes for n tasks with a single shared parent GP.
@@ -17,7 +16,7 @@ object hgprPredict {
 
   case class TaskPosterior(x: DenseMatrix[Double], xPosterior: DenseCanonicalGaussian)
 
-  def apply(xTest: DenseMatrix[Double], model: HgprModel): DenseVector[UnivariateGaussian] = {
+  def apply(xTest: DenseMatrix[Double], model: HgprModel): DenseVector[Gaussian] = {
 
     val taskPosteriorByTaskId: Map[Int, TaskPosterior] = createTaskPosteriorByTaskId(xTest, model)
 
@@ -28,7 +27,7 @@ object hgprPredict {
       val taskPosterior = taskPosteriorByTaskId(taskId)
 
       val xTestPrior = GPPredictSingle(MultivariateGaussian(taskPosterior.xPosterior.mean, taskPosterior.xPosterior.variance), taskPosterior.x, model.covFunc, model.covFuncParams).predictSingle(xRow.toDenseMatrix)
-      UnivariateGaussian(xTestPrior.m(0), xTestPrior.v(0, 0))
+      Gaussian(xTestPrior.m(0), xTestPrior.v(0, 0))
     }.toArray
     DenseVector(predictedArray)
 
@@ -59,7 +58,7 @@ object hgprPredict {
 
         val A = DenseMatrix.horzcat(DenseMatrix.eye[Double](taskX.rows), DenseMatrix.zeros[Double](taskX.rows, taskXTest.rows))
         val yVar = DenseMatrix.eye[Double](taskY.size) * exp(2d * model.likNoiseLogStdDev)
-        val yVariable = Gaussian(A, xPriorVariable, b = DenseVector.zeros[Double](taskX.rows), yVar, yValue = taskY) //y variable
+        val yVariable = dk.bayes.dsl.variable.Gaussian(A, xPriorVariable, b = DenseVector.zeros[Double](taskX.rows), yVar, yValue = taskY) //y variable
 
         val xPosterior = dk.bayes.dsl.infer(xPriorVariable)
         TaskPosterior(taskXX, DenseCanonicalGaussian(xPosterior.m, xPosterior.v))

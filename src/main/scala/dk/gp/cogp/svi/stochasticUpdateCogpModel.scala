@@ -4,10 +4,10 @@ import breeze.linalg.DenseMatrix
 import dk.gp.cov.CovFunc
 import breeze.linalg.DenseVector
 import dk.gp.cov.utils.covDiag
-import dk.gp.math.MultivariateGaussian
 import dk.gp.cogp.lb.LowerBound
 import dk.gp.cogp.model.CogpModel
 import dk.gp.cogp.model.Task
+import dk.bayes.math.gaussian.MultivariateGaussian
 
 object stochasticUpdateCogpModel {
 

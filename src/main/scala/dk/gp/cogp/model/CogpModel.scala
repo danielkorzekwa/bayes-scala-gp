@@ -3,7 +3,6 @@ package dk.gp.cogp.model
 import dk.gp.cov.CovFunc
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import dk.gp.math.MultivariateGaussian
 import dk.gp.cov.utils.covDiag
 import breeze.linalg.inv
 import breeze.stats._

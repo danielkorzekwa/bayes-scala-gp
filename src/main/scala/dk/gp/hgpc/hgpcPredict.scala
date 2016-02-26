@@ -10,7 +10,6 @@ import dk.gp.gp.GPPredictSingle
 import dk.gp.gpc.util.calcLoglikGivenLatentVar
 import dk.gp.hgpc.util.HgpcFactorGraph
 import dk.gp.hgpc.util.calibrateHgpcFactorGraph
-import dk.gp.math.MultivariateGaussian
 
 /**
  * Hierarchical Gaussian Process classification. Multiple Gaussian Processes for n tasks with a single shared parent GP.

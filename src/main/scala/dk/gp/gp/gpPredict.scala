@@ -28,7 +28,7 @@ object gpPredict {
    *
    * @return Vector of p(y_i) for t points {i=1 to n}
    */
-  def apply(t: DenseMatrix[Double], f: dk.gp.math.MultivariateGaussian, x: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double = 0): DenseVector[dk.gp.math.MultivariateGaussian] = {
+  def apply(t: DenseMatrix[Double], f: dk.bayes.math.gaussian.MultivariateGaussian, x: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double = 0): DenseVector[dk.bayes.math.gaussian.MultivariateGaussian] = {
     
     val condGPFactory = ConditionalGPFactory(x,covFunc,covFuncParams,mean)
 
@@ -41,7 +41,7 @@ object gpPredict {
 
       val yVariable = Gaussian(a, fVariable, b, v)
       val yPosterior = infer(yVariable)
-      dk.gp.math.MultivariateGaussian(yPosterior.m, yPosterior.v)
+     dk.bayes.math.gaussian.MultivariateGaussian(yPosterior.m, yPosterior.v)
     }.toArray
 
     DenseVector(predicted)

@@ -5,11 +5,9 @@ import dk.gp.gpr.gprLoglik
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
 import breeze.numerics._
-import dk.gp.math.MultivariateGaussian
-import dk.gp.math.MultivariateGaussian
 import dk.gp.hgpr.HgprModel
-import dk.gp.math.MultivariateGaussian
 import dk.gp.gp.GPPredictSingle
+import dk.bayes.math.gaussian.MultivariateGaussian
 
 object calcHgprLoglik {
 

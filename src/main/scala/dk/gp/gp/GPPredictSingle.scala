@@ -15,7 +15,7 @@ import dk.gp.cov.CovFunc
  *
  *
  */
-case class GPPredictSingle(f: dk.gp.math.MultivariateGaussian, x: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double = 0d) {
+case class GPPredictSingle(f: dk.bayes.math.gaussian.MultivariateGaussian, x: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double = 0d) {
 
   val condGPFactory = ConditionalGPFactory(x, covFunc, covFuncParams, mean)
 
@@ -29,7 +29,7 @@ case class GPPredictSingle(f: dk.gp.math.MultivariateGaussian, x: DenseMatrix[Do
    *
    * @return p(y)
    */
-  def predictSingle(t: DenseMatrix[Double]): dk.gp.math.MultivariateGaussian = {
+  def predictSingle(t: DenseMatrix[Double]): dk.bayes.math.gaussian.MultivariateGaussian = {
     val (a, b, v) = condGPFactory.create(t)
 
     val fVariable = MultivariateGaussian(f.m, f.v)
@@ -37,7 +37,7 @@ case class GPPredictSingle(f: dk.gp.math.MultivariateGaussian, x: DenseMatrix[Do
     val yVariable = Gaussian(a, fVariable, b, v)
     val yPosterior = infer(yVariable)
 
-    val predicted = dk.gp.math.MultivariateGaussian(yPosterior.m, yPosterior.v)
+    val predicted = dk.bayes.math.gaussian.MultivariateGaussian(yPosterior.m, yPosterior.v)
     predicted
   }
 }

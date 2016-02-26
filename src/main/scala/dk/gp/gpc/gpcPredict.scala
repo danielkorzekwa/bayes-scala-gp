@@ -40,7 +40,7 @@ object gpcPredict extends LazyLogging {
 
     val fPosterior = gpcFactorGraph.fVariable.get.asInstanceOf[DenseCanonicalGaussian]
 
-    val predictedT = gpPredict(t, dk.gp.math.MultivariateGaussian(fPosterior.mean, fPosterior.variance), model.x, model.covFunc, model.covFuncParams, model.gpMean)
+    val predictedT = gpPredict(t, dk.bayes.math.gaussian.MultivariateGaussian(fPosterior.mean, fPosterior.variance), model.x, model.covFunc, model.covFuncParams, model.gpMean)
 
     val predictedProb = predictedT.map(predictedT => calcLoglikGivenLatentVar(predictedT.m(0), predictedT.v(0, 0), 1d))
 

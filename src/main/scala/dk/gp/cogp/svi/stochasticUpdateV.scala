@@ -2,7 +2,6 @@ package dk.gp.cogp.svi
 
 import breeze.linalg.DenseMatrix
 import breeze.linalg.inv
-import dk.gp.math.MultivariateGaussian
 import breeze.linalg.InjectNumericOps
 import breeze.linalg.cholesky
 import dk.gp.math.invchol
@@ -14,6 +13,7 @@ import breeze.linalg.eig
 import breeze.linalg.diag
 import dk.gp.cov.CovNoise
 import dk.gp.math.inveig
+import dk.bayes.math.gaussian.MultivariateGaussian
 
 /**
  * Stochastic update for the parameters (mu,S) of p(v|y)

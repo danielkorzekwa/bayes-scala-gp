@@ -1,6 +1,5 @@
 package dk.gp.gpc.util
 
-import dk.gp.math.MultivariateGaussian
 import breeze.linalg.DenseVector
 import DenseVector._
 import breeze.linalg._

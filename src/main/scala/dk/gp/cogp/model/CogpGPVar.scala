@@ -1,6 +1,5 @@
 package dk.gp.cogp.model
 
-import dk.gp.math.MultivariateGaussian
 import dk.gp.cov.CovFunc
 import breeze.linalg.DenseVector
 import breeze.linalg.DenseMatrix
@@ -10,6 +9,7 @@ import scala.util.Random
 import breeze.stats._
 import breeze.linalg.InjectNumericOps
 import breeze.stats.variance.reduceDouble
+import dk.bayes.math.gaussian.MultivariateGaussian
 
 case class CogpGPVar(z: DenseMatrix[Double], u: MultivariateGaussian, covFunc: CovFunc, covFuncParams: DenseVector[Double], covFuncParamsDelta: DenseVector[Double]) {
 

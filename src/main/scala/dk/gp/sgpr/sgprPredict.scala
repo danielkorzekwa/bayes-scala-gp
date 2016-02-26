@@ -2,13 +2,13 @@ package dk.gp.sgpr
 
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import dk.gp.math.UnivariateGaussian
 import breeze.linalg._
 import breeze.numerics._
+import dk.bayes.math.gaussian.Gaussian
 
 object sgprPredict {
 
-  def apply(s: DenseMatrix[Double], model: SgprModel, computeVariance: Boolean = true): DenseVector[UnivariateGaussian] = {
+  def apply(s: DenseMatrix[Double], model: SgprModel, computeVariance: Boolean = true): DenseVector[Gaussian] = {
 
     val likNoiseStdDev = exp(model.logNoiseStdDev)
     val invLmInvLa = model.invLm * model.invLa
@@ -30,7 +30,7 @@ object sgprPredict {
         val v = diag(kZZ - kZUinvLm * kZUinvLm.t + pow(likNoiseStdDev, 2) * (kZUinvLmInvLa * kZUinvLmInvLa.t))
         v(0)
       } else Double.NaN
-      UnivariateGaussian(predMean(0), predVariance)
+      Gaussian(predMean(0), predVariance)
     }.toArray
 
     DenseVector(predictedArray)
