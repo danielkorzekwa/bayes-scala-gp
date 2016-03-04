@@ -7,12 +7,17 @@ import dk.bayes.math.accuracy.binaryAcc
 import breeze.linalg.DenseVector
 import breeze.numerics._
 import breeze.stats._
+import dk.gp.hgpc.util.calcHGPCLoglik
+import dk.gp.hgpc.util.calcHGPCAcc
 
 object accuracy {
 
   def apply(model: HgpcModel): String = {
 
     val (allLoglik, allAvgLoglik, allAcc) = calcLoglikAndAcc(model.x, model.y, model)
+
+    val looCVLoglik = calcHGPCLoglik(model)
+val looAcc = calcHGPCAcc(model)
 
     val (trainingSet, testSet) = split(DenseMatrix.horzcat(model.x, model.y.toDenseMatrix.t))
 
@@ -27,11 +32,15 @@ object accuracy {
 
     val (testLoglik, testAvgLoglik, testAcc) = calcLoglikAndAcc(testSetX, testSetY, trainingSetModel)
 
-    val allReport = "All: n=%2d, loglik=%.2f, avgLoglik=%.2f, acc=%.2f".format(model.y.size, allLoglik, allAvgLoglik, allAcc)
-    val trainReport = "Train: n=%2d, loglik=%.2f, avgLoglik=%.2f, acc=%.2f".format(trainingSetY.size, trainLoglik, trainAvgLoglik, trainAcc)
-    val testReport = "Test: n=%2d, loglik=%.2f, avgLoglik=%.2f, acc=%.2f".format(testSetY.size, testLoglik, testAvgLoglik, testAcc)
+    val allReport = "All: n=%2d, loglik=%.2f, avgLoglik=%.2f, acc=%.3f".format(model.y.size, allLoglik, allAvgLoglik, allAcc)
 
-    allReport + "\n" + trainReport + "\n" + testReport
+    val looCVReport = "LooCV: loglik=%.2f, avgLoglik=%.2f,acc=%.3f".format(looCVLoglik,looCVLoglik/model.y.size,looAcc)
+
+    val trainReport = "Train: n=%2d, loglik=%.2f, avgLoglik=%.2f, acc=%.3f".format(trainingSetY.size, trainLoglik, trainAvgLoglik, trainAcc)
+
+    val testReport = "Test: n=%2d, loglik=%.2f, avgLoglik=%.2f, acc=%.3f".format(testSetY.size, testLoglik, testAvgLoglik, testAcc)
+
+    allReport + "\n" + looCVReport + "\n" + trainReport + "\n" + testReport
   }
 
   /**
