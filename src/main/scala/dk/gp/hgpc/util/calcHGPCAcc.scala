@@ -13,7 +13,10 @@ import dk.bayes.math.accuracy.binaryAcc
 
 object calcHGPCAcc {
 
-  def apply(model: HgpcModel): Double = {
+  /**
+   * @return (acc,tpr,tnr)
+   */
+  def apply(model: HgpcModel): Tuple3[Double, Double, Double] = {
 
     val hgpcFactorGraph = HgpcFactorGraph(model)
     val (calib, iters) = calibrateHgpcFactorGraph(hgpcFactorGraph, maxIter = 10)
@@ -22,7 +25,10 @@ object calcHGPCAcc {
 
   }
 
-  def apply(calibratedHgpcFactorGraph: HgpcFactorGraph): Double = {
+  /**
+   * @return (acc,tpr,tnr)
+   */
+  def apply(calibratedHgpcFactorGraph: HgpcFactorGraph): Tuple3[Double, Double, Double] = {
 
     val predictedVSActual = calibratedHgpcFactorGraph.taskIds.flatMap { taskId =>
 
@@ -37,7 +43,11 @@ object calcHGPCAcc {
     val predicted = predictedVSActualMatrix(::, 0)
     val actual = predictedVSActualMatrix(::, 1)
 
-    binaryAcc(predicted, actual)
+    val acc = binaryAcc(predicted, actual)
+    val tpr = binaryAcc(predicted(actual :== 1d).toDenseVector, actual(actual :== 1d).toDenseVector)
+    val tnr = binaryAcc(predicted(actual :== 0d).toDenseVector, actual(actual :== 0d).toDenseVector)
+
+    (acc, tpr, tnr)
   }
 
 }
