@@ -12,4 +12,14 @@ import dk.gp.cov.CovFunc
  * @param covFuncParams
  * @param mean
  */
-case class HgpcModel(x: DenseMatrix[Double], y: DenseVector[Double], u: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double)
+case class HgpcModel(x: DenseMatrix[Double], y: DenseVector[Double], u: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double) {
+
+  def getTaskData(taskId: Int): Tuple2[DenseMatrix[Double], DenseVector[Double]] = {
+
+    val taskIdx = x(::, 0).findAll { tId => tId == taskId }
+    val taskX = x(taskIdx, ::).toDenseMatrix
+    val taskY = y(taskIdx).toDenseVector
+
+    (taskX, taskY)
+  }
+}
