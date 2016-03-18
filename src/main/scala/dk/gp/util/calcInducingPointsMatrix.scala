@@ -1,9 +1,11 @@
-package dk.gp.math
+package dk.gp.util
 
+import breeze.linalg._
+import breeze.linalg._
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
-import breeze.linalg._
 import breeze.stats._
+import breeze.stats.mean.reduce_Double
 
 /**
  * Creates matrix with n vectors placed on the diagonal of the matrix. Off diagonal of the matrix equals to the means of the input vectors. Example explains it the best:
@@ -39,7 +41,8 @@ object calcInducingPointsMatrix {
     }
 
     val u = DenseMatrix.vertcat(uMatrices: _*)
-    u
+    val uniqueU = calcUniqueRowsMatrix(u)
+    uniqueU
   }
 
 }
