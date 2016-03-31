@@ -6,7 +6,9 @@ import breeze.io.CSVWriter
 
 object csvwrite {
   
-  def apply(file: File, mat: Matrix[Double],
+  
+  
+  def apply(fileString: String, mat: Matrix[Double],
             separator: Char = ',',
             quote: Char = '\u0000',
             escape: Char = '\\',
@@ -18,6 +20,6 @@ object csvwrite {
     val data = if (header.isEmpty) matrixRows
     else header.split(",").toIndexedSeq +: matrixRows
 
-    CSVWriter.writeFile(file, data, separator, quote, escape)
+    CSVWriter.writeFile(new File(fileString), data, separator, quote, escape)
   }
 }
