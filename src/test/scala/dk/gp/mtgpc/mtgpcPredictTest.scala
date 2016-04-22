@@ -14,7 +14,7 @@ class mtgpcPredictTest {
   val covFuncParams = DenseVector(4.1296, 1.3718, 1.32032) //log sf, logEllx1, logEllx2
   val gpMean = -6.3811
 
-  val xTest = DenseMatrix((1.0, 4.0, -4.0), (1.0, -2.5, -1.3), (2.0, 4.0, -4.0), (2.0, -2.5, -1.3), (3.0, 4.0, -4.0), (3.0, -2.5, -1.3))
+  val xTest = DenseMatrix((1.0, 4.0, -4.0), (1.0, -2.5, -1.3), (2.0, 4.0, -4.0), (2.0, -2.5, -1.3), (3.0, 4.0, -4.0), (3.0, -2.5, -1.3), (1.0, 2000.5, 1000.3), (4.0, -2.5, -1.3))
 
   @Test def test = {
 
@@ -29,5 +29,10 @@ class mtgpcPredictTest {
 
     assertEquals(0.36825, predicted(4), 0.0001)
     assertEquals(0.1892, predicted(5), 0.0001)
+
+    assertEquals(0.45911, predicted(6), 0.0001)
+
+    //unknown task
+    assertEquals(0.32499, predicted(7), 0.0001)
   }
 }
