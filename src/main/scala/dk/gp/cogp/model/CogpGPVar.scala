@@ -10,7 +10,6 @@ import breeze.stats._
 import breeze.linalg.InjectNumericOps
 import breeze.stats.variance.reduceDouble
 import dk.bayes.math.gaussian.MultivariateGaussian
-import dk.bayes.math.linear.isIdentical
 
 case class CogpGPVar(z: DenseMatrix[Double], u: MultivariateGaussian, covFunc: CovFunc, covFuncParams: DenseVector[Double], covFuncParamsDelta: DenseVector[Double]) {
 
