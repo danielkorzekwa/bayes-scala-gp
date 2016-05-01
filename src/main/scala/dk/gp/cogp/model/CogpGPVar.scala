@@ -10,6 +10,7 @@ import breeze.stats._
 import breeze.linalg.InjectNumericOps
 import breeze.stats.variance.reduceDouble
 import dk.bayes.math.gaussian.MultivariateGaussian
+import dk.bayes.math.linear.isIdentical
 
 case class CogpGPVar(z: DenseMatrix[Double], u: MultivariateGaussian, covFunc: CovFunc, covFuncParams: DenseVector[Double], covFuncParamsDelta: DenseVector[Double]) {
 
@@ -34,10 +35,9 @@ object CogpGPVar {
 
   private def getInitialIndVar(y: DenseVector[Double], z: DenseMatrix[Double]): MultivariateGaussian = {
 
-    val m = DenseVector.zeros[Double](z.rows)
-
-    val vInv = 0.1 * (1.0 / (variance(y))) * DenseMatrix.eye[Double](z.rows)
-    val v = invchol(cholesky(vInv).t)
+    val m = DenseVector.zeros[Double](z.rows)    
+    val v = 10*variance(y)*DenseMatrix.eye[Double](z.rows)
+    
     MultivariateGaussian(m, v)
   }
 }

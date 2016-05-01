@@ -38,7 +38,7 @@ class stochasticUpdateHypCovGTest {
     val newModel = model.copy(g = Array(newG))
 
     val loglik = calcLBLoglik(LowerBound(newModel, data))
-    assertEquals(-6693.0626, loglik, 0.0001)
+    assertEquals(-6660.2501, loglik, 0.0001)
   }
 
 }
