@@ -1,6 +1,8 @@
 package dk.gp.util
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import breeze.linalg.DenseMatrix
+import breeze.linalg.DenseVector
 
 object averagePrecision extends LazyLogging {
 
@@ -13,7 +15,7 @@ object averagePrecision extends LazyLogging {
       var cnt = 0d
       var score = 0d
       while (i < n) {
-        if (labSet.contains(predicted(i))) {
+        if (labSet.contains(predicted(i)) && !predicted.take(i).contains(predicted(i))) {
           cnt += 1
           score = score + cnt / (i + 1)
         }
@@ -25,5 +27,15 @@ object averagePrecision extends LazyLogging {
       logger.info("Empty ground truth set, check input data")
       0.0
     }
+  }
+
+  def apply(predictedMat: DenseMatrix[Double], actual: DenseVector[Double], k: Int): DenseVector[Double] = {
+    val apkVec = DenseVector.tabulate(predictedMat.rows) { r =>
+
+      val predicted = predictedMat(r, ::).t.toArray
+      apply(predicted, Array(actual(r)), k)
+    }
+
+    apkVec
   }
 }

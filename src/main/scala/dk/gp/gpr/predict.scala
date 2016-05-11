@@ -12,7 +12,7 @@ object predict {
 
     val kZZ = model.covFunc.cov(z, z, model.covFuncParams) + exp(2 * model.noiseLogStdDev) * DenseMatrix.eye[Double](z.rows)
 
-    val meanZ = DenseVector.zeros[Double](z.rows) + model.mean
+    val meanZ = model.meanFunc(z)
 
     val predMean = meanZ + kXZ.t * (model.kXXInv * (model.y - model.meanX))
     val predVar = kZZ - kXZ.t * model.kXXInv * kXZ

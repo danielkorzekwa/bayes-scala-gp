@@ -12,7 +12,7 @@ case class GprDiffFunction(initialGpModel: GprModel) extends DiffFunction[DenseV
 
     val covFuncParams = DenseVector(params.toArray.dropRight(1))
     val noiseLogStdDev = params.toArray.last
-    val gpModel = GprModel(initialGpModel.x, initialGpModel.y, initialGpModel.covFunc, covFuncParams, noiseLogStdDev, initialGpModel.mean)
+    val gpModel = GprModel(initialGpModel.x, initialGpModel.y, initialGpModel.covFunc, covFuncParams, noiseLogStdDev, initialGpModel.meanFunc)
     
     val f = -gprLoglik(gpModel.meanX, gpModel.kXX, gpModel.kXXInv, gpModel.y)
 
