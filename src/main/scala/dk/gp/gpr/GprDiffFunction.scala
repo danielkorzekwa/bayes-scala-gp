@@ -5,25 +5,30 @@ import breeze.optimize.DiffFunction
 import dk.gp.cov.CovFunc
 import breeze.linalg.DenseMatrix
 import scala.math._
+import breeze.linalg.NotConvergedException
 
 case class GprDiffFunction(initialGpModel: GprModel) extends DiffFunction[DenseVector[Double]] {
-  
+
   def calculate(params: DenseVector[Double]): (Double, DenseVector[Double]) = {
 
-    val covFuncParams = DenseVector(params.toArray.dropRight(1))
-    val noiseLogStdDev = params.toArray.last
-    val gpModel = GprModel(initialGpModel.x, initialGpModel.y, initialGpModel.covFunc, covFuncParams, noiseLogStdDev, initialGpModel.meanFunc)
-    
-    val f = -gprLoglik(gpModel.meanX, gpModel.kXX, gpModel.kXXInv, gpModel.y)
+    try {
+      val covFuncParams = DenseVector(params.toArray.dropRight(1))
+      val noiseLogStdDev = params.toArray.last
+      val gpModel = GprModel(initialGpModel.x, initialGpModel.y, initialGpModel.covFunc, covFuncParams, noiseLogStdDev, initialGpModel.meanFunc)
 
-    //calculate partial derivatives
-    val covFuncCovElemWiseD = gpModel.covFunc.covD(gpModel.x,gpModel.x,gpModel.covFuncParams)
-    val noiseCovElemWiseD = 2 * exp(2 * noiseLogStdDev) * DenseMatrix.eye[Double](gpModel.x.rows)
-    val allParamsCovElemWiseD = covFuncCovElemWiseD :+ noiseCovElemWiseD
+      val f = -gprLoglik(gpModel.meanX, gpModel.kXX, gpModel.kXXInv, gpModel.y)
 
-    val covFuncParamsD = gprLoglikD(gpModel.meanX, gpModel.kXXInv, gpModel.y, allParamsCovElemWiseD).map(d => -d)
+      //calculate partial derivatives
+      val covFuncCovElemWiseD = gpModel.covFunc.covD(gpModel.x, gpModel.x, gpModel.covFuncParams)
+      val noiseCovElemWiseD = 2 * exp(2 * noiseLogStdDev) * DenseMatrix.eye[Double](gpModel.x.rows)
+      val allParamsCovElemWiseD = covFuncCovElemWiseD :+ noiseCovElemWiseD
 
-    (f, covFuncParamsD)
+      val covFuncParamsD = gprLoglikD(gpModel.meanX, gpModel.kXXInv, gpModel.y, allParamsCovElemWiseD).map(d => -d)
+
+      (f, covFuncParamsD)
+    } catch {
+      case e: NotConvergedException => (Double.NaN, DenseVector.zeros[Double](params.size) * Double.NaN)
+    }
   }
 
 }

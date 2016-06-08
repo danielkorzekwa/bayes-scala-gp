@@ -1,4 +1,4 @@
-package dk.gp.mtgpc
+package dk.gp.mtgpr
 
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector

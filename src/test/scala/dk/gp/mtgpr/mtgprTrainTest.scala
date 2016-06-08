@@ -1,14 +1,14 @@
-package dk.gp.mtgp
+package dk.gp.mtgpr
+
+import java.io.File
 
 import org.junit._
-import Assert._
-import breeze.linalg._
-import java.io.File
-import dk.gp.cov.CovSEiso
-import breeze.numerics._
-import dk.gp.mtgpc.TestMtGprCovFunc
+import org.junit.Assert._
 
-class learnMtGgHyperParamsTest {
+import breeze.linalg._
+import breeze.numerics._
+
+class mtgprTrainTest {
 
   //[x,y]
   val data = csvread(new File("src/test/resources/gp/gpml_regression_data.csv"), skipLines = 1)
@@ -25,12 +25,14 @@ class learnMtGgHyperParamsTest {
   val covFuncParams = DenseVector(log(1d), log(1))
   val likNoiseLogStdDev = log(0.1)
 
+  val mtGprModel = MtGprModel(allX, allY, covFunc, covFuncParams, likNoiseLogStdDev)
+
   @Test def test = {
 
-    val (learnedCovFuncParams, learnedLikNoiseLogStdDev) = learnMtGgHyperParams(allX, allY, covFunc, covFuncParams, likNoiseLogStdDev)
+    val trainedModel = mtgprTrain(mtGprModel)
 
-    assertEquals(0.68594, learnedCovFuncParams(0), 0.0001)
-    assertEquals(-0.99340,learnedCovFuncParams(1), 0.0001)
-    assertEquals(-1.9025, learnedLikNoiseLogStdDev, 0.0001)
+    assertEquals(0.68594, trainedModel.covFuncParams(0), 0.0001)
+    assertEquals(-0.99340, trainedModel.covFuncParams(1), 0.0001)
+    assertEquals(-1.9025, trainedModel.likNoiseLogStdDev, 0.0001)
   }
 }

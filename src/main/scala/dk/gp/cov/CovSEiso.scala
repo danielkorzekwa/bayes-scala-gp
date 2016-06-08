@@ -26,12 +26,27 @@ case class CovSEiso() extends CovFunc {
 
   def cov(x1: DenseMatrix[Double], x2: DenseMatrix[Double], covFuncParams: DenseVector[Double]): DenseMatrix[Double] = {
 
+    require(covFuncParams.size == 2, "Wrong number of hyper parameters. Is=%d, expected=2".format(covFuncParams.size))
+
     val logSf = covFuncParams(0)
     val logEll = covFuncParams(1)
     val ell = exp(logEll)
 
     val sqDistMatrix = sqDist(x1.t / ell, x2.t / ell)
     val covMatrix = exp(2 * logSf) * exp(-0.5 * sqDistMatrix)
+    covMatrix
+
+  }
+
+  def cov(sqDistMat: DenseMatrix[Double], covFuncParams: DenseVector[Double]): DenseMatrix[Double] = {
+
+    require(covFuncParams.size == 2, "Wrong number of hyper parameters. Is=%d, expected=2".format(covFuncParams.size))
+
+    val logSf = covFuncParams(0)
+    val logEll = covFuncParams(1)
+    val ell = exp(logEll)
+
+    val covMatrix = exp(2 * logSf) * exp(-0.5 / (ell * ell) * sqDistMat)
     covMatrix
   }
 
@@ -49,6 +64,21 @@ case class CovSEiso() extends CovFunc {
     val covMatrixDEll = exp(2 * logSf) * expSqDistMatrix :* sqDistMatrix
 
     Array(covMatrixDSf, covMatrixDEll)
+
+  }
+
+  def covD(sqDistMat: DenseMatrix[Double], covFuncParams: DenseVector[Double]): Array[DenseMatrix[Double]] = {
+    val logSf = covFuncParams(0)
+    val logEll = covFuncParams(1)
+    val ell = exp(logEll)
+
+    val expSqDistMatrix = exp(-0.5 / (ell * ell) * sqDistMat)
+
+    val covMatrixDSf = 2 * exp(2 * logSf) * expSqDistMatrix
+    val covMatrixDEll = exp(2 * logSf) * expSqDistMatrix :* ((1d / (ell * ell)) * sqDistMat)
+
+    Array(covMatrixDSf, covMatrixDEll)
+
   }
 
 }
