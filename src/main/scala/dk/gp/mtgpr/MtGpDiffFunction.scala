@@ -13,7 +13,7 @@ case class MtGpDiffFunction(gpDiffFunctions: Seq[GprDiffFunction]) extends DiffF
 
   def calculate(params: DenseVector[Double]): (Double, DenseVector[Double]) = {
 
-    val loglikWithD = gpDiffFunctions.map(gpDiffFunc => gpDiffFunc.calculate(params))
+    val loglikWithD = gpDiffFunctions.par.map(gpDiffFunc => gpDiffFunc.calculate(params)).toList
 
     val totalLoglik = loglikWithD.map(_._1).sum
     val totalGrad = sum(loglikWithD.map(_._2))

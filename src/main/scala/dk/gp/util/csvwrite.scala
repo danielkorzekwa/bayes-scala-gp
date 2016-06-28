@@ -8,7 +8,7 @@ object csvwrite {
   
   
   
-  def apply(fileString: String, mat: Matrix[Double],
+  def apply[T](fileString: String, mat: Matrix[T],
             separator: Char = ',',
             quote: Char = '\u0000',
             escape: Char = '\\',

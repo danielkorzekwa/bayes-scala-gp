@@ -6,6 +6,7 @@ import dk.bayes.dsl.variable.Gaussian
 import breeze.linalg.DenseMatrix
 import breeze.linalg.DenseVector
 import dk.gp.cov.CovFunc
+import breeze.linalg.cholesky
 
 /**
  * Returns p(y) = integral of p(f)*p(y|f)df
@@ -17,8 +18,10 @@ import dk.gp.cov.CovFunc
  */
 case class GPPredictSingle(f: dk.bayes.math.gaussian.MultivariateGaussian, x: DenseMatrix[Double], covFunc: CovFunc, covFuncParams: DenseVector[Double], mean: Double = 0d) {
 
-  val condGPFactory = ConditionalGPFactory(x, covFunc, covFuncParams, mean)
+  private val condGPFactory = ConditionalGPFactory(x, covFunc, covFuncParams, mean)
 
+  private val fvchol = cholesky(f.v)
+  
   /**
    * @param t A single N dim variable for which p(y) is computed
    * @param f
@@ -32,12 +35,11 @@ case class GPPredictSingle(f: dk.bayes.math.gaussian.MultivariateGaussian, x: De
   def predictSingle(t: DenseMatrix[Double]): dk.bayes.math.gaussian.MultivariateGaussian = {
     val (a, b, v) = condGPFactory.create(t)
 
-    val fVariable = MultivariateGaussian(f.m, f.v)
-
-    val yVariable = Gaussian(a, fVariable, b, v)
-    val yPosterior = infer(yVariable)
-
-    val predicted = dk.bayes.math.gaussian.MultivariateGaussian(yPosterior.m, yPosterior.v)
+    val skillMean = a * f.m + b
+    val al = a*fvchol
+    val skillVar = v + al*al.t
+     
+    val predicted = dk.bayes.math.gaussian.MultivariateGaussian(skillMean, skillVar)
     predicted
   }
 }

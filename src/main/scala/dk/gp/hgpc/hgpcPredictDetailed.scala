@@ -16,8 +16,6 @@ import dk.bayes.math.gaussian.MultivariateGaussian
  */
 object hgpcPredictDetailed extends LazyLogging {
 
-  case class TaskPosterior(x: DenseMatrix[Double], xPosterior: DenseCanonicalGaussian)
-
   /**
    * Returns mat [gp mean, gp var, probability for the class 1]
    */

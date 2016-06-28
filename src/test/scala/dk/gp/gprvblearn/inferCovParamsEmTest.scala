@@ -66,7 +66,11 @@ class inferCovParamsEmTest extends LazyLogging {
 
     val gpModel = GprModel(x, y, covFunc, DenseVector(params), logLikStdDev)
 
-    val loglik = gprLoglik(gpModel.meanX, gpModel.kXX, gpModel.kXXInv, gpModel.y)
+      val meanX = gpModel.meanFunc(gpModel.x)
+      val kXX = gpModel.calcKXX()
+      val kXXInv = gpModel.calcKXXInv(kXX)
+    
+    val loglik = gprLoglik(meanX, kXX, kXXInv, gpModel.y)
     logger.info("Loglik=%.2f".format(loglik))
 
     MultivariateGaussian(fPosterior.m, fPosterior.v)
